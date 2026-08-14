@@ -15,11 +15,11 @@ export const POST: RequestHandler = async ({ request }) => {
     if (exportSessions) {
       for (const session of exportSessions) {
         await prisma.workoutSession.upsert({
-          where: { id: session.id },
+          where: { id: String(session.id) },
           create: {
-            id: session.id,
+            id: String(session.id),
             dateISO: session.dateISO,
-            plannedSessionId: session.plannedSessionId,
+            plannedSessionId: session.plannedSessionId ? String(session.plannedSessionId) : null,
             type: session.type,
             status: session.status,
             startedAt: session.startedAt,
@@ -39,11 +39,11 @@ export const POST: RequestHandler = async ({ request }) => {
     if (exportSets) {
       for (const set of exportSets) {
         await prisma.performedSet.upsert({
-          where: { id: set.id },
+          where: { id: String(set.id) },
           create: {
-            id: set.id,
-            sessionId: set.sessionId,
-            exerciseId: set.exerciseId,
+            id: String(set.id),
+            sessionId: String(set.sessionId),
+            exerciseId: set.exerciseId ? String(set.exerciseId) : null,
             exerciseName: set.exerciseName,
             exerciseType: set.exerciseType,
             setNumber: set.setNumber,
@@ -64,9 +64,9 @@ export const POST: RequestHandler = async ({ request }) => {
     if (exportPlanned) {
       for (const p of exportPlanned) {
         await prisma.plannedSession.upsert({
-          where: { id: p.id },
+          where: { id: String(p.id) },
           create: {
-            id: p.id,
+            id: String(p.id),
             dateISO: p.dateISO,
             cycleIndex: p.cycleIndex,
             sessionIndex: p.sessionIndex,
