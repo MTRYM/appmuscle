@@ -2,9 +2,10 @@
   import { onMount } from 'svelte';
   import {
     addVacationAndShiftPlan,
-    
     getDayData,
     getVacations,
+    getPlannedSessions,
+    getAllSessionsWithSets
   } from '$lib/api';
   import { formatDateFR, formatSetPerformance, todayISO } from '$lib/programme';
 
@@ -151,6 +152,7 @@
 
   <div class="legend">
     <span class="dot done"></span> Faite
+    <span class="dot pending"></span> Prévue
     <span class="dot missed"></span> Loupée
     <span class="dot extra"></span> Hors planning
     <span class="dot vacation"></span> Vacances
@@ -404,6 +406,9 @@
 
   .dot.done {
     background: var(--deepblue);
+  }
+  .dot.pending {
+    background: var(--beige);
   }
   .dot.missed {
     background: var(--destructive);
