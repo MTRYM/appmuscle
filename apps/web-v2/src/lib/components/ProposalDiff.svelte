@@ -7,9 +7,9 @@
 
   let { actions = [], reasoning = '' } = $props<{actions?: CoachAction[], reasoning?: string}>();
   
-  let processing = false;
-  let hasBeenProcessed = false;
-  let appliedStatus: 'accepted' | 'rejected' | null = null;
+  let processing = $state(false);
+  let hasBeenProcessed = $state(false);
+  let appliedStatus = $state<'accepted' | 'rejected' | null>(null);
 
   async function handleDecision(decision: 'accepted' | 'rejected') {
     if (processing || hasBeenProcessed) return;
@@ -18,7 +18,7 @@
     try {
       const now = new Date().toISOString();
       const proposal: CoachProposalRecord = {
-        id: generateId(),
+        id: crypto.randomUUID(),
         actions,
         status: decision,
         confidence: 'medium',
@@ -27,8 +27,6 @@
         updatedAt: now
       };
 
-      // await api.saveCoachProposal(proposal);
-
       if (decision === 'accepted') {
         // Apply actions to local DB
         for (const action of actions) {
@@ -36,7 +34,7 @@
             // Find exercise in latest planned sessions and update targetReps/Weight
             // Simplified for demonstration: we could log a program change
             const programChange = {
-              id: generateId(),
+              id: crypto.randomUUID(),
               dateISO: now.split('T')[0],
               type: 'weight_override',
               targetExerciseId: action.targetId,
@@ -49,10 +47,10 @@
           if (action.type === 'addMemory') {
             // Sync this to the server so Ollama remembers it
             const memoryEvent = {
-              eventId: generateId(),
+              eventId: crypto.randomUUID(),
               deviceId: localStorage.getItem('deviceId') || 'local',
               entityType: 'coach_memory',
-              entityId: generateId(),
+              entityId: crypto.randomUUID(),
               operation: 'create' as const,
               payload: {
                 content: action.proposedValue,
@@ -61,7 +59,7 @@
               baseVersion: null,
               clientSequence: Date.now(),
               createdAtClient: now,
-              idempotencyKey: generateId(),
+              idempotencyKey: crypto.randomUUID(),
               schemaVersion: 1
             };
             // await api.saveSyncEvent(memoryEvent);
@@ -117,10 +115,10 @@
 
   {#if !hasBeenProcessed}
     <div class="diff-controls">
-      <button class="btn-reject" disabled={processing} on:click={() => handleDecision('rejected')}>
+      <button class="btn-reject" disabled={processing} onclick={() => handleDecision('rejected')}>
         <X size={16} /> Refuser
       </button>
-      <button class="btn-accept" disabled={processing} on:click={() => handleDecision('accepted')}>
+      <button class="btn-accept" disabled={processing} onclick={() => handleDecision('accepted')}>
         <Check size={16} /> Valider la modification
       </button>
     </div>
