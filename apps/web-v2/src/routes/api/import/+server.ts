@@ -10,9 +10,10 @@ export const POST: RequestHandler = async ({ request }) => {
   try {
     const tables = data.tables || data; // handle different export formats
 
-    // We only import workoutSessions, performedSets, plannedWorkouts for now
-    if (tables.workoutSessions) {
-      for (const session of tables.workoutSessions) {
+    // Handle old Dexie export keys (sessions, sets, plannedSessions)
+    const exportSessions = tables.sessions || tables.workoutSessions;
+    if (exportSessions) {
+      for (const session of exportSessions) {
         await prisma.workoutSession.upsert({
           where: { id: session.id },
           create: {
@@ -34,8 +35,9 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     }
 
-    if (tables.performedSets) {
-      for (const set of tables.performedSets) {
+    const exportSets = tables.sets || tables.performedSets;
+    if (exportSets) {
+      for (const set of exportSets) {
         await prisma.performedSet.upsert({
           where: { id: set.id },
           create: {
@@ -58,8 +60,9 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     }
 
-    if (tables.plannedWorkouts) {
-      for (const p of tables.plannedWorkouts) {
+    const exportPlanned = tables.plannedSessions || tables.plannedWorkouts;
+    if (exportPlanned) {
+      for (const p of exportPlanned) {
         await prisma.plannedSession.upsert({
           where: { id: p.id },
           create: {
