@@ -8,6 +8,8 @@
   let startDate = $state('');
   let theme = $state('dark');
   let message = $state('');
+  let importing = $state(false);
+  let selectedFile = $state(null);
 
   onMount(async () => {
     settings = await getSettings();
@@ -27,6 +29,37 @@
     await updateSettings({ theme });
     applyTheme(theme);
     settings = await getSettings();
+  }
+
+  function handleFileSelect(e) {
+    selectedFile = e.target.files[0];
+    message = '';
+  }
+
+  async function importData() {
+    if (!selectedFile) return;
+    importing = true;
+    message = 'Importation en cours...';
+    try {
+      const text = await selectedFile.text();
+      const data = JSON.parse(text);
+      
+      const res = await fetch('/api/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      if (!res.ok) throw new Error(await res.text());
+      
+      message = 'Données importées avec succès ! 🎉 Tu peux actualiser la page.';
+      selectedFile = null;
+    } catch (err) {
+      console.error(err);
+      message = 'Erreur lors de l\'importation : ' + err.message;
+    } finally {
+      importing = false;
+    }
   }
 
 </script>
@@ -56,6 +89,20 @@
     <button type="button" class="btn-secondary" onclick={toggleTheme}>
       Thème : {theme === 'dark' ? 'Sombre' : 'Clair'} — Appuyer pour changer
     </button>
+  </div>
+
+  <div class="card">
+    <h2>Données</h2>
+    <p class="description">Importe ton ancienne sauvegarde JSON pour retrouver tout ton historique.</p>
+    <label class="file-upload">
+      <input type="file" accept=".json" onchange={handleFileSelect} />
+      <span>{selectedFile ? selectedFile.name : 'Choisir un fichier JSON'}</span>
+    </label>
+    {#if selectedFile}
+      <button type="button" class="btn-primary" disabled={importing} onclick={importData}>
+        {importing ? 'Importation en cours...' : 'Importer les données'}
+      </button>
+    {/if}
   </div>
 </div>
 
