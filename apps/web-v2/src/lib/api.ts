@@ -46,13 +46,15 @@ export async function markMissedSessions(todayISO: string) {
 }
 
 export async function replacePlannedSessions(sessions: any[]) {
-  // Clear future sessions in db or just upsert?
-  // Upsert array
-  await fetch('/api/planned-sessions', {
+  const res = await fetch('/api/planned-sessions/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(sessions)
   });
+  if (!res.ok) {
+    throw new Error('Erreur lors de la génération des séances planifiées');
+  }
+  return res.json();
 }
 
 export async function syncPlannedWithCompleted() {

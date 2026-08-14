@@ -1,7 +1,7 @@
 <script>
-  import { getSettings, updateSettings } from '$lib/api';
+  import { getSettings, updateSettings, replacePlannedSessions } from '$lib/api';
   import { applyTheme } from '$lib/theme';
-  import { todayISO } from '$lib/programme';
+  import { todayISO, parseProgramme, generatePlannedSessions } from '$lib/programme';
   import { onMount } from 'svelte';
 
   let settings = $state(null);
@@ -19,9 +19,20 @@
 
   async function saveStartDate() {
     if (!startDate) return;
-    await updateSettings({ programStartDate: startDate });
-    settings = await getSettings();
-    message = 'Date de début enregistrée.';
+    try {
+      await updateSettings({ programStartDate: startDate });
+      
+      // Générer les séances prévues à partir de la nouvelle date
+      const programme = parseProgramme();
+      const planned = generatePlannedSessions(startDate, programme);
+      await replacePlannedSessions(planned);
+      
+      settings = await getSettings();
+      message = 'Date enregistrée et programme généré avec succès ! 🎉';
+    } catch (err) {
+      console.error(err);
+      message = 'Erreur lors de la génération du programme.';
+    }
   }
 
   async function toggleTheme() {
