@@ -10,7 +10,30 @@ export const POST: RequestHandler = async ({ request }) => {
   try {
     const tables = data.tables || data; // handle different export formats
 
-    // Handle old Dexie export keys (sessions, sets, plannedSessions)
+    // 1. D'abord les séances planifiées (car workoutSession dépend de plannedSession)
+    const exportPlanned = tables.plannedSessions || tables.plannedWorkouts;
+    if (exportPlanned) {
+      for (const p of exportPlanned) {
+        await prisma.plannedSession.upsert({
+          where: { id: String(p.id) },
+          create: {
+            id: String(p.id),
+            dateISO: p.dateISO,
+            cycleIndex: p.cycleIndex,
+            sessionIndex: p.sessionIndex,
+            cycleName: p.cycleName,
+            sessionName: p.sessionName,
+            jour: p.jour,
+            status: p.status,
+            createdAt: p.createdAt || new Date().toISOString(),
+            updatedAt: p.updatedAt || new Date().toISOString(),
+          },
+          update: {},
+        });
+      }
+    }
+
+    // 2. Ensuite les séances réalisées (qui dépendent potentiellement de plannedSession)
     const exportSessions = tables.sessions || tables.workoutSessions;
     if (exportSessions) {
       for (const session of exportSessions) {
@@ -35,6 +58,7 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     }
 
+    // 3. Enfin les séries (qui dépendent de workoutSession)
     const exportSets = tables.sets || tables.performedSets;
     if (exportSets) {
       for (const set of exportSets) {
@@ -54,28 +78,6 @@ export const POST: RequestHandler = async ({ request }) => {
             restSecActual: set.restSecActual,
             createdAt: set.createdAt || new Date().toISOString(),
             updatedAt: set.updatedAt || new Date().toISOString(),
-          },
-          update: {},
-        });
-      }
-    }
-
-    const exportPlanned = tables.plannedSessions || tables.plannedWorkouts;
-    if (exportPlanned) {
-      for (const p of exportPlanned) {
-        await prisma.plannedSession.upsert({
-          where: { id: String(p.id) },
-          create: {
-            id: String(p.id),
-            dateISO: p.dateISO,
-            cycleIndex: p.cycleIndex,
-            sessionIndex: p.sessionIndex,
-            cycleName: p.cycleName,
-            sessionName: p.sessionName,
-            jour: p.jour,
-            status: p.status,
-            createdAt: p.createdAt || new Date().toISOString(),
-            updatedAt: p.updatedAt || new Date().toISOString(),
           },
           update: {},
         });
