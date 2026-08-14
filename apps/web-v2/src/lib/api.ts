@@ -93,7 +93,12 @@ export async function saveWorkoutSession(sessionData: any, setsData: any[]) {
 
 export async function getAllSessionsWithSets() {
   const res = await fetch('/api/sessions?limit=500'); // limit or get all
-  return res.json();
+  const data = await res.json();
+  // Map Prisma relation name 'performedSets' to 'sets' for frontend compatibility
+  return data.map((session: any) => ({
+    ...session,
+    sets: session.performedSets || []
+  }));
 }
 
 export async function getPlannedSessions() {
@@ -101,6 +106,33 @@ export async function getPlannedSessions() {
   return res.json();
 }
 
-export async function getVacations() { return []; }
-export async function addVacationAndShiftPlan(s, e, d) {}
-export async function getDayData(dateISO) { return { isRestDay: false, type: 'Aucun plan' }; }
+export async function getVacations() { 
+  // Should call /api/vacations, but for now let's just return empty array if not implemented
+  return []; 
+}
+
+export async function addVacationAndShiftPlan(s: any, e: any, d: any) {
+  // Not implemented yet on backend
+  throw new Error("Mode vacances non implémenté côté serveur");
+}
+
+export async function getDayData(dateISO: string) {
+  const [planned, sessions, vacations] = await Promise.all([
+    fetch(`/api/planned-sessions?date=${dateISO}`).then(r => r.json()),
+    fetch(`/api/sessions?date=${dateISO}`).then(r => r.json()),
+    getVacations()
+  ]);
+
+  const mappedSessions = sessions.map((session: any) => ({
+    ...session,
+    sets: session.performedSets || []
+  }));
+
+  const activeVacations = vacations.filter((v: any) => dateISO >= v.startDateISO && dateISO <= v.endDateISO);
+
+  return {
+    planned,
+    sessions: mappedSessions,
+    vacations: activeVacations
+  };
+}
