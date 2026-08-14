@@ -1,0 +1,61 @@
+// Prisma Schema for AppMuscu Coach Server
+// Replaces the previous SQLite/Drizzle schema with PostgreSQL via Prisma Postgres
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Sync Engine ────────────────────────────────────────────────────────────────
+
+model SyncEvent {
+  eventId          String   @id @map("event_id")
+  deviceId         String   @map("device_id")
+  entityType       String   @map("entity_type")
+  entityId         String   @map("entity_id")
+  operation        String   // create | update | delete | restore
+  payload          Json?
+  baseVersion      Int?     @map("base_version")
+  clientSequence   Int      @map("client_sequence")
+  serverSequence   Int      @default(autoincrement()) @map("server_sequence")
+  createdAtClient  String   @map("created_at_client")
+  receivedAtServer String   @map("received_at_server")
+  idempotencyKey   String   @unique @map("idempotency_key")
+  schemaVersion    Int      @map("schema_version")
+
+  @@map("sync_events")
+}
+
+// ─── Coach Memories ─────────────────────────────────────────────────────────────
+
+model CoachMemory {
+  id              String   @id @default(uuid())
+  category        String   // injury, preference, goal, plateau, strength, weakness
+  content         String
+  sourceType      String   @map("source_type") // user_stated, coach_observed, auto_detected
+  confidence      String   @default("medium") // low, medium, high
+  status          String   @default("candidate") // candidate, confirmed, rejected, expired
+  createdAt       String   @map("created_at")
+  expiresAt       String?  @map("expires_at")
+  lastConfirmedAt String?  @map("last_confirmed_at")
+
+  @@map("coach_memories")
+}
+
+// ─── Coach Conversations ────────────────────────────────────────────────────────
+
+model CoachConversation {
+  id        String   @id @default(uuid())
+  deviceId  String   @map("device_id")
+  role      String   // user | assistant
+  content   String
+  metadata  Json?    // proposedActions, confidence, reasoning
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([deviceId, createdAt])
+  @@map("coach_conversations")
+}

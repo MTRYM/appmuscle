@@ -1,0 +1,27 @@
+{
+  "name": "coach-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@appmuscu/shared-schema": "*",
+    "@fastify/cors": "^11.3.0",
+    "@libsql/client": "^0.14.0",
+    "drizzle-orm": "^0.33.0",
+    "fastify": "^5.0.0",
+    "fastify-plugin": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "@types/pg": "^8.21.0",
+    "drizzle-kit": "^0.24.0",
+    "prisma": "^7.9.1",
+    "tsx": "^4.23.12",
+    "typescript": "^5.5.0"
+  }
+}

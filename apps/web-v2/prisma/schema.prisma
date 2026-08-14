@@ -1,0 +1,316 @@
+// Prisma Schema — AppMuscu (Full)
+// Source de vérité unique pour PC + Mobile
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth ───────────────────────────────────────────────────────────────────────
+
+model AppUser {
+  id             String   @id @default(uuid())
+  passwordHash   String   @map("password_hash")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("app_users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  userAgent String?  @map("user_agent")
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// ─── App Settings ───────────────────────────────────────────────────────────────
+
+model AppSettings {
+  id               String  @id @default("main")
+  programStartDate String? @map("program_start_date")
+  theme            String  @default("dark")
+  createdAt        String  @map("created_at")
+  updatedAt        String  @map("updated_at")
+
+  @@map("app_settings")
+}
+
+// ─── Athlete ────────────────────────────────────────────────────────────────────
+
+model AthleteProfile {
+  id        String @id @default(uuid())
+  data      String // JSON blob with athlete info
+  createdAt String @map("created_at")
+  updatedAt String @map("updated_at")
+
+  @@map("athlete_profiles")
+}
+
+// ─── Exercises ──────────────────────────────────────────────────────────────────
+
+model Exercise {
+  id        String @id @default(uuid())
+  name      String @unique
+  type      String @default("reps") // reps | isometrique
+  createdAt String @map("created_at")
+  updatedAt String @map("updated_at")
+
+  plannedExercises PlannedExercise[]
+  performedSets    PerformedSet[]
+  personalRecords  PersonalRecord[]
+
+  @@map("exercises")
+}
+
+// ─── Programme & Planning ───────────────────────────────────────────────────────
+
+model Program {
+  id        String          @id @default(uuid())
+  name      String
+  createdAt String          @map("created_at")
+  updatedAt String          @map("updated_at")
+  blocks    TrainingBlock[]
+
+  @@map("programs")
+}
+
+model TrainingBlock {
+  id        String            @id @default(uuid())
+  programId String            @map("program_id")
+  name      String
+  order     Int
+  createdAt String            @map("created_at")
+  updatedAt String            @map("updated_at")
+
+  program   Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  templates WorkoutTemplate[]
+
+  @@map("training_blocks")
+}
+
+model WorkoutTemplate {
+  id        String            @id @default(uuid())
+  blockId   String            @map("block_id")
+  name      String
+  dayOfWeek String            @map("day_of_week")
+  createdAt String            @map("created_at")
+  updatedAt String            @map("updated_at")
+
+  block     TrainingBlock     @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  exercises PlannedExercise[]
+
+  @@map("workout_templates")
+}
+
+model PlannedExercise {
+  id                String          @id @default(uuid())
+  workoutTemplateId String          @map("workout_template_id")
+  exerciseId        String          @map("exercise_id")
+  groupName         String?         @map("group_name")
+  order             Int
+  sets              Int
+  targetReps        String          @map("target_reps")
+  targetRpe         Float?          @map("target_rpe")
+  targetRestSec     Int             @map("target_rest_sec")
+  description       String          @default("")
+  createdAt         String          @map("created_at")
+  updatedAt         String          @map("updated_at")
+
+  template          WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
+  exercise          Exercise        @relation(fields: [exerciseId], references: [id])
+  plannedSets       PlannedSet[]
+
+  @@map("planned_exercises")
+}
+
+// ─── Planned Sessions & Sets ────────────────────────────────────────────────────
+
+model PlannedSession {
+  id           String   @id @default(uuid())
+  dateISO      String   @map("date_iso")
+  cycleIndex   Int      @map("cycle_index")
+  sessionIndex Int      @map("session_index")
+  cycleName    String   @map("cycle_name")
+  sessionName  String   @map("session_name")
+  jour         String
+  status       String   @default("pending") // pending | done | missed
+  legacyId     Int?     @map("legacy_id")
+  createdAt    String   @map("created_at")
+  updatedAt    String   @map("updated_at")
+
+  workoutSessions WorkoutSession[]
+  plannedSets     PlannedSet[]
+
+  @@index([dateISO])
+  @@index([status])
+  @@map("planned_sessions")
+}
+
+model PlannedSet {
+  id                String          @id @default(uuid())
+  plannedSessionId  String          @map("planned_session_id")
+  plannedExerciseId String          @map("planned_exercise_id")
+  setNumber         Int             @map("set_number")
+  createdAt         String          @map("created_at")
+  updatedAt         String          @map("updated_at")
+
+  session           PlannedSession  @relation(fields: [plannedSessionId], references: [id], onDelete: Cascade)
+  exercise          PlannedExercise @relation(fields: [plannedExerciseId], references: [id], onDelete: Cascade)
+
+  @@map("planned_sets")
+}
+
+// ─── Workout Sessions (Actual Training Data) ────────────────────────────────────
+
+model WorkoutSession {
+  id               String   @id @default(uuid())
+  dateISO          String   @map("date_iso")
+  plannedSessionId String?  @map("planned_session_id")
+  type             String   @default("planned") // planned | catchup | extra
+  status           String   @default("in_progress") // completed | in_progress
+  startedAt        String   @map("started_at")
+  completedAt      String?  @map("completed_at")
+  durationSec      Int?     @map("duration_sec")
+  avgRpe           Float?   @map("avg_rpe")
+  feedback         Json?    // WorkoutSessionFeedback
+  legacyId         Int?     @map("legacy_id")
+  createdAt        String   @map("created_at")
+  updatedAt        String   @map("updated_at")
+
+  plannedSession   PlannedSession? @relation(fields: [plannedSessionId], references: [id])
+  performedSets    PerformedSet[]
+
+  @@index([dateISO])
+  @@index([status])
+  @@map("workout_sessions")
+}
+
+model PerformedSet {
+  id            String  @id @default(uuid())
+  sessionId     String  @map("session_id")
+  exerciseId    String? @map("exercise_id")
+  exerciseName  String  @map("exercise_name")
+  exerciseType  String  @default("reps") @map("exercise_type") // reps | isometrique
+  setNumber     Int     @map("set_number")
+  weight        Float
+  repsActual    Int     @map("reps_actual")
+  repsTarget    String  @map("reps_target")
+  rpe           Float?
+  restSecActual Int?    @map("rest_sec_actual")
+  legacyId      Int?    @map("legacy_id")
+  createdAt     String  @map("created_at")
+  updatedAt     String  @map("updated_at")
+
+  session       WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exercise      Exercise?      @relation(fields: [exerciseId], references: [id])
+
+  @@index([sessionId])
+  @@index([exerciseName])
+  @@map("performed_sets")
+}
+
+// ─── Suivi & Santé ──────────────────────────────────────────────────────────────
+
+model CheckIn {
+  id        String  @id @default(uuid())
+  dateISO   String  @map("date_iso")
+  weight    Float?
+  notes     String  @default("")
+  createdAt String  @map("created_at")
+  updatedAt String  @map("updated_at")
+
+  @@index([dateISO])
+  @@map("check_ins")
+}
+
+model Measurement {
+  id        String @id @default(uuid())
+  dateISO   String @map("date_iso")
+  type      String
+  value     Float
+  createdAt String @map("created_at")
+  updatedAt String @map("updated_at")
+
+  @@index([dateISO])
+  @@map("measurements")
+}
+
+model PersonalRecord {
+  id         String  @id @default(uuid())
+  exerciseId String  @map("exercise_id")
+  dateISO    String  @map("date_iso")
+  weight     Float
+  reps       Int
+  createdAt  String  @map("created_at")
+  updatedAt  String  @map("updated_at")
+
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@index([exerciseId])
+  @@map("personal_records")
+}
+
+model Vacation {
+  id             String @id @default(uuid())
+  startDateISO   String @map("start_date_iso")
+  endDateISO     String @map("end_date_iso")
+  days           Int
+  shiftedSessions Int   @map("shifted_sessions")
+  legacyId       Int?   @map("legacy_id")
+  createdAt      String @map("created_at")
+  updatedAt      String @map("updated_at")
+
+  @@map("vacations")
+}
+
+// ─── Coach Memories ─────────────────────────────────────────────────────────────
+
+model CoachMemory {
+  id              String  @id @default(uuid())
+  category        String
+  content         String
+  sourceType      String  @map("source_type")
+  confidence      String  @default("medium")
+  status          String  @default("candidate")
+  createdAt       String  @map("created_at")
+  expiresAt       String? @map("expires_at")
+  lastConfirmedAt String? @map("last_confirmed_at")
+
+  @@map("coach_memories")
+}
+
+// ─── Coach Conversations ────────────────────────────────────────────────────────
+
+model CoachConversation {
+  id        String   @id @default(uuid())
+  deviceId  String   @map("device_id")
+  role      String
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([deviceId, createdAt])
+  @@map("coach_conversations")
+}
+
+// ─── Programme Changes (Coach recommendations applied) ──────────────────────────
+
+model ProgramChange {
+  id                 String @id @default(uuid())
+  dateISO            String @map("date_iso")
+  type               String // weight_override | volume_override | rest_override
+  targetExerciseId   String @map("target_exercise_id")
+  targetExerciseName String @map("target_exercise_name")
+  overrideValue      String @map("override_value")
+  createdAt          String @map("created_at")
+
+  @@map("program_changes")
+}

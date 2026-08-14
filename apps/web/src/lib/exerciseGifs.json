@@ -1,0 +1,272 @@
+{
+  "Push-Up": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/push-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Push Up",
+    "sourceId": "pectorals/push-up"
+  },
+  "Scapular Pull-Up": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/traps/scapular-pull-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Scapular Pull Up",
+    "sourceId": "traps/scapular-pull-up"
+  },
+  "Glute Bridge": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/barbell-glute-bridge-two-legs-on-bench-male.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Barbell Glute Bridge Two Legs On Bench Male",
+    "sourceId": "glutes/barbell-glute-bridge-two-legs-on-bench-male"
+  },
+  "Bodyweight Squat": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/bodyweight-squatting-row-with-towel.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Bodyweight Squatting Row With Towel",
+    "sourceId": "upper-back/bodyweight-squatting-row-with-towel"
+  },
+  "Jump Squat": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/jump-squat.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Jump Squat",
+    "sourceId": "glutes/jump-squat"
+  },
+  "Handstand Chest-to-Wall": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/triceps/handstand.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Handstand",
+    "sourceId": "triceps/handstand"
+  },
+  "Wall Handstand Toe Pulls": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/triceps/handstand.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Handstand",
+    "sourceId": "triceps/handstand"
+  },
+  "Scapular Handstand Shrugs": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/traps/scapular-pull-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Scapular Pull Up",
+    "sourceId": "traps/scapular-pull-up"
+  },
+  "Copenhagen Side Plank": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/adductors/side-plank-hip-adduction.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Side Plank Hip Adduction",
+    "sourceId": "adductors/side-plank-hip-adduction"
+  },
+  "Dead Bug": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/dead-bug.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Dead Bug",
+    "sourceId": "abs/dead-bug"
+  },
+  "Bench Press": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/barbell-bench-press.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Barbell Bench Press",
+    "sourceId": "pectorals/barbell-bench-press"
+  },
+  "Larsen Press": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/barbell-bench-press.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Barbell Bench Press",
+    "sourceId": "pectorals/barbell-bench-press"
+  },
+  "Weighted Ring Dip": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/triceps/ring-dips.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Ring Dips",
+    "sourceId": "triceps/ring-dips"
+  },
+  "Standing Dumbbell Overhead Press": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/delts/dumbbell-standing-overhead-press.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Dumbbell Standing Overhead Press",
+    "sourceId": "delts/dumbbell-standing-overhead-press"
+  },
+  "Cable Lateral Raise": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/delts/cable-lateral-raise.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Cable Lateral Raise",
+    "sourceId": "delts/cable-lateral-raise"
+  },
+  "Cable External Rotation": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/delts/cable-standing-shoulder-external-rotation.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Cable Standing Shoulder External Rotation",
+    "sourceId": "delts/cable-standing-shoulder-external-rotation"
+  },
+  "Advanced Tuck Front Lever Hold": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/front-lever.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Front Lever",
+    "sourceId": "abs/front-lever"
+  },
+  "Front Lever Raises (Tuck)": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/front-lever.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Front Lever",
+    "sourceId": "abs/front-lever"
+  },
+  "Front Lever Raises": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/front-lever.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Front Lever",
+    "sourceId": "abs/front-lever"
+  },
+  "Weighted Pull-Up": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/weighted-pull-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Weighted Pull Up",
+    "sourceId": "lats/weighted-pull-up"
+  },
+  "Chest-to-Bar Pull-Up": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/pull-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Pull Up",
+    "sourceId": "lats/pull-up"
+  },
+  "Chest Supported Row": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/lever-seated-row.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Lever Seated Row",
+    "sourceId": "upper-back/lever-seated-row"
+  },
+  "Bayesian Cable Curl": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/cable-curl.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Cable Curl",
+    "sourceId": "biceps/cable-curl"
+  },
+  "Reverse Wrist Curl": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/forearms/dumbbell-reverse-wrist-curl.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Dumbbell Reverse Wrist Curl",
+    "sourceId": "forearms/dumbbell-reverse-wrist-curl"
+  },
+  "Countermovement Jump": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/jump-squat.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Jump Squat",
+    "sourceId": "glutes/jump-squat"
+  },
+  "Hang Power Clean": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/hamstrings/power-clean.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Power Clean",
+    "sourceId": "hamstrings/power-clean"
+  },
+  "Bulgarian Split Squat": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/quads/dumbbell-single-leg-split-squat.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Dumbbell Single Leg Split Squat",
+    "sourceId": "quads/dumbbell-single-leg-split-squat"
+  },
+  "Romanian Deadlift": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/barbell-romanian-deadlift.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Barbell Romanian Deadlift",
+    "sourceId": "glutes/barbell-romanian-deadlift"
+  },
+  "Seated Calf Raise": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/calves/barbell-seated-calf-raise.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Barbell Seated Calf Raise",
+    "sourceId": "calves/barbell-seated-calf-raise"
+  },
+  "Pallof Press": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/abs/band-horizontal-pallof-press.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Band Horizontal Pallof Press",
+    "sourceId": "abs/band-horizontal-pallof-press"
+  },
+  "Explosive Chest-to-Bar Pull-Up": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/pull-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Pull Up",
+    "sourceId": "lats/pull-up"
+  },
+  "Low Bar Muscle-Up Transition": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/muscle-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Muscle Up",
+    "sourceId": "lats/muscle-up"
+  },
+  "Low Bar Transition": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/muscle-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Muscle Up",
+    "sourceId": "lats/muscle-up"
+  },
+  "Negative Muscle-Up": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/muscle-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Muscle Up",
+    "sourceId": "lats/muscle-up"
+  },
+  "Incline Dumbbell Press": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/dumbbell-incline-bench-press.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Dumbbell Incline Bench Press",
+    "sourceId": "pectorals/dumbbell-incline-bench-press"
+  },
+  "Leaning Cable Lateral Raise": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/delts/cable-lateral-raise.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Cable Lateral Raise",
+    "sourceId": "delts/cable-lateral-raise"
+  },
+  "Overhead Rope Triceps Extension": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/triceps/cable-overhead-triceps-extension-rope-attachment.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Cable Overhead Triceps Extension Rope Attachment",
+    "sourceId": "triceps/cable-overhead-triceps-extension-rope-attachment"
+  },
+  "Front Lever Scapular Pull": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/traps/scapular-pull-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Scapular Pull Up",
+    "sourceId": "traps/scapular-pull-up"
+  },
+  "Pronated Pull-Up": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/lats/pull-up.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Pull Up",
+    "sourceId": "lats/pull-up"
+  },
+  "Chest Supported T-Bar Row": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/upper-back/lever-t-bar-row.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Lever T Bar Row",
+    "sourceId": "upper-back/lever-t-bar-row"
+  },
+  "Incline Dumbbell Curl": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/biceps/dumbbell-incline-biceps-curl.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Dumbbell Incline Biceps Curl",
+    "sourceId": "biceps/dumbbell-incline-biceps-curl"
+  },
+  "Face Pull": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/delts/cable-rear-delt-row-with-rope.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Cable Rear Delt Row With Rope",
+    "sourceId": "delts/cable-rear-delt-row-with-rope"
+  },
+  "Max Vertical Jump": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/jump-squat.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Jump Squat",
+    "sourceId": "glutes/jump-squat"
+  },
+  "Shoulder Mobility Flow": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/pectorals/chest-and-front-of-shoulder-stretch.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Chest And Front Of Shoulder Stretch",
+    "sourceId": "pectorals/chest-and-front-of-shoulder-stretch"
+  },
+  "Hip Mobility Flow": {
+    "gifUrl": "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/glutes/roller-hip-stretch.gif",
+    "source": "ExerciseGymGifsDB",
+    "sourceName": "Roller Hip Stretch",
+    "sourceId": "glutes/roller-hip-stretch"
+  }
+}
