@@ -159,14 +159,8 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     throw new Error('Clé API Google Gemini manquante. Configurez GEMINI_API_KEY ou entrez votre clé dans les réglages du Coach IA.');
   }
 
-  // Normalize model identifier to reliable, official GA models
-  let cleanModel = (model || DEFAULT_GEMINI_MODEL).replace(/^models\//, '').trim();
-  if (cleanModel.includes('thinking')) {
-    // If a thinking experimental name was used, map to gemini-2.0-flash or gemini-1.5-pro
-    cleanModel = 'gemini-2.0-flash';
-  } else if (!cleanModel.startsWith('gemini-')) {
-    cleanModel = 'gemini-2.0-flash';
-  }
+  // Normalize model identifier
+  const cleanModel = (model || DEFAULT_GEMINI_MODEL).replace(/^models\//, '').trim();
 
   // Format messages
   const contents: any[] = [];
@@ -197,41 +191,42 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     }
   };
 
-  // Helper to send request
-  async function sendToModel(targetModel: string) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+  // Try candidate models in order of priority
+  const candidateModels = Array.from(new Set([
+    cleanModel || 'gemini-2.0-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro-latest',
+    'gemini-1.5-flash-latest'
+  ]));
+
+  let lastErrorMsg = '';
+
+  for (const targetModel of candidateModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawText) {
+          return rawText;
+        }
+      } else {
+        const errBody = await res.json().catch(() => ({}));
+        lastErrorMsg = errBody.error?.message || `Erreur Gemini (${res.status})`;
+      }
+    } catch (fetchErr: any) {
+      lastErrorMsg = fetchErr.message || 'Erreur réseau';
+    }
   }
 
-  let res = await sendToModel(cleanModel);
-
-  // If the requested model is not found, fallback to gemini-2.0-flash or gemini-1.5-pro
-  if (!res.ok && res.status === 404 && cleanModel !== 'gemini-2.0-flash') {
-    cleanModel = 'gemini-2.0-flash';
-    res = await sendToModel('gemini-2.0-flash');
-  }
-  if (!res.ok && res.status === 404 && cleanModel !== 'gemini-1.5-pro') {
-    cleanModel = 'gemini-1.5-pro';
-    res = await sendToModel('gemini-1.5-pro');
-  }
-
-  if (!res.ok) {
-    const errBody = await res.json().catch(() => ({}));
-    const errMsg = errBody.error?.message || `Erreur Gemini (${res.status})`;
-    throw new Error(errMsg);
-  }
-
-  const data = await res.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) {
-    throw new Error('Aucune réponse générée par Gemini.');
-  }
-
-  return rawText;
+  throw new Error(lastErrorMsg || 'Aucune réponse générée par les modèles Gemini.');
 }
 
 // ─── 2. Groq Cloud API (Free Tier 0€ - Llama 3.3 70B) ────────────────────────
