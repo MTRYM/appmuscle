@@ -56,7 +56,6 @@ export const GET: RequestHandler = async ({ url, request }) => {
       });
     }
   }
-  }
 
   // 2. If Groq key is provided or present in env
   const effectiveGroqKey = (provider === 'groq' ? apiKey : (apiKey.startsWith('gsk_') ? apiKey : '')) || process.env.GROQ_API_KEY || '';
