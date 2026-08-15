@@ -159,15 +159,18 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     throw new Error('Clé API Google Gemini manquante. Configurez GEMINI_API_KEY ou entrez votre clé dans les réglages du Coach IA.');
   }
 
-  const cleanModel = (model || DEFAULT_GEMINI_MODEL).replace(/^models\//, '');
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey}`;
-
-  const isThinkingModel = cleanModel.includes('thinking');
+  // Normalize model identifier to reliable, official GA models
+  let cleanModel = (model || DEFAULT_GEMINI_MODEL).replace(/^models\//, '').trim();
+  if (cleanModel.includes('thinking')) {
+    // If a thinking experimental name was used, map to gemini-2.0-flash or gemini-1.5-pro
+    cleanModel = 'gemini-2.0-flash';
+  } else if (!cleanModel.startsWith('gemini-')) {
+    cleanModel = 'gemini-2.0-flash';
+  }
 
   // Format messages
   const contents: any[] = [];
 
-  // Add conversation history if available
   if (opts.conversationHistory && opts.conversationHistory.length > 0) {
     for (const item of opts.conversationHistory) {
       contents.push({
@@ -177,7 +180,6 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     }
   }
 
-  // Add current user message
   contents.push({
     role: 'user',
     parts: [{ text: opts.userMessage }]
@@ -189,21 +191,33 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     },
     contents,
     generationConfig: {
-      temperature: opts.temperature ?? (isThinkingModel ? 0.7 : 0.3),
+      response_mime_type: 'application/json',
+      temperature: opts.temperature ?? 0.3,
       maxOutputTokens: 8192
     }
   };
 
-  // Thinking models handle JSON in prompt directly
-  if (!isThinkingModel) {
-    payload.generationConfig.response_mime_type = 'application/json';
+  // Helper to send request
+  async function sendToModel(targetModel: string) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
   }
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  let res = await sendToModel(cleanModel);
+
+  // If the requested model is not found, fallback to gemini-2.0-flash or gemini-1.5-pro
+  if (!res.ok && res.status === 404 && cleanModel !== 'gemini-2.0-flash') {
+    cleanModel = 'gemini-2.0-flash';
+    res = await sendToModel('gemini-2.0-flash');
+  }
+  if (!res.ok && res.status === 404 && cleanModel !== 'gemini-1.5-pro') {
+    cleanModel = 'gemini-1.5-pro';
+    res = await sendToModel('gemini-1.5-pro');
+  }
 
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}));
