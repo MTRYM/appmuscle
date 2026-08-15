@@ -678,6 +678,19 @@
           </div>
         {/if}
 
+        {#if availableModels.length > 0}
+          <div class="form-group">
+            <label for="model-mode-select">Mode d'analyse & Modèle</label>
+            <select id="model-mode-select" bind:value={selectedModel}>
+              {#each availableModels as m}
+                <option value={m.name}>
+                  {m.description ? m.description : m.name}
+                </option>
+              {/each}
+            </select>
+          </div>
+        {/if}
+
         <!-- Connection Test Result -->
         <div class="connection-status-box {coachStatus}">
           <div class="status-indicator">

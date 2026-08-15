@@ -29,11 +29,12 @@ export const GET: RequestHandler = async ({ url, request }) => {
         return json({
           status: 'ok',
           provider: 'gemini',
-          message: 'Google Gemini 2.0 Flash connecté (Gratuit 0€ · Quota illimité)',
-          preferredModel: 'gemini-2.0-flash',
+          message: 'Google Gemini connecté (Gratuit 0€ · Quota illimité)',
+          preferredModel: 'gemini-2.0-flash-thinking-exp-01-21',
           models: [
-            { name: 'gemini-2.0-flash', description: 'Recommandé — Rapide, intelligent et gratuit' },
-            { name: 'gemini-1.5-pro', description: 'Raisonnement ultra-profond' }
+            { name: 'gemini-2.0-flash-thinking-exp-01-21', description: '🧠 Réflexion Profonde — Prend le temps de raisonner pour une intelligence maximale' },
+            { name: 'gemini-2.0-flash', description: '⚡ Flash Standard — Rapide et très intelligent' },
+            { name: 'gemini-1.5-pro', description: '🏆 1.5 Pro — Analyse biomécanique experte' }
           ]
         });
       } else {

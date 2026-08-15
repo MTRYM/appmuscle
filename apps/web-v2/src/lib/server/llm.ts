@@ -159,8 +159,10 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     throw new Error('Clé API Google Gemini manquante. Configurez GEMINI_API_KEY ou entrez votre clé dans les réglages du Coach IA.');
   }
 
-  const cleanModel = model.replace(/^models\//, '');
+  const cleanModel = (model || DEFAULT_GEMINI_MODEL).replace(/^models\//, '');
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey}`;
+
+  const isThinkingModel = cleanModel.includes('thinking');
 
   // Format messages
   const contents: any[] = [];
@@ -181,17 +183,21 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     parts: [{ text: opts.userMessage }]
   });
 
-  const payload = {
+  const payload: any = {
     system_instruction: {
       parts: [{ text: opts.systemPrompt }]
     },
     contents,
     generationConfig: {
-      response_mime_type: 'application/json',
-      temperature: opts.temperature ?? 0.3,
+      temperature: opts.temperature ?? (isThinkingModel ? 0.7 : 0.3),
       maxOutputTokens: 8192
     }
   };
+
+  // Thinking models handle JSON in prompt directly
+  if (!isThinkingModel) {
+    payload.generationConfig.response_mime_type = 'application/json';
+  }
 
   const res = await fetch(url, {
     method: 'POST',
