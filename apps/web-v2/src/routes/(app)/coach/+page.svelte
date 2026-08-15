@@ -6,6 +6,15 @@
   <title>AppMuscu — Coach IA</title>
 </svelte:head>
 
-<div class="page-centered" style="align-items: stretch; justify-content: flex-start; padding-top: 1rem;">
+<div class="coach-page">
   <CoachChat />
 </div>
+
+<style>
+  .coach-page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+</style>
