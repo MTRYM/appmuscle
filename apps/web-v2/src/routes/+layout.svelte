@@ -1,6 +1,6 @@
 <script lang="ts">
   import '../app.css';
-  import { Dumbbell, CalendarDays, BarChart3, Bot, Settings, LogOut } from 'lucide-svelte';
+  import { Dumbbell, CalendarDays, BarChart3, Bot, Settings } from 'lucide-svelte';
   import { page } from '$app/stores';
 
   let { children } = $props();
@@ -17,102 +17,138 @@
     if (tabId === '/') return currentPath === '/';
     return currentPath.startsWith(tabId);
   }
-
-  // Skip layout on login page
-  $effect(() => {});
-
-  async function logout() {
-    await fetch('/api/auth/login', { method: 'DELETE' });
-    window.location.href = '/login';
-  }
 </script>
 
 {#if $page.url.pathname === '/login'}
   {@render children()}
 {:else}
   <div class="app-shell">
-    <nav class="nav-bar" aria-label="Navigation principale">
-      <div class="nav-bar-inner">
-        <div class="sidebar-logo">
-          <span class="logo-text">🏋️ AppMuscu</span>
-        </div>
-        {#each tabs as tab}
-          {@const Icon = tab.icon}
-          <a
-            href={tab.id}
-            class="nav-item"
-            class:active={isActive(tab.id, $page.url.pathname)}
-          >
-            <span class="nav-icon">
-              <Icon strokeWidth={isActive(tab.id, $page.url.pathname) ? 2.25 : 1.75} size={20} />
-            </span>
-            <span class="nav-label">{tab.label}</span>
-          </a>
-        {/each}
-        <div class="sidebar-spacer"></div>
-        <button class="nav-item logout-btn" onclick={logout}>
-          <span class="nav-icon">
-            <LogOut strokeWidth={1.75} size={20} />
-          </span>
-          <span class="nav-label">Déconnexion</span>
-        </button>
-      </div>
-    </nav>
-
     <main class="app-main">
       {@render children()}
     </main>
+
+    <!-- Mobile Bottom Navigation Bar (100% iPhone 13 & Safari Optimized) -->
+    <nav class="mobile-nav" aria-label="Navigation principale">
+      <div class="mobile-nav-inner">
+        {#each tabs as tab}
+          {@const Icon = tab.icon}
+          {@const active = isActive(tab.id, $page.url.pathname)}
+          <a
+            href={tab.id}
+            class="nav-tab"
+            class:active
+            aria-current={active ? 'page' : undefined}
+          >
+            <div class="nav-tab-icon-wrap" class:active>
+              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+            </div>
+            <span class="nav-tab-label">{tab.label}</span>
+          </a>
+        {/each}
+      </div>
+    </nav>
   </div>
 {/if}
 
 <style>
-  .sidebar-logo {
-    display: none;
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    min-height: 100svh;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+    background: var(--bg);
   }
 
-  .sidebar-spacer {
-    display: none;
+  .app-main {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0.85rem calc(76px + env(safe-area-inset-bottom, 16px));
+    box-sizing: border-box;
   }
 
-  .logout-btn {
-    display: none;
+  /* === Mobile Bottom Tab Bar (iOS Glassmorphism) === */
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(11, 10, 9, 0.88);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-top: 1px solid rgba(247, 245, 242, 0.09);
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 12px));
+    padding-top: 6px;
+    display: flex;
+    justify-content: center;
   }
 
-  .nav-label {
-    line-height: 1;
-    white-space: nowrap;
+  .mobile-nav-inner {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 480px;
+    padding: 0 0.5rem;
   }
 
-  @media (min-width: 768px) {
-    .sidebar-logo {
-      display: block;
-      padding: 0.5rem 0.85rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 0.75rem;
-    }
-
-    .logo-text {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-
-    .sidebar-spacer {
-      display: block;
-      flex: 1;
-    }
-
-    .logout-btn {
-      display: flex;
-      color: var(--text-muted);
-    }
-
-    .logout-btn:hover {
-      color: var(--danger);
-    }
-  }
-
-  a.nav-item {
+  .nav-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
     text-decoration: none;
+    color: var(--text-muted);
+    padding: 4px 8px;
+    border-radius: 12px;
+    min-width: 56px;
+    min-height: 48px;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .nav-tab:active {
+    transform: scale(0.92);
+  }
+
+  .nav-tab-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 28px;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+  }
+
+  .nav-tab.active {
+    color: var(--pink);
+  }
+
+  .nav-tab-icon-wrap.active {
+    background: color-mix(in srgb, var(--pink) 16%, transparent);
+    color: var(--pink);
+  }
+
+  .nav-tab-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-tab.active .nav-tab-label {
+    font-weight: 700;
+    color: var(--pink);
   }
 </style>
