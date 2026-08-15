@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { getAvailableGeminiModels } from '$lib/server/llm';
 
 const DEFAULT_OLLAMA_URL = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
 
@@ -17,32 +18,32 @@ export const GET: RequestHandler = async ({ url, request }) => {
         status: 'no_key',
         provider: 'gemini',
         message: 'Clé API Gemini requise. Obtiens-en une gratuitement (0€) sur https://aistudio.google.com/app/apikey',
-        models: [{ name: 'gemini-2.0-flash' }, { name: 'gemini-1.5-pro' }]
+        models: [{ name: 'gemini-2.0-flash' }]
       });
     }
 
-    // Ping Gemini to verify key validity
     try {
-      const pingUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash?key=${effectiveGeminiKey}`;
-      const pingRes = await fetch(pingUrl);
-      if (pingRes.ok) {
+      const availableModels = await getAvailableGeminiModels(effectiveGeminiKey);
+      if (availableModels.length > 0) {
         return json({
           status: 'ok',
           provider: 'gemini',
-          message: 'Google Gemini connecté (Gratuit 0€ · Quota illimité)',
-          preferredModel: 'gemini-2.0-flash',
-          models: [
-            { name: 'gemini-2.0-flash', description: '⚡ Google Gemini 2.0 Flash (Recommandé · Intelligent et gratuit)' },
-            { name: 'gemini-1.5-pro', description: '🧠 Google Gemini 1.5 Pro (Raisonnement approfondi & expert biomécanique)' },
-            { name: 'gemini-1.5-flash', description: '🚀 Google Gemini 1.5 Flash' }
-          ]
+          message: `Google Gemini connecté (${availableModels.length} modèles disponibles · Gratuit 0€)`,
+          preferredModel: availableModels.includes('gemini-2.0-flash') ? 'gemini-2.0-flash' : availableModels[0],
+          models: availableModels.map(name => ({
+            name,
+            description: name.includes('2.0')
+              ? `⚡ ${name} (Recommandé · Rapide & Intelligent)`
+              : name.includes('pro')
+                ? `🧠 ${name} (Raisonnement approfondi)`
+                : name
+          }))
         });
       } else {
-        const errData = await pingRes.json().catch(() => ({}));
         return json({
           status: 'error',
           provider: 'gemini',
-          message: `Clé Gemini invalide ou refusée : ${errData.error?.message || pingRes.status}`,
+          message: 'Clé Gemini invalide ou refusée par Google AI Studio.',
           models: []
         });
       }
@@ -54,6 +55,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
         models: []
       });
     }
+  }
   }
 
   // 2. If Groq key is provided or present in env

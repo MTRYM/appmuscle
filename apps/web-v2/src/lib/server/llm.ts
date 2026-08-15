@@ -153,14 +153,34 @@ export async function executeCoachPrompt(opts: LLMRequestOptions): Promise<LLMRe
   };
 }
 
+/**
+ * Dynamically list available Gemini models for this API key
+ */
+export async function getAvailableGeminiModels(apiKey: string): Promise<string[]> {
+  try {
+    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (listRes.ok) {
+      const data = await listRes.json();
+      const available = (data.models || [])
+        .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+        .map((m: any) => m.name.replace(/^models\//, ''));
+      if (available.length > 0) {
+        return available;
+      }
+    }
+  } catch {
+    // Ignore
+  }
+  return ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+}
+
 // ─── 1. Google Gemini API (100% Free Tier, 0€) ──────────────────────────────
 async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOptions): Promise<string> {
   if (!apiKey) {
     throw new Error('Clé API Google Gemini manquante. Configurez GEMINI_API_KEY ou entrez votre clé dans les réglages du Coach IA.');
   }
 
-  // Normalize model identifier
-  const cleanModel = (model || DEFAULT_GEMINI_MODEL).replace(/^models\//, '').trim();
+  const cleanRequestedModel = (model || DEFAULT_GEMINI_MODEL).replace(/^models\//, '').trim();
 
   // Format messages
   const contents: any[] = [];
@@ -191,14 +211,18 @@ async function callGeminiAPI(apiKey: string, model: string, opts: LLMRequestOpti
     }
   };
 
-  // Try candidate models in order of priority
+  // Discover actual models supported by this key
+  const availableFromApi = await getAvailableGeminiModels(apiKey);
+
+  // Build prioritized candidate list
   const candidateModels = Array.from(new Set([
-    cleanModel || 'gemini-2.0-flash',
+    cleanRequestedModel,
+    ...availableFromApi,
     'gemini-2.0-flash',
     'gemini-1.5-flash',
-    'gemini-1.5-pro-latest',
-    'gemini-1.5-flash-latest'
-  ]));
+    'gemini-1.5-flash-8b',
+    'gemini-1.0-pro'
+  ])).filter(Boolean);
 
   let lastErrorMsg = '';
 
@@ -405,7 +429,6 @@ function parseLLMJsonResponse(rawText: string): any {
   try {
     return JSON.parse(cleaned);
   } catch {
-    // Attempt extracting the first JSON object {}
     const startIdx = cleaned.indexOf('{');
     const endIdx = cleaned.lastIndexOf('}');
     if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
