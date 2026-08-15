@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import Chrono from './Chrono.svelte';
+  import HoldTimer from './HoldTimer.svelte';
   import PostSessionDebrief from './PostSessionDebrief.svelte';
   import {
     getTodayPlannedSession,
@@ -49,6 +50,7 @@ import {
   let restKey = $state(0);
   let restDuration = $state(90);
   let pendingAfterRest = $state(null);
+  let holdTimerKey = $state(0);
 
   let summary = $state(null);
   let sessionFeedback = $state({});
@@ -529,6 +531,18 @@ import {
         </div>
 
         {#if !showRest}
+          {#if isIso}
+            {#key `${exerciseIndex}-${setIndex}-${holdTimerKey}`}
+              <HoldTimer
+                targetSeconds={parseInt(currentExercise.cibleParsed?.mid ?? currentExercise.cible ?? '20', 10) || 20}
+                exerciseName={currentExercise.nom}
+                onTimeRecorded={(secs) => {
+                  repsActual = String(secs);
+                }}
+              />
+            {/key}
+          {/if}
+
           {#if weightHint && setIndex === 0 && !isIso}
             <div
               class="weight-hint"
