@@ -5,6 +5,8 @@
     Send,
     Bot,
     User,
+    UserCheck,
+    FileText,
     Sparkles,
     AlertCircle,
     Wifi,
@@ -21,7 +23,8 @@
     Check,
     HelpCircle,
     RefreshCw,
-    X
+    X,
+    Save
   } from 'lucide-svelte';
   import { onMount, tick } from 'svelte';
 
@@ -58,6 +61,12 @@
   let isTestingConnection = $state(false);
   let showSettingsModal = $state(false);
   let showHelpAccordion = $state(false);
+
+  // Athlete Profile State
+  let showProfileModal = $state(false);
+  let athleteProfileText = $state('');
+  let isSavingProfile = $state(false);
+  let profileSaveFeedback = $state('');
 
   // UI state
   let messagesContainer: HTMLElement | undefined = $state(undefined);
@@ -124,6 +133,40 @@
     }
     showSettingsModal = false;
     checkOllamaStatus();
+  }
+
+  async function openProfileModal() {
+    showProfileModal = true;
+    profileSaveFeedback = '';
+    try {
+      const res = await fetch('/api/athlete-profile');
+      const data = await res.json();
+      athleteProfileText = data.text || '';
+    } catch {
+      profileSaveFeedback = 'Impossible de charger le profil.';
+    }
+  }
+
+  async function saveProfile() {
+    isSavingProfile = true;
+    profileSaveFeedback = '';
+    try {
+      const res = await fetch('/api/athlete-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: athleteProfileText })
+      });
+      if (!res.ok) throw new Error('Erreur lors de la sauvegarde');
+      profileSaveFeedback = 'Profil enregistré avec succès ! ✅';
+      setTimeout(() => {
+        showProfileModal = false;
+        profileSaveFeedback = '';
+      }, 1200);
+    } catch (err: any) {
+      profileSaveFeedback = err.message || 'Erreur de sauvegarde';
+    } finally {
+      isSavingProfile = false;
+    }
   }
 
   async function scrollToBottom(smooth = true) {
@@ -300,6 +343,15 @@
         >
           <Sparkles size={15} />
           <span class="btn-sparkle-text">Bilan rapide</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-icon-header"
+          onclick={openProfileModal}
+          title="Consulter et modifier ma fiche Profil Athlète"
+        >
+          <UserCheck size={18} />
         </button>
 
         <button
@@ -610,6 +662,64 @@
         </button>
         <button type="button" class="btn-save" onclick={saveSettings}>
           Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Athlete Profile Viewer / Editor Modal -->
+{#if showProfileModal}
+  <div class="modal-backdrop" onclick={() => showProfileModal = false} role="presentation">
+    <div class="modal-card profile-modal-card" onclick={(e) => e.stopPropagation()} role="dialog" tabindex="-1">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <UserCheck size={20} class="modal-icon" />
+          <div>
+            <h3>Fiche Profil Athlète & Directives</h3>
+            <span class="profile-subtitle">Source de vérité utilisée par le Coach IA</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close" onclick={() => showProfileModal = false}>
+          <X size={18} />
+        </button>
+      </div>
+
+      <div class="modal-body profile-modal-body">
+        <p class="profile-info-banner">
+          💡 Cette fiche définit ton identité athlétique, tes mensurations (193cm, ~83kg), tes records, ton passé volley et toutes les règles de programmation. Tu peux la modifier manuellement ou laisser le coach te proposer des ajustements au fil de tes séances.
+        </p>
+
+        {#if profileSaveFeedback}
+          <div class="profile-feedback-box">
+            {profileSaveFeedback}
+          </div>
+        {/if}
+
+        <div class="profile-editor-container">
+          <label for="athlete-profile-textarea">Spécification complète du profil :</label>
+          <textarea
+            id="athlete-profile-textarea"
+            class="profile-textarea"
+            bind:value={athleteProfileText}
+            placeholder="Chargement de ton profil athlète…"
+            rows="18"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick={() => showProfileModal = false}>
+          Fermer
+        </button>
+        <button type="button" class="btn-save" disabled={isSavingProfile} onclick={saveProfile}>
+          {#if isSavingProfile}
+            <Loader2 size={16} class="spin" />
+            <span>Enregistrement…</span>
+          {:else}
+            <Save size={16} />
+            <span>Enregistrer mon profil</span>
+          {/if}
         </button>
       </div>
     </div>
@@ -1618,6 +1728,81 @@
     font-weight: 700;
     cursor: pointer;
     min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  /* === Athlete Profile Modal Styles === */
+  .profile-modal-card {
+    max-width: 780px !important;
+    max-height: 90vh !important;
+  }
+
+  .profile-subtitle {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .profile-modal-body {
+    gap: 1rem !important;
+  }
+
+  .profile-info-banner {
+    background: color-mix(in srgb, var(--pink) 12%, var(--bg-elevated));
+    border: 1px solid color-mix(in srgb, var(--pink) 30%, transparent);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .profile-feedback-box {
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: color-mix(in srgb, #4ade80 18%, var(--bg-elevated));
+    border: 1px solid color-mix(in srgb, #4ade80 40%, transparent);
+    color: #4ade80;
+  }
+
+  .profile-editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .profile-editor-container label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--text-heading);
+  }
+
+  .profile-textarea {
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    color: var(--text);
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    resize: vertical;
+    min-height: 340px;
+    box-sizing: border-box;
+    display: block;
+  }
+
+  .profile-textarea:focus {
+    border-color: var(--pink);
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--pink) 25%, transparent);
   }
 
   /* === Animations === */

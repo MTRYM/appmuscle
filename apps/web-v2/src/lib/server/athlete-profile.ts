@@ -1,4 +1,8 @@
-MASTER ATHLETE PROFILE & PROGRAMMING SPECIFICATION
+import { prisma } from './prisma';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export const DEFAULT_ATHLETE_PROFILE = `MASTER ATHLETE PROFILE & PROGRAMMING SPECIFICATION
 ROLE
 
 You are a world-class hybrid performance coach specializing in advanced calisthenics, strength training, athletic performance, biomechanics, sports science, periodization, injury prevention, nutrition, and long-term athlete development.
@@ -447,20 +451,7 @@ Relative strength
 Athleticism
 Hypertrophy
 Maximal absolute strength
-Expected Response Format
 
-Whenever generating a program:
-
-Explain the overall strategy.
-Explain why each training block exists.
-Explain fatigue management.
-Explain progression criteria.
-Explain deload criteria.
-Explain exercise selection.
-Explain how each exercise transfers to athletic goals.
-Provide precise rest periods.
-Provide RPE or RIR targets.
-Explain how to adapt when progress stalls.
 Performance Tracking
 
 After each training block, evaluate:
@@ -489,4 +480,111 @@ Joint health.
 
 Sleep.
 
-Adjust future programming accordingly.
+Adjust future programming accordingly.`;
+
+const LOCAL_FILE_PATHS = [
+  path.resolve(process.cwd(), 'AthleteProfil'),
+  path.resolve(process.cwd(), '../../AthleteProfil'),
+  path.resolve(process.cwd(), '../AthleteProfil'),
+];
+
+/**
+ * Get the current athlete profile text (from DB or default seed).
+ */
+export async function getAthleteProfileText(): Promise<{ text: string; id: string; updatedAt: string }> {
+  try {
+    const existing = await prisma.athleteProfile.findFirst({
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    if (existing && existing.data && existing.data.trim()) {
+      return {
+        text: existing.data,
+        id: existing.id,
+        updatedAt: existing.updatedAt,
+      };
+    }
+
+    // Try reading from local file if exists
+    let initialText = DEFAULT_ATHLETE_PROFILE;
+    for (const filePath of LOCAL_FILE_PATHS) {
+      if (fs.existsSync(filePath)) {
+        try {
+          initialText = fs.readFileSync(filePath, 'utf-8');
+          break;
+        } catch { /* ignore */ }
+      }
+    }
+
+    // Seed database
+    const now = new Date().toISOString();
+    const created = await prisma.athleteProfile.create({
+      data: {
+        id: 'main',
+        data: initialText,
+        createdAt: now,
+        updatedAt: now,
+      },
+    });
+
+    return {
+      text: created.data,
+      id: created.id,
+      updatedAt: created.updatedAt,
+    };
+  } catch (err) {
+    console.error('Error fetching athlete profile:', err);
+    return {
+      text: DEFAULT_ATHLETE_PROFILE,
+      id: 'default',
+      updatedAt: new Date().toISOString(),
+    };
+  }
+}
+
+/**
+ * Save new athlete profile text to DB and sync with local file if possible.
+ */
+export async function saveAthleteProfileText(newText: string): Promise<{ success: boolean; updatedAt: string }> {
+  const now = new Date().toISOString();
+
+  // 1. Update Database
+  try {
+    const existing = await prisma.athleteProfile.findFirst();
+    if (existing) {
+      await prisma.athleteProfile.update({
+        where: { id: existing.id },
+        data: {
+          data: newText,
+          updatedAt: now,
+        },
+      });
+    } else {
+      await prisma.athleteProfile.create({
+        data: {
+          id: 'main',
+          data: newText,
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
+    }
+  } catch (err) {
+    console.error('Failed to save athlete profile to DB:', err);
+    throw err;
+  }
+
+  // 2. Sync to local file if writable
+  for (const filePath of LOCAL_FILE_PATHS) {
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.writeFileSync(filePath, newText, 'utf-8');
+        break;
+      }
+    } catch {
+      // Local filesystem might be read-only in Vercel serverless environment
+    }
+  }
+
+  return { success: true, updatedAt: now };
+}

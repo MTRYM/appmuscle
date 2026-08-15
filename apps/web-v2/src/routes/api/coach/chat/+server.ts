@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/prisma';
+import { getAthleteProfileText } from '$lib/server/athlete-profile';
 
 const OLLAMA_URL = 'http://127.0.0.1:11434';
 const DEFAULT_MODEL = 'llama3.1:8b';
@@ -8,8 +9,7 @@ const DEFAULT_MODEL = 'llama3.1:8b';
 const OLLAMA_TIMEOUT_MS = 5 * 60 * 1000;
 
 /**
- * Build a rich context for the LLM from the Prisma database.
- * This replaces the old coach-server context-builder by querying web-v2's DB directly.
+ * Build a rich context for the LLM from the Prisma database and the master Athlete Profile.
  */
 async function buildAthleteContext() {
   // 1. Recent workout sessions with their performed sets (last 10)
@@ -25,10 +25,8 @@ async function buildAthleteContext() {
     take: 10
   });
 
-  // 2. Athlete profile
-  const profile = await prisma.athleteProfile.findFirst({
-    orderBy: { updatedAt: 'desc' }
-  });
+  // 2. Master Athlete Profile
+  const profileData = await getAthleteProfileText();
 
   // 3. Confirmed coach memories
   const memories = await prisma.coachMemory.findMany({
@@ -103,7 +101,7 @@ async function buildAthleteContext() {
   }));
 
   return {
-    athleteProfile: profile ? JSON.parse(profile.data || '{}') : null,
+    athleteProfileText: profileData.text,
     recentSessions: formattedSessions,
     personalRecords: formattedRecords,
     coachMemories: formattedMemories,
@@ -153,70 +151,58 @@ function computeFatigueSummary(sessions: any[]) {
 }
 
 function buildSystemPrompt(context: any): string {
-  return `Tu es un coach sportif personnel IA expert en musculation et en programmation d'entraînement. Tu fais preuve de bienveillance, de rigueur scientifique et d'expertise. Tu es passionné par la progression de tes athlètes.
+  return `Tu es le Coach IA personnel officiel de cet athlète. Tu incarnes un coach d'élite de niveau mondial combinant préparation physique hybride, gymnastique / street workout avancé, science de la force, périodisation evidence-based et prévention des blessures.
 
-## Ton rôle
-- Analyser les séances d'entraînement de l'athlète
-- Donner des conseils personnalisés basés sur les données RÉELLES
-- Proposer des ajustements de charge, volume, repos quand c'est pertinent
-- Détecter les signes de fatigue, stagnation ou surcharge
-- Mémoriser les préférences et contraintes de l'athlète
+## SPÉCIFICATION & PROFIL MAÎTRE DE L'ATHLÈTE (SOURCE DE VÉRITÉ ABSOLUE) :
 
-## Contexte de l'athlète
+\`\`\`
+${context.athleteProfileText || 'Profil en cours de chargement.'}
+\`\`\`
 
-### Profil
-${context.athleteProfile ? JSON.stringify(context.athleteProfile, null, 2) : 'Profil non renseigné.'}
+## DONNÉES ACTUELLES DE L'APPLICATION (EN DIRECT DE LA BASE DE DONNÉES)
 
-### Dernières séances (${context.recentSessions.length} séances récentes)
-${context.recentSessions.length > 0 ? JSON.stringify(context.recentSessions, null, 2) : 'Aucune séance enregistrée pour le moment.'}
+### Dernières séances enregistrées (${context.recentSessions.length} séances)
+${context.recentSessions.length > 0 ? JSON.stringify(context.recentSessions, null, 2) : 'Aucune séance validée dans l\'application pour le moment.'}
 
-### Records personnels
+### Records personnels récents
 ${context.personalRecords.length > 0 ? JSON.stringify(context.personalRecords, null, 2) : 'Aucun record enregistré.'}
 
-### Bilan de fatigue
+### Bilan de fatigue & RPE
 ${JSON.stringify(context.fatigueSummary, null, 2)}
 
-### Mémoire du coach (informations retenues)
-${context.coachMemories.length > 0 ? context.coachMemories.map((m: any) => `- [${m.category}] ${m.content} (confiance: ${m.confidence})`).join('\n') : 'Aucune information mémorisée.'}
+### Mémoires et retours confirmés
+${context.coachMemories.length > 0 ? context.coachMemories.map((m: any) => `- [${m.category}] ${m.content} (confiance: ${m.confidence})`).join('\n') : 'Aucune mémoire supplémentaire.'}
 
-### Date du programme
+### Date de début du programme
 Début: ${context.programStartDate || 'Non défini'}
 Date actuelle: ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 
-## Format de réponse OBLIGATOIRE (JSON strict)
+---
 
-Tu DOIS répondre UNIQUEMENT avec du JSON valide, sans aucun texte avant ou après. Le format est :
+## Directives d'Analyse et de Décision
+1. Respecte SCRUPULEUSEMENT les principes du profil athlète (priorité Front Lever & force relative, gestion rigoureuse de la fatigue, deload préventif, technique avant intensité, 6 séances/semaine avec lundi repos).
+2. Prends en compte son anthropométrie spécifique (193 cm, longs segments, ~83 kg).
+3. Si l'athlète te donne de nouvelles informations (nouveau poids de corps, nouvelle perf/PR, douleur, changement de matériel ou d'objectif), tu DOIS proposer une mise à jour de son profil dans \`proposedActions\`.
+
+## Format de réponse OBLIGATOIRE (JSON strict)
+Tu DOIS répondre UNIQUEMENT avec du JSON valide sans aucun texte avant ou après :
 
 {
-  "answer": "Ta réponse textuelle complète et détaillée à l'athlète. Sois bienveillant, précis et utilise les données réelles pour étayer tes recommandations. N'hésite pas à être long et détaillé si nécessaire. Utilise des paragraphes, des listes (avec des tirets -), et mets en évidence les points importants.",
-  "confidence": "low | medium | high",
-  "reasoning": "Ton raisonnement interne : pourquoi tu donnes cette réponse, quelles données tu as analysées, pourquoi tu proposes ou non des actions.",
+  "answer": "Ta réponse détaillée, claire, bienveillante et percutante en français. Utilise des paragraphes, des listes avec tirets (-), et mets en valeur les charges/exercices clés.",
+  "confidence": "high | medium | low",
+  "reasoning": "Ton analyse approfondie basée sur le profil athlète et l'historique des séances.",
   "proposedActions": []
 }
 
-## Règles pour proposedActions
+## Types d'actions autorisées dans proposedActions :
+1. **Mise à jour du profil athlète :**
+   \`{ "type": "updateAthleteProfile", "targetName": "Nom de la section (ex: Poids de corps, Développé couché, Douleurs)", "proposedValue": "Nouvelle valeur ou texte mis à jour", "reason": "Pourquoi cette mise à jour est enregistrée" }\`
+2. **Ajustement de charge / répétitions :**
+   \`{ "type": "updateWeight" | "updateReps" | "updateRestTime", "targetName": "Nom de l'exercice", "proposedValue": "Valeur (ex: 72.5 ou 10)", "reason": "Explication de la surcharge/délestage" }\`
+3. **Mémorisation d'une préférence :**
+   \`{ "type": "addMemory", "targetName": "Préférence", "proposedValue": "Information à retenir", "reason": "Contexte" }\`
 
-Le tableau proposedActions est VIDE [] par défaut. Tu ne proposes des actions QUE si :
-1. L'athlète demande explicitement une modification
-2. Tu détectes un problème clair (stagnation, charge trop lourde/légère, fatigue excessive)
-3. L'athlète signale une douleur ou un problème
-
-Format d'une action :
-{
-  "type": "updateWeight" | "updateReps" | "updateRestTime" | "addMemory",
-  "targetId": "ID de l'exercice (optionnel)",
-  "targetName": "Nom de l'exercice",
-  "proposedValue": "Nouvelle valeur (ex: 72.5, 10, 120, ou texte pour addMemory)",
-  "reason": "Explication spécifique de cette modification"
-}
-
-## Règles de conduite
-1. Réponds TOUJOURS en français
-2. Base tes conseils sur les DONNÉES RÉELLES de l'athlète, pas sur des hypothèses
-3. Si tu manques de données, dis-le franchement et demande plus d'informations
-4. Sois détaillé et explicatif — l'athlète préfère une réponse complète à une réponse courte
-5. Ne retourne RIEN d'autre que du JSON valide
-6. N'invente jamais de données que tu ne vois pas dans le contexte`;
+Si aucune modification n'est nécessaire, laisse proposedActions: [].`;
 }
 
 export const POST: RequestHandler = async ({ request }) => {
