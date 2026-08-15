@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/prisma';
 import { getAthleteProfileText } from '$lib/server/athlete-profile';
+import { executeCoachPrompt } from '$lib/server/llm';
 
 const OLLAMA_URL = 'http://127.0.0.1:11434';
 const DEFAULT_MODEL = 'llama3.1:8b';
@@ -208,115 +209,42 @@ Si aucune modification n'est nécessaire, laisse proposedActions: [].`;
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const body = await request.json();
-    const { message, model: requestedModel, ollamaUrl: customUrl } = body;
+    const {
+      message,
+      provider,
+      apiKey,
+      model: requestedModel,
+      ollamaUrl: customUrl
+    } = body;
 
     if (!message || !message.trim()) {
       return json({ error: 'Message requis' }, { status: 400 });
     }
 
-    const targetOllamaUrl = (customUrl || request.headers.get('x-ollama-url') || process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
-
-    // 1. Build context from database
+    // 1. Build rich athlete context from database
     const context = await buildAthleteContext();
 
-    // 2. Build prompt
+    // 2. Build system prompt with athlete profile and guidelines
     const systemPrompt = buildSystemPrompt(context);
 
-    // 3. Include conversation history in the prompt
-    let conversationContext = '';
-    if (context.conversationHistory.length > 0) {
-      conversationContext = '\n\n## Historique de conversation récent\n';
-      for (const msg of context.conversationHistory) {
-        const role = msg.role === 'user' ? 'Athlète' : 'Coach';
-        conversationContext += `${role}: ${msg.content}\n`;
-      }
-    }
+    // 3. Resolve API key from body, headers, or server env
+    const activeApiKey = apiKey || request.headers.get('x-api-key') || '';
+    const activeProvider = provider || request.headers.get('x-llm-provider') || 'auto';
 
-    const fullPrompt = `${systemPrompt}${conversationContext}\n\nNouvelle question/remarque de l'athlète :\n"${message.trim()}"`;
+    // 4. Execute prompt with chosen provider (Gemini 2.0 Flash default free tier 0€)
+    const result = await executeCoachPrompt({
+      provider: activeProvider,
+      apiKey: activeApiKey,
+      model: requestedModel,
+      ollamaUrl: customUrl,
+      systemPrompt,
+      userMessage: message.trim(),
+      conversationHistory: context.conversationHistory
+    });
 
-    // 4. Determine which model to use
-    let modelName = requestedModel || DEFAULT_MODEL;
-    if (!requestedModel) {
-      try {
-        const tagsRes = await fetch(`${targetOllamaUrl}/api/tags`);
-        if (tagsRes.ok) {
-          const tagsData = await tagsRes.json();
-          const availableModels = (tagsData.models || []).map((m: any) => m.name);
-          if (availableModels.length > 0 && !availableModels.some((m: string) => m.startsWith(DEFAULT_MODEL.split(':')[0]))) {
-            modelName = availableModels[0];
-          }
-        }
-      } catch { /* Use default */ }
-    }
-
-    // 5. Call Ollama with high timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), OLLAMA_TIMEOUT_MS);
-
-    let ollamaResponse;
-    try {
-      ollamaResponse = await fetch(`${targetOllamaUrl}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: modelName,
-          prompt: fullPrompt,
-          stream: false,
-          format: 'json',
-          options: {
-            temperature: 0.7,
-            num_predict: 4096,
-            top_p: 0.9,
-          }
-        }),
-        signal: controller.signal
-      });
-    } catch (fetchErr: any) {
-      clearTimeout(timeout);
-      if (fetchErr.name === 'AbortError') {
-        return json({
-          error: 'Timeout',
-          message: 'Le modèle a mis trop de temps à répondre (> 5 min). Essaie avec une question plus ciblée ou un modèle plus léger (ex: llama3.2:3b).'
-        }, { status: 504 });
-      }
-      return json({
-        error: 'Ollama inaccessible',
-        message: `Impossible de contacter Ollama sur ${targetOllamaUrl}. Vérifie qu'il tourne sur ton PC avec 'ollama serve'.`
-      }, { status: 503 });
-    }
-
-    clearTimeout(timeout);
-
-    if (!ollamaResponse.ok) {
-      const errText = await ollamaResponse.text();
-      console.error('Ollama error:', errText);
-      return json({
-        error: 'Erreur Ollama',
-        message: `Le modèle a retourné une erreur : ${ollamaResponse.status}. Vérifie que le modèle ${modelName} est bien installé (ollama pull ${modelName})`
-      }, { status: 502 });
-    }
-
-    const result = await ollamaResponse.json();
-
-    // 6. Parse LLM response
-    let parsedData;
-    try {
-      parsedData = JSON.parse(result.response);
-    } catch (parseErr) {
-      console.error('Failed to parse LLM JSON:', result.response);
-      // If JSON parsing fails, try to extract answer from raw text
-      parsedData = {
-        answer: result.response || "Désolé, je n'ai pas pu formuler une réponse structurée. Réessaie en reformulant ta question.",
-        confidence: 'low',
-        reasoning: 'La réponse du modèle n\'était pas en JSON valide.',
-        proposedActions: []
-      };
-    }
-
-    // 7. Save conversation to database
+    // 5. Save conversation history in database
     const now = new Date();
     try {
-      // Save user message
       await prisma.coachConversation.create({
         data: {
           deviceId: 'web',
@@ -325,45 +253,44 @@ export const POST: RequestHandler = async ({ request }) => {
           createdAt: now
         }
       });
-      // Save assistant response
+
       await prisma.coachConversation.create({
         data: {
           deviceId: 'web',
           role: 'assistant',
-          content: parsedData.answer || '',
+          content: result.answer || '',
           metadata: {
-            proposedActions: parsedData.proposedActions || [],
-            confidence: parsedData.confidence || 'low',
-            reasoning: parsedData.reasoning || '',
-            model: modelName
+            proposedActions: result.proposedActions || [],
+            confidence: result.confidence || 'high',
+            reasoning: result.reasoning || '',
+            provider: result.provider,
+            model: result.model
           },
-          createdAt: new Date(now.getTime() + 1) // +1ms to ensure ordering
+          createdAt: new Date(now.getTime() + 1)
         }
       });
     } catch (dbErr) {
-      // Don't fail the request if DB save fails
-      console.error('Failed to save conversation:', dbErr);
+      console.error('Failed to save conversation to DB:', dbErr);
     }
 
-    // 8. Return response
+    // 6. Return structured response
     return json({
       success: true,
-      answer: parsedData.answer || "Désolé, je n'ai pas bien formulé ma réponse.",
-      proposedActions: parsedData.proposedActions || [],
-      confidence: parsedData.confidence || 'low',
-      reasoning: parsedData.reasoning || '',
-      model: modelName,
-      totalDuration: result.total_duration
-        ? Math.round(result.total_duration / 1_000_000_000 * 10) / 10 // nanoseconds to seconds
-        : null,
+      answer: result.answer,
+      proposedActions: result.proposedActions || [],
+      confidence: result.confidence,
+      reasoning: result.reasoning,
+      provider: result.provider,
+      model: result.model,
+      totalDuration: result.durationSec,
       timestamp: new Date().toISOString()
     });
 
   } catch (err: any) {
     console.error('Coach chat error:', err);
     return json({
-      error: 'Erreur serveur',
-      message: err.message || 'Une erreur inattendue est survenue.'
+      error: 'Erreur lors de la génération',
+      message: err.message || 'Une erreur est survenue lors de la communication avec l\'IA.'
     }, { status: 500 });
   }
 };

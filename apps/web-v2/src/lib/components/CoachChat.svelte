@@ -6,11 +6,9 @@
     Bot,
     User,
     UserCheck,
-    FileText,
     Sparkles,
     AlertCircle,
     Wifi,
-    WifiOff,
     Loader2,
     ChevronDown,
     Zap,
@@ -24,7 +22,10 @@
     HelpCircle,
     RefreshCw,
     X,
-    Save
+    Save,
+    Key,
+    ExternalLink,
+    ShieldCheck
   } from 'lucide-svelte';
   import { onMount, tick } from 'svelte';
 
@@ -34,15 +35,16 @@
     text: string;
     timestamp: string;
     model?: string;
+    provider?: string;
     actions?: CoachAction[];
     reasoning?: string;
     duration?: number | null;
   }
 
-  interface OllamaModel {
+  interface ProviderModel {
     name: string;
+    description?: string;
     size?: string;
-    modifiedAt?: string;
   }
 
   let messages = $state<Message[]>([]);
@@ -52,11 +54,14 @@
   let copiedMessageId = $state<string | null>(null);
 
   // Settings & Status
+  let provider = $state<'gemini' | 'groq' | 'openai' | 'anthropic' | 'ollama'>('gemini');
+  let apiKey = $state('');
+  let selectedModel = $state('gemini-2.0-flash');
   let ollamaUrl = $state('http://127.0.0.1:11434');
-  let selectedModel = $state('');
-  let availableModels = $state<OllamaModel[]>([]);
-  let ollamaStatus = $state<'checking' | 'ok' | 'offline' | 'no_model' | 'error'>('checking');
-  let ollamaStatusMessage = $state('');
+
+  let availableModels = $state<ProviderModel[]>([]);
+  let coachStatus = $state<'checking' | 'ok' | 'no_key' | 'offline' | 'no_model' | 'error'>('checking');
+  let coachStatusMessage = $state('');
   let activeModel = $state('');
   let isTestingConnection = $state(false);
   let showSettingsModal = $state(false);
@@ -79,60 +84,70 @@
   const WELCOME_MESSAGE: Message = {
     id: 'welcome',
     sender: 'coach',
-    text: 'Salut ! 👋 Je suis ton **Coach IA personnel**. J\'ai accès à tout ton historique d\'entraînement, tes charges actuelles, tes RPE et ta progression.\n\nPose-moi n\'importe quelle question sur tes séances, demande-moi d\'analyser tes perfs ou d\'ajuster tes charges pour ta prochaine séance !',
+    text: 'Salut ! 👋 Je suis ton **Coach IA personnel**. J\'ai accès à l\'intégralité de ta spécification **AthleteProfil**, tes mensurations (193 cm, ~83 kg), ton passé sportif et tout ton historique de séances.\n\nPose-moi tes questions d\'entraînement, demande-moi d\'analyser tes progrès ou de planifier tes prochaines charges !',
     timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
   };
 
   const QUICK_SUGGESTIONS = [
-    { label: 'Bilan global', icon: TrendingUp, prompt: 'Fais-moi un bilan global complet de mes dernières séances. Analyse ma progression, mes points forts et mes axes d\'amélioration.' },
-    { label: 'Analyse charges', icon: Dumbbell, prompt: 'Analyse mes charges sur mes exercices principaux. Est-ce que je progresse bien ? Quels ajustements me conseilles-tu ?' },
-    { label: 'Prochaine séance', icon: Zap, prompt: 'Quels sont tes conseils pour ma prochaine séance d\'entraînement ? Quels poids devrais-je viser ?' },
-    { label: 'Fatigue & RPE', icon: Clock, prompt: 'Analyse mon niveau de fatigue récent d\'après mes RPE et mes sensations. Dois-je lever le pied ou continuer à pousser ?' },
+    { label: 'Bilan global', icon: TrendingUp, prompt: 'Fais-moi un bilan complet de ma progression selon mon profil athlète (193cm, 83kg) et mes dernières séances.' },
+    { label: 'Analyse charges', icon: Dumbbell, prompt: 'Analyse mes charges actuelles (Bench 70kg, Squat 100kg, Tractions +15kg). Quels sont tes conseils pour surcharger proprement ?' },
+    { label: 'Prochaine séance', icon: Zap, prompt: 'Quels sont tes conseils pour ma prochaine séance d\'entraînement ? Quels poids et durées devrais-je viser ?' },
+    { label: 'Front Lever & Skills', icon: Clock, prompt: 'Analyse mon niveau sur le Front Lever (tuck 15-20s) et le Handstand. Comment structurer mes maintiens cette semaine ?' },
   ];
 
   onMount(async () => {
+    const storedProvider = localStorage.getItem('appmuscu_llm_provider') as any;
+    if (storedProvider) provider = storedProvider;
+    const storedKey = localStorage.getItem('appmuscu_api_key');
+    if (storedKey) apiKey = storedKey;
+    const storedModel = localStorage.getItem('appmuscu_llm_model');
+    if (storedModel) selectedModel = storedModel;
     const storedUrl = localStorage.getItem('appmuscu_ollama_url');
     if (storedUrl) ollamaUrl = storedUrl;
-    const storedModel = localStorage.getItem('appmuscu_ollama_model');
-    if (storedModel) selectedModel = storedModel;
 
     messages = [WELCOME_MESSAGE];
-    await checkOllamaStatus();
+    await checkHealth();
   });
 
-  async function checkOllamaStatus(customUrl?: string) {
-    ollamaStatus = 'checking';
-    const targetUrl = customUrl || ollamaUrl;
+  async function checkHealth(overrideProvider?: string, overrideKey?: string) {
+    coachStatus = 'checking';
+    const activeProv = overrideProvider || provider;
+    const activeK = overrideKey !== undefined ? overrideKey : apiKey;
 
     try {
-      const res = await fetch(`/api/coach/health?url=${encodeURIComponent(targetUrl)}`);
+      const url = `/api/coach/health?provider=${activeProv}&apiKey=${encodeURIComponent(activeK)}&url=${encodeURIComponent(ollamaUrl)}`;
+      const res = await fetch(url);
       const data = await res.json();
-      ollamaStatus = data.status;
-      ollamaStatusMessage = data.message;
+      coachStatus = data.status;
+      coachStatusMessage = data.message;
       availableModels = data.models || [];
       activeModel = selectedModel || data.preferredModel || (data.models?.[0]?.name ?? '');
       if (!selectedModel && activeModel) {
         selectedModel = activeModel;
       }
     } catch {
-      ollamaStatus = 'error';
-      ollamaStatusMessage = `Impossible de contacter l'API coach (${targetUrl}).`;
+      coachStatus = 'error';
+      coachStatusMessage = "Impossible de contacter l'API coach.";
     }
   }
 
   async function testConnection() {
     isTestingConnection = true;
-    await checkOllamaStatus();
+    await checkHealth();
     isTestingConnection = false;
   }
 
   function saveSettings() {
-    localStorage.setItem('appmuscu_ollama_url', ollamaUrl);
+    localStorage.setItem('appmuscu_llm_provider', provider);
+    localStorage.setItem('appmuscu_api_key', apiKey);
     if (selectedModel) {
-      localStorage.setItem('appmuscu_ollama_model', selectedModel);
+      localStorage.setItem('appmuscu_llm_model', selectedModel);
+    }
+    if (ollamaUrl) {
+      localStorage.setItem('appmuscu_ollama_url', ollamaUrl);
     }
     showSettingsModal = false;
-    checkOllamaStatus();
+    checkHealth();
   }
 
   async function openProfileModal() {
@@ -243,6 +258,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userText,
+          provider,
+          apiKey,
           model: selectedModel || activeModel,
           ollamaUrl
         })
@@ -259,6 +276,7 @@
         sender: 'coach',
         text: data.answer,
         model: data.model,
+        provider: data.provider,
         actions: data.proposedActions || [],
         reasoning: data.reasoning || '',
         duration: data.totalDuration,
@@ -284,7 +302,7 @@
   }
 
   function triggerQuickAnalysis() {
-    sendMessage('Fais-moi un bilan global complet de mes dernières séances : analyse ma progression, ma fatigue, mes points forts et donne-moi tes recommandations pour les prochains jours.');
+    sendMessage('Fais-moi un bilan global complet selon mon profil athlète (193cm, 83kg) et mes dernières séances : analyse ma progression, ma fatigue, mes points forts et donne-moi tes recommandations pour les prochains jours.');
   }
 
   function formatMessageText(text: string): string {
@@ -297,6 +315,15 @@
       .replace(/\n\n/g, '<div class="paragraph-gap"></div>')
       .replace(/\n/g, '<br>');
   }
+
+  function onProviderChange() {
+    if (provider === 'gemini') selectedModel = 'gemini-2.0-flash';
+    else if (provider === 'groq') selectedModel = 'llama-3.3-70b-versatile';
+    else if (provider === 'openai') selectedModel = 'gpt-4o-mini';
+    else if (provider === 'anthropic') selectedModel = 'claude-3-7-sonnet-20250219';
+    else if (provider === 'ollama') selectedModel = 'llama3.1:8b';
+    checkHealth(provider);
+  }
 </script>
 
 <div class="coach-wrapper">
@@ -304,30 +331,42 @@
     <!-- Header -->
     <header class="coach-header">
       <div class="header-left">
-        <div class="header-avatar" class:active={ollamaStatus === 'ok'}>
+        <div class="header-avatar" class:active={coachStatus === 'ok'}>
           <Brain size={22} />
-          {#if ollamaStatus === 'ok'}
+          {#if coachStatus === 'ok'}
             <span class="avatar-glow"></span>
           {/if}
         </div>
         <div class="header-info">
           <div class="header-title-row">
             <h2>Coach IA Personnel</h2>
-            <span class="badge-ai">Local & Privé</span>
+            <span class="badge-ai">
+              {#if provider === 'gemini'}
+                Gemini 0€
+              {:else if provider === 'groq'}
+                Groq 0€
+              {:else if provider === 'anthropic'}
+                Claude
+              {:else if provider === 'openai'}
+                OpenAI
+              {:else}
+                Ollama Local
+              {/if}
+            </span>
           </div>
           <div class="header-status">
-            {#if ollamaStatus === 'checking'}
+            {#if coachStatus === 'checking'}
               <span class="status-dot checking"></span>
               <span class="status-text">Vérification de la connexion…</span>
-            {:else if ollamaStatus === 'ok'}
+            {:else if coachStatus === 'ok'}
               <span class="status-dot online"></span>
               <span class="status-text">Prêt{activeModel ? ` · ${activeModel}` : ''}</span>
-            {:else if ollamaStatus === 'no_model'}
+            {:else if coachStatus === 'no_key'}
               <span class="status-dot warning"></span>
-              <span class="status-text">Ollama actif sans modèle</span>
+              <span class="status-text">Clé API requise (Gratuit 0€)</span>
             {:else}
               <span class="status-dot offline"></span>
-              <span class="status-text">Hors ligne</span>
+              <span class="status-text">Déconnecté</span>
             {/if}
           </div>
         </div>
@@ -338,7 +377,7 @@
           type="button"
           class="btn-sparkle"
           onclick={triggerQuickAnalysis}
-          disabled={loading || ollamaStatus !== 'ok'}
+          disabled={loading || coachStatus !== 'ok'}
           title="Lancer une analyse complète de ton historique"
         >
           <Sparkles size={15} />
@@ -358,7 +397,7 @@
           type="button"
           class="btn-icon-header"
           onclick={() => showSettingsModal = true}
-          title="Paramètres de connexion Ollama"
+          title="Paramètres de l'IA (Gemini / Clé API)"
         >
           <Settings size={18} />
         </button>
@@ -366,26 +405,26 @@
         <button
           type="button"
           class="btn-icon-header"
-          onclick={() => checkOllamaStatus()}
+          onclick={() => checkHealth()}
           title="Rafraîchir l'état"
         >
-          <RefreshCw size={17} class={ollamaStatus === 'checking' ? 'spin' : ''} />
+          <RefreshCw size={17} class={coachStatus === 'checking' ? 'spin' : ''} />
         </button>
       </div>
     </header>
 
-    <!-- Status Notice (if offline or error) -->
-    {#if ollamaStatus !== 'ok' && ollamaStatus !== 'checking'}
-      <div class="status-banner" class:warning={ollamaStatus === 'no_model'} class:error={ollamaStatus === 'offline' || ollamaStatus === 'error'}>
+    <!-- Status Notice (if no key or error) -->
+    {#if coachStatus !== 'ok' && coachStatus !== 'checking'}
+      <div class="status-banner" class:warning={coachStatus === 'no_key' || coachStatus === 'no_model'} class:error={coachStatus === 'offline' || coachStatus === 'error'}>
         <div class="status-banner-content">
           <AlertCircle size={17} class="status-icon" />
           <div class="status-banner-text">
-            <strong>{ollamaStatus === 'no_model' ? 'Aucun modèle IA installé' : 'Ollama déconnecté'}</strong>
-            <p>{ollamaStatusMessage}</p>
+            <strong>{coachStatus === 'no_key' ? 'Active ton Coach IA gratuitement (0€)' : 'Configuration requise'}</strong>
+            <p>{coachStatusMessage}</p>
           </div>
         </div>
         <button type="button" class="btn-banner-action" onclick={() => showSettingsModal = true}>
-          Configurer
+          {coachStatus === 'no_key' ? 'Activer (0€)' : 'Configurer'}
         </button>
       </div>
     {/if}
@@ -481,11 +520,6 @@
                 <span class="typing-timer">{formatElapsed(elapsedSeconds)}</span>
               </div>
             </div>
-            {#if elapsedSeconds > 12}
-              <div class="typing-patience">
-                💡 Analyse approfondie de tes séries, RPE et progression en cours…
-              </div>
-            {/if}
           </div>
         </div>
       {/if}
@@ -508,7 +542,7 @@
             type="button"
             class="suggestion-chip"
             onclick={() => sendMessage(suggestion.prompt)}
-            disabled={ollamaStatus !== 'ok'}
+            disabled={coachStatus !== 'ok'}
           >
             <Icon size={14} class="chip-icon" />
             <span>{suggestion.label}</span>
@@ -523,17 +557,17 @@
         <textarea
           bind:this={textareaElement}
           rows="1"
-          placeholder={loading ? 'Le coach réfléchit…' : 'Pose une question à ton coach (Entrée pour envoyer)…'}
+          placeholder={loading ? 'Le coach réfléchit…' : coachStatus !== 'ok' ? 'Configure ta clé API dans ⚙️ pour commencer…' : 'Pose une question à ton coach (Entrée pour envoyer)…'}
           bind:value={inputMessage}
           onkeydown={handleKeydown}
-          disabled={loading || ollamaStatus === 'offline'}
+          disabled={loading || coachStatus === 'no_key'}
         ></textarea>
       </div>
 
       <button
         type="submit"
         class="send-btn"
-        disabled={loading || !inputMessage.trim() || ollamaStatus === 'offline'}
+        disabled={loading || !inputMessage.trim() || coachStatus === 'no_key'}
         title="Envoyer le message"
       >
         {#if loading}
@@ -546,14 +580,14 @@
   </div>
 </div>
 
-<!-- Connection Settings Modal -->
+<!-- AI Provider & Connection Settings Modal -->
 {#if showSettingsModal}
   <div class="modal-backdrop" onclick={() => showSettingsModal = false} role="presentation">
     <div class="modal-card" onclick={(e) => e.stopPropagation()} role="dialog" tabindex="-1">
       <div class="modal-header">
         <div class="modal-title-group">
-          <Settings size={20} class="modal-icon" />
-          <h3>Configuration du Coach IA (Ollama)</h3>
+          <Brain size={20} class="modal-icon" />
+          <h3>Moteur d'Intelligence Artificielle</h3>
         </div>
         <button type="button" class="modal-close" onclick={() => showSettingsModal = false}>
           <X size={18} />
@@ -562,97 +596,100 @@
 
       <div class="modal-body">
         <div class="form-group">
-          <label for="ollama-url-input">URL du serveur Ollama</label>
-          <div class="input-with-action">
+          <label for="llm-provider-select">Fournisseur d'IA</label>
+          <select id="llm-provider-select" bind:value={provider} onchange={onProviderChange}>
+            <option value="gemini">Google Gemini 2.0 Flash (Recommandé · 100% Gratuit 0€)</option>
+            <option value="groq">Groq Cloud (Llama 3.3 70B · 100% Gratuit 0€)</option>
+            <option value="openai">OpenAI (GPT-4o mini / GPT-4o)</option>
+            <option value="anthropic">Anthropic Claude (Claude 3.7 Sonnet)</option>
+            <option value="ollama">Ollama Local (Sur ton PC)</option>
+          </select>
+        </div>
+
+        {#if provider === 'gemini'}
+          <div class="form-group">
+            <div class="label-with-link">
+              <label for="gemini-api-key">Clé API Google Gemini (0€)</label>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" class="ext-link">
+                <span>Obtenir ma clé gratuite</span>
+                <ExternalLink size={12} />
+              </a>
+            </div>
+            <div class="input-with-action">
+              <input
+                id="gemini-api-key"
+                type="password"
+                bind:value={apiKey}
+                placeholder="Colle ta clé API Google AI Studio (AIzaSy...)"
+              />
+              <button
+                type="button"
+                class="btn-test"
+                disabled={isTestingConnection || !apiKey.trim()}
+                onclick={testConnection}
+              >
+                {#if isTestingConnection}
+                  <Loader2 size={15} class="spin" />
+                {:else}
+                  <Wifi size={15} />
+                {/if}
+                <span>Tester</span>
+              </button>
+            </div>
+            <span class="form-hint">
+              🔒 <strong>100% Gratuit et sans carte bancaire</strong>. Tes données ne sont jamais utilisées pour entraîner les modèles.
+            </span>
+          </div>
+        {:else if provider === 'groq'}
+          <div class="form-group">
+            <div class="label-with-link">
+              <label for="groq-api-key">Clé API Groq (0€)</label>
+              <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer" class="ext-link">
+                <span>Obtenir ma clé Groq</span>
+                <ExternalLink size={12} />
+              </a>
+            </div>
+            <input
+              id="groq-api-key"
+              type="password"
+              bind:value={apiKey}
+              placeholder="gsk_..."
+            />
+          </div>
+        {:else if provider === 'openai' || provider === 'anthropic'}
+          <div class="form-group">
+            <label for="cloud-api-key">Clé API {provider === 'openai' ? 'OpenAI' : 'Anthropic'}</label>
+            <input
+              id="cloud-api-key"
+              type="password"
+              bind:value={apiKey}
+              placeholder="sk-..."
+            />
+          </div>
+        {:else}
+          <div class="form-group">
+            <label for="ollama-url-input">URL du serveur Ollama Local</label>
             <input
               id="ollama-url-input"
               type="text"
               bind:value={ollamaUrl}
               placeholder="http://127.0.0.1:11434"
             />
-            <button
-              type="button"
-              class="btn-test"
-              disabled={isTestingConnection}
-              onclick={testConnection}
-            >
-              {#if isTestingConnection}
-                <Loader2 size={15} class="spin" />
-              {:else}
-                <Wifi size={15} />
-              {/if}
-              <span>Tester</span>
-            </button>
           </div>
-          <span class="form-hint">
-            Par défaut : <code>http://127.0.0.1:11434</code> (ou ton IP locale / tunnel si sur mobile).
-          </span>
-        </div>
-
-        <div class="form-group">
-          <label for="ollama-model-select">Modèle IA</label>
-          {#if availableModels.length > 0}
-            <select id="ollama-model-select" bind:value={selectedModel}>
-              {#each availableModels as m}
-                <option value={m.name}>
-                  {m.name} {m.size ? `(${m.size})` : ''}
-                </option>
-              {/each}
-            </select>
-          {:else}
-            <input
-              id="ollama-model-select"
-              type="text"
-              bind:value={selectedModel}
-              placeholder="ex: llama3.1:8b, mistral, deepseek-r1:8b"
-            />
-          {/if}
-          <span class="form-hint">
-            Modèles recommandés : <strong>llama3.1:8b</strong>, <strong>mistral</strong>, <strong>deepseek-r1:8b</strong>.
-          </span>
-        </div>
+        {/if}
 
         <!-- Connection Test Result -->
-        <div class="connection-status-box {ollamaStatus}">
+        <div class="connection-status-box {coachStatus}">
           <div class="status-indicator">
-            <span class="status-dot {ollamaStatus}"></span>
-            <strong>Statut : {ollamaStatus === 'ok' ? 'Connecté' : ollamaStatus === 'no_model' ? 'Sans modèle' : 'Hors ligne'}</strong>
+            <span class="status-dot {coachStatus}"></span>
+            <strong>Statut : {coachStatus === 'ok' ? 'Connecté et opérationnel' : coachStatus === 'no_key' ? 'Clé requise' : 'Déconnecté'}</strong>
           </div>
-          <p>{ollamaStatusMessage}</p>
+          <p>{coachStatusMessage}</p>
         </div>
 
-        <!-- Guide de démarrage -->
-        <div class="help-section">
-          <button
-            type="button"
-            class="help-toggle"
-            onclick={() => showHelpAccordion = !showHelpAccordion}
-          >
-            <HelpCircle size={16} />
-            <span>Guide rapide : lancer Ollama sur ton PC</span>
-            <ChevronDown size={16} class="help-chevron {showHelpAccordion ? 'open' : ''}" />
-          </button>
-
-          {#if showHelpAccordion}
-            <div class="help-content">
-              <ol>
-                <li>
-                  Installe <strong>Ollama</strong> depuis <a href="https://ollama.com" target="_blank" rel="noreferrer">ollama.com</a>.
-                </li>
-                <li>
-                  Ouvre ton terminal (PowerShell ou Invite de commandes) et télécharge un modèle :
-                  <pre><code>ollama pull llama3.1:8b</code></pre>
-                </li>
-                <li>
-                  Lance le serveur Ollama :
-                  <pre><code>ollama serve</code></pre>
-                </li>
-                <li>
-                  Si tu utilises l'appli depuis ton téléphone, configure l'adresse IP de ton PC (ex: <code>http://192.168.1.50:11434</code>) ou utilise un tunnel Cloudflare gratuit.
-                </li>
-              </ol>
-            </div>
-          {/if}
+        <div class="security-banner">
+          <ShieldCheck size={16} class="shield-icon" />
+          <span>Sécurité : Ta clé est stockée uniquement dans ton navigateur et protégée par contrat développeur Zero-Training.</span>
         </div>
       </div>
 
@@ -1274,15 +1311,6 @@
     font-weight: 700;
   }
 
-  .typing-patience {
-    margin-top: 0.65rem;
-    padding-top: 0.55rem;
-    border-top: 1px dashed var(--border);
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    line-height: 1.45;
-  }
-
   /* === Scroll to Bottom Button === */
   .scroll-bottom-btn {
     position: absolute;
@@ -1418,7 +1446,6 @@
   }
 
   .send-btn {
-    /* STRICT FIXED DIMENSIONS to override any global width:100% */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1471,7 +1498,7 @@
     border: 1px solid var(--border);
     border-radius: 20px;
     width: 100%;
-    max-width: 520px;
+    max-width: 540px;
     max-height: 85vh;
     overflow-y: auto;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
@@ -1533,6 +1560,21 @@
     gap: 0.4rem;
   }
 
+  .label-with-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ext-link {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--pink);
+    text-decoration: underline;
+  }
+
   .form-group label {
     font-size: 0.85rem;
     font-weight: 600;
@@ -1546,6 +1588,16 @@
 
   .input-with-action input {
     flex: 1;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  .form-group input, .form-group select {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -1575,27 +1627,13 @@
     color: var(--pink);
   }
 
-  .form-group select {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.65rem 0.9rem;
-    color: var(--text);
-    font-size: 0.9rem;
-    min-height: 44px;
-  }
-
   .form-hint {
     font-size: 0.75rem;
     color: var(--text-muted);
     line-height: 1.4;
   }
 
-  .form-hint code {
-    background: var(--bg-elevated);
-    padding: 0.1rem 0.35rem;
-    border-radius: 4px;
-    font-family: monospace;
+  .form-hint strong {
     color: var(--pink);
   }
 
@@ -1620,7 +1658,7 @@
     color: var(--text);
   }
 
-  .connection-status-box.no_model {
+  .connection-status-box.no_key, .connection-status-box.no_model {
     background: color-mix(in srgb, var(--warning) 12%, var(--bg-elevated));
     border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
     color: var(--text);
@@ -1638,66 +1676,22 @@
     color: var(--text-muted);
   }
 
-  .help-section {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .help-toggle {
-    width: 100%;
+  .security-banner {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: var(--bg-elevated);
-    border: none;
-    color: var(--text-heading);
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: left;
-    min-height: auto;
-  }
-
-  .help-chevron {
-    margin-left: auto;
-    transition: transform 0.2s ease;
-  }
-
-  .help-chevron.open {
-    transform: rotate(180deg);
-  }
-
-  .help-content {
-    padding: 1rem 1.25rem;
-    background: var(--bg-card);
-    font-size: 0.8rem;
+    gap: 0.55rem;
+    background: color-mix(in srgb, var(--pink) 10%, var(--bg-elevated));
+    border: 1px solid color-mix(in srgb, var(--pink) 25%, transparent);
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
-    line-height: 1.6;
-    border-top: 1px solid var(--border);
+    line-height: 1.4;
   }
 
-  .help-content ol {
-    margin: 0;
-    padding-left: 1.2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .help-content pre {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    padding: 0.45rem 0.75rem;
-    border-radius: 8px;
-    margin: 0.3rem 0 0;
-    overflow-x: auto;
-  }
-
-  .help-content code {
-    font-family: monospace;
+  .shield-icon {
     color: var(--pink);
+    flex-shrink: 0;
   }
 
   .modal-footer {
