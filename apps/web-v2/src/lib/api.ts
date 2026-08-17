@@ -62,34 +62,25 @@ export async function syncPlannedWithCompleted() {
   // We can skip or implement server-side if needed.
 }
 
-export async function saveWorkoutSession(sessionData: any, setsData: any[]) {
-  // 1. Save session
+export async function saveWorkoutSession(sessionData: any, setsData?: any[]) {
+  const sets = setsData || sessionData.sets || [];
+  const payload = {
+    ...sessionData,
+    sets,
+  };
+
   const res = await fetch('/api/sessions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(sessionData)
+    body: JSON.stringify(payload)
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || err.error || `Erreur lors de la sauvegarde (${res.status})`);
+  }
+
   const savedSession = await res.json();
-
-  // 2. Save sets
-  for (const set of setsData) {
-    set.sessionId = savedSession.id;
-    await fetch('/api/sets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(set)
-    });
-  }
-
-  // 3. Mark planned session as done if completed
-  if (sessionData.status === 'completed' && sessionData.plannedSessionId) {
-    await fetch(`/api/planned-sessions?id=${sessionData.plannedSessionId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'done' })
-    });
-  }
-
   return savedSession;
 }
 

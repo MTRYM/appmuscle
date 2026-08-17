@@ -344,8 +344,9 @@ import {
     try {
       await saveWorkoutSession({
         dateISO: todayISO(),
-        plannedSessionId: sessionMeta.plannedSessionId,
-        type: sessionMeta.type,
+        plannedSessionId: sessionMeta?.plannedSessionId || null,
+        type: sessionMeta?.type || 'planned',
+        status: 'completed',
         startedAt,
         completedAt: summary.completedAt,
         durationSec: summary.durationSec,
@@ -356,6 +357,9 @@ import {
 
       phase = 'done';
       onSessionSaved();
+    } catch (err: any) {
+      console.error('Erreur lors de la sauvegarde de la séance:', err);
+      alert('Erreur lors de l\'enregistrement de la séance : ' + (err.message || err));
     } finally {
       saving = false;
     }
