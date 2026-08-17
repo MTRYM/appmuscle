@@ -357,9 +357,9 @@ import {
 
       phase = 'done';
       onSessionSaved();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erreur lors de la sauvegarde de la séance:', err);
-      alert('Erreur lors de l\'enregistrement de la séance : ' + (err.message || err));
+      alert('Erreur lors de l\'enregistrement de la séance : ' + (err?.message || err));
     } finally {
       saving = false;
     }
