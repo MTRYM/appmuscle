@@ -2,12 +2,32 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { prisma } from "$lib/server/prisma";
 
-// GET /api/planned-sessions — list planned sessions with optional filters
+// GET /api/planned-sessions — list planned sessions with automatic missed sync
 export const GET: RequestHandler = async ({ url }) => {
   const dateISO = url.searchParams.get("date");
   const status = url.searchParams.get("status");
-  const limit = parseInt(url.searchParams.get("limit") || "100");
+  const limit = parseInt(url.searchParams.get("limit") || "200", 10);
 
+  const now = new Date();
+  const todayISO = now.toISOString().slice(0, 10);
+
+  // 1. Automatically mark past pending sessions as missed
+  try {
+    await prisma.plannedSession.updateMany({
+      where: {
+        status: "pending",
+        dateISO: { lt: todayISO },
+      },
+      data: {
+        status: "missed",
+        updatedAt: now.toISOString(),
+      },
+    });
+  } catch (err) {
+    console.warn("Could not auto-mark missed sessions:", err);
+  }
+
+  // 2. Query with applied filters
   const where: any = {};
   if (dateISO) where.dateISO = dateISO;
   if (status) where.status = status;
