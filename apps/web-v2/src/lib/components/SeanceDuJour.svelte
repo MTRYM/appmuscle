@@ -8,6 +8,8 @@
     getMissedSessions,
     saveWorkoutSession,
     getAllSessionsWithSets,
+    getInProgressSession,
+    deleteWorkoutSession,
   } from '$lib/api';
 import {
     parseProgramme,
@@ -40,6 +42,8 @@ import {
   let exerciseIndex = $state(0);
   let setIndex = $state(0);
   let startedAt = $state(null);
+  let currentSessionId = $state(null);
+  let inProgressSession = $state(null);
 
   let weight = $state('');
   let repsActual = $state('');
@@ -75,6 +79,13 @@ import {
     todaySession = await getTodayPlannedSession(todayISO());
     missedSessions = await getMissedSessions();
     freeTemplates = getAllSessionTemplates(programme);
+    // Check for in-progress sessions
+    try {
+      inProgressSession = await getInProgressSession();
+    } catch (e) {
+      console.warn('Could not check in-progress sessions:', e);
+      inProgressSession = null;
+    }
   }
 
   function suggestWeightFromSession(exerciseName) {
@@ -137,9 +148,125 @@ import {
     showCatchup = false;
     showFreePicker = false;
     sessionFeedback = {};
+    currentSessionId = null;
     await loadSessionHistory();
     await initExerciseInputs(exercices[0]);
+
+    // Immediately save to DB with in_progress status
+    try {
+      const saved = await saveWorkoutSession({
+        dateISO: todayISO(),
+        plannedSessionId: sessionMeta?.plannedSessionId || null,
+        type: sessionMeta?.type || 'planned',
+        status: 'in_progress',
+        startedAt,
+        sets: [],
+      });
+      currentSessionId = saved.id;
+    } catch (err) {
+      console.error('Erreur lors de la création initiale de la séance:', err);
+    }
+
     phase = 'active';
+  }
+
+  async function autoSaveProgress() {
+    if (!currentSessionId) return;
+    try {
+      await saveWorkoutSession({
+        id: currentSessionId,
+        dateISO: todayISO(),
+        plannedSessionId: sessionMeta?.plannedSessionId || null,
+        type: sessionMeta?.type || 'planned',
+        status: 'in_progress',
+        startedAt,
+        sets: $state.snapshot(completedSets),
+      });
+    } catch (err) {
+      console.error('Erreur auto-save:', err);
+    }
+  }
+
+  async function resumeSession(session) {
+    // Reconstruct session state from saved in-progress data
+    const template = getSessionTemplate(
+      programme,
+      session.plannedSession?.cycleIndex ?? 0,
+      session.plannedSession?.sessionIndex ?? 0,
+    );
+
+    if (!template) {
+      alert('Impossible de retrouver le modèle de séance.');
+      return;
+    }
+
+    sessionMeta = {
+      plannedSessionId: session.plannedSessionId || null,
+      cycleIndex: session.plannedSession?.cycleIndex ?? 0,
+      sessionIndex: session.plannedSession?.sessionIndex ?? 0,
+      sessionName: session.plannedSession?.sessionName || 'Séance reprise',
+      cycleName: session.plannedSession?.cycleName || '',
+      type: session.type || 'planned',
+    };
+    exercices = template.exercices.map((e) => ({ ...e }));
+    completedSets = (session.sets || []).map((s) => ({
+      exerciseName: s.exerciseName,
+      exerciseType: s.exerciseType,
+      setNumber: s.setNumber,
+      weight: s.weight,
+      repsActual: s.repsActual,
+      repsTarget: s.repsTarget,
+      rpe: s.rpe,
+      rpeTarget: s.rpe,
+      restSecActual: s.restSecActual,
+    }));
+    startedAt = session.startedAt;
+    currentSessionId = session.id;
+    inProgressSession = null;
+
+    // Figure out where the user left off
+    let totalSetsSoFar = 0;
+    let foundIndex = 0;
+    let foundSet = 0;
+    for (let i = 0; i < exercices.length; i++) {
+      const setsForEx = completedSets.filter((s) => s.exerciseName === exercices[i].nom).length;
+      if (setsForEx < exercices[i].series) {
+        foundIndex = i;
+        foundSet = setsForEx;
+        break;
+      }
+      totalSetsSoFar += exercices[i].series;
+      if (i === exercices.length - 1) {
+        foundIndex = i;
+        foundSet = exercices[i].series;
+      }
+    }
+
+    exerciseIndex = foundIndex;
+    setIndex = foundSet;
+    weight = '';
+    repsActual = '';
+    weightHint = null;
+    showRest = false;
+    showCatchup = false;
+    showFreePicker = false;
+    sessionFeedback = {};
+
+    await loadSessionHistory();
+    await initExerciseInputs(exercices[exerciseIndex]);
+    phase = 'active';
+  }
+
+  async function discardInProgress() {
+    if (!inProgressSession) return;
+    if (!confirm('Supprimer définitivement la séance en cours ? Les données seront perdues.')) return;
+    try {
+      await deleteWorkoutSession(inProgressSession.id);
+    } catch (err) {
+      console.error('Erreur suppression séance en cours:', err);
+    }
+    inProgressSession = null;
+    await refreshIdle();
   }
 
   function startToday() {
@@ -242,6 +369,9 @@ import {
     completedSets = [...completedSets, set];
     flashSetValidated();
 
+    // Auto-save progress after each set
+    autoSaveProgress();
+
     if (isLastSet && isLastExercise) {
       showRest = false;
       finishSession();
@@ -343,6 +473,7 @@ import {
 
     try {
       await saveWorkoutSession({
+        id: currentSessionId || undefined,
         dateISO: todayISO(),
         plannedSessionId: sessionMeta?.plannedSessionId || null,
         type: sessionMeta?.type || 'planned',
@@ -356,6 +487,7 @@ import {
       });
 
       phase = 'done';
+      currentSessionId = null;
       onSessionSaved();
     } catch (err) {
       console.error('Erreur lors de la sauvegarde de la séance:', err);
@@ -370,15 +502,26 @@ import {
     summary = null;
     sessionMeta = null;
     sessionFeedback = {};
+    currentSessionId = null;
     refreshIdle();
   }
 
-  function cancelSession() {
+  async function cancelSession() {
     if (confirm('Annuler la séance en cours ? Les données seront perdues.')) {
+      // Delete the in-progress session from DB
+      if (currentSessionId) {
+        try {
+          await deleteWorkoutSession(currentSessionId);
+        } catch (err) {
+          console.error('Erreur suppression séance annulée:', err);
+        }
+      }
       phase = 'idle';
       sessionMeta = null;
       summary = null;
       showRest = false;
+      currentSessionId = null;
+      await refreshIdle();
     }
   }
 
@@ -407,6 +550,24 @@ import {
   {#if phase === 'idle'}
     <h1>Séance du jour</h1>
     <p class="date accent-text">{formatDateFR(todayISO())}</p>
+
+    {#if inProgressSession}
+      <div class="card resume-card">
+        <span class="badge badge-warning">Séance en cours</span>
+        <h2>{inProgressSession.plannedSession?.sessionName || 'Séance'}</h2>
+        <p class="muted">
+          {inProgressSession.sets?.length || 0} série(s) enregistrée(s) — commencée le {formatDateFR(inProgressSession.dateISO)}
+        </p>
+        <div class="resume-actions">
+          <button type="button" class="btn-primary" onclick={() => resumeSession(inProgressSession)}>
+            Reprendre la séance
+          </button>
+          <button type="button" class="btn-ghost cancel-resume" onclick={discardInProgress}>
+            Abandonner
+          </button>
+        </div>
+      </div>
+    {/if}
 
     {#if todaySession}
       {@const split = getSessionExercisesSplit(todaySession.cycleIndex, todaySession.sessionIndex)}
@@ -1033,5 +1194,28 @@ import {
 
   .card-value.sm {
     font-size: 1.5rem;
+  }
+
+  .resume-card {
+    border: 2px solid var(--warning);
+    background: color-mix(in srgb, var(--warning) 8%, var(--bg-card));
+    margin-bottom: 1rem;
+  }
+
+  .resume-card h2 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .resume-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .cancel-resume {
+    color: var(--destructive);
+    font-size: 0.88rem;
   }
 </style>

@@ -7,9 +7,12 @@ import crypto from "crypto";
 export const GET: RequestHandler = async ({ url }) => {
   try {
     const dateISO = url.searchParams.get("date");
+    const status = url.searchParams.get("status");
     const limit = parseInt(url.searchParams.get("limit") || "100", 10);
 
-    const where = dateISO ? { dateISO } : {};
+    const where: any = {};
+    if (dateISO) where.dateISO = dateISO;
+    if (status) where.status = status;
 
     const sessions = await prisma.workoutSession.findMany({
       where,
@@ -122,6 +125,71 @@ export const POST: RequestHandler = async ({ request }) => {
     return json(
       {
         error: "Erreur lors de la sauvegarde de la séance",
+        message: err.message || "Erreur serveur inconnue",
+      },
+      { status: 500 }
+    );
+  }
+};
+
+// DELETE /api/sessions?id=xxx — delete a session and its performed sets
+export const DELETE: RequestHandler = async ({ url }) => {
+  try {
+    const id = url.searchParams.get("id");
+    if (!id) {
+      return json({ error: "id requis" }, { status: 400 });
+    }
+
+    const now = new Date().toISOString();
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Find the session to get plannedSessionId before deleting
+      const session = await tx.workoutSession.findUnique({
+        where: { id },
+        select: { plannedSessionId: true, status: true },
+      });
+
+      if (!session) {
+        throw new Error("Séance introuvable");
+      }
+
+      // 2. Delete all performed sets for this session
+      await tx.performedSet.deleteMany({
+        where: { sessionId: id },
+      });
+
+      // 3. Delete the workout session itself
+      await tx.workoutSession.delete({
+        where: { id },
+      });
+
+      // 4. If it was linked to a planned session, revert its status
+      if (session.plannedSessionId) {
+        try {
+          const planned = await tx.plannedSession.findUnique({
+            where: { id: session.plannedSessionId },
+          });
+          if (planned) {
+            // Determine new status: if session date is before today, mark missed; otherwise pending
+            const todayISO = new Date().toISOString().slice(0, 10);
+            const newStatus = planned.dateISO < todayISO ? "missed" : "pending";
+            await tx.plannedSession.update({
+              where: { id: session.plannedSessionId },
+              data: { status: newStatus, updatedAt: now },
+            });
+          }
+        } catch (planErr) {
+          console.warn("Could not revert plannedSession status:", planErr);
+        }
+      }
+    });
+
+    return json({ success: true, id });
+  } catch (err: any) {
+    console.error("Erreur DELETE /api/sessions:", err);
+    return json(
+      {
+        error: "Erreur lors de la suppression de la séance",
         message: err.message || "Erreur serveur inconnue",
       },
       { status: 500 }

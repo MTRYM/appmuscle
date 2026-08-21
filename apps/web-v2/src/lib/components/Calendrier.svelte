@@ -5,7 +5,8 @@
     getDayData,
     getVacations,
     getPlannedSessions,
-    getAllSessionsWithSets
+    getAllSessionsWithSets,
+    deleteWorkoutSession
   } from '$lib/api';
   import { formatDateFR, formatSetPerformance, todayISO } from '$lib/programme';
 
@@ -141,6 +142,25 @@
   }
 
   let calendarDays = $derived(getCalendarDays());
+
+  let deletingSessionId = $state(null);
+
+  async function deleteSession(sessionId) {
+    if (!confirm('Supprimer cette séance et toutes ses données ? Cette action est irréversible.')) return;
+    deletingSessionId = sessionId;
+    try {
+      await deleteWorkoutSession(sessionId);
+      await loadData();
+      if (selectedDate) {
+        dayDetail = await getDayData(selectedDate);
+      }
+      onCalendarChanged();
+    } catch (err) {
+      alert('Erreur lors de la suppression : ' + (err?.message || err));
+    } finally {
+      deletingSessionId = null;
+    }
+  }
 </script>
 
 <div class="calendrier">
@@ -255,12 +275,23 @@
 
         {#each dayDetail.sessions as session}
           <div class="detail-block">
-            <p>
-              <span class="badge badge-info">
-                {session.type === 'extra' ? 'Hors planning' : session.type === 'catchup' ? 'Rattrapage' : 'Séance'}
-              </span>
-              Durée : {formatDuration(session.durationSec)} — RPE moy. {session.avgRpe?.toFixed(1) ?? '—'}
-            </p>
+            <div class="detail-block-header">
+              <p>
+                <span class="badge badge-info">
+                  {session.type === 'extra' ? 'Hors planning' : session.type === 'catchup' ? 'Rattrapage' : 'Séance'}
+                </span>
+                Durée : {formatDuration(session.durationSec)} — RPE moy. {session.avgRpe?.toFixed(1) ?? '—'}
+              </p>
+              <button
+                type="button"
+                class="btn-delete-session"
+                disabled={deletingSessionId === session.id}
+                onclick={() => deleteSession(session.id)}
+                title="Supprimer cette séance"
+              >
+                {deletingSessionId === session.id ? '…' : '🗑️'}
+              </button>
+            </div>
             {#if session.sets.length > 0}
               {#each [...new Set(session.sets.map((s) => s.exerciseName))] as exName}
                 <div class="ex-block">
@@ -536,5 +567,40 @@
     margin-top: 0.5rem;
     font-style: italic;
     color: var(--text-muted);
+  }
+
+  .detail-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .detail-block-header p {
+    flex: 1;
+  }
+
+  .btn-delete-session {
+    flex-shrink: 0;
+    min-height: 40px;
+    min-width: 40px;
+    padding: 0;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--destructive) 15%, var(--bg-elevated));
+    border: 1px solid color-mix(in srgb, var(--destructive) 35%, transparent);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-delete-session:hover {
+    background: color-mix(in srgb, var(--destructive) 30%, var(--bg-elevated));
+    transform: scale(1.05);
+  }
+
+  .btn-delete-session:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 </style>

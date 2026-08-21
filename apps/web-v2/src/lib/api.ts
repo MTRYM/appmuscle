@@ -129,3 +129,28 @@ export async function getDayData(dateISO: string) {
     vacations: activeVacations
   };
 }
+
+export async function deleteWorkoutSession(sessionId: string) {
+  const res = await fetch(`/api/sessions?id=${sessionId}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || err.error || `Erreur lors de la suppression (${res.status})`);
+  }
+
+  return res.json();
+}
+
+export async function getInProgressSession() {
+  const res = await fetch('/api/sessions?status=in_progress&limit=1');
+  const data = await res.json();
+  if (Array.isArray(data) && data.length > 0) {
+    return {
+      ...data[0],
+      sets: data[0].performedSets || [],
+    };
+  }
+  return null;
+}
