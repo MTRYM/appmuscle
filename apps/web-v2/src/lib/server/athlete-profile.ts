@@ -87,7 +87,7 @@ Lean (exact percentage unknown)
 Current Strength Levels
 
 Bench Press:
-70 kg × 3 reps
+70 kg × 5 reps
 
 Squat:
 100 kg × 5 reps
@@ -104,7 +104,7 @@ Sometimes 5×5 with +5 kg.
 Sometimes unable to perform weighted dips due to fatigue.
 
 Muscle-Up:
-1 strict muscle-up approximately every 2 minutes.
+Performs strict muscle-ups easily and consistently.
 
 Front Lever:
 Tuck Front Lever:
@@ -114,8 +114,8 @@ Advanced Tuck:
 Approximately 1–2 seconds.
 
 Handstand:
-Maximum 5 seconds.
-Consistency approximately 1/10.
+Maximum 10–15 seconds freestanding.
+Consistency approximately 1/4 to 1/5 attempts.
 
 Vertical Jump:
 Estimated standing reach jump:
@@ -164,7 +164,7 @@ Complete commercial gym.
 
 Home equipment:
 
-Pull-up bar
+Pull-up bar (standard door/wall mount — no overhead clearance for Muscle-Up; Muscle-Ups performed at the gym)
 
 TRX
 
@@ -182,7 +182,7 @@ Jump rope
 
 No dedicated neck harness.
 
-Athlete prefers doing calisthenics practice at home rather than inside the gym.
+Athlete prefers doing general calisthenics practice at home, while weighted pull-ups and muscle-ups are performed at the gym.
 
 Recovery
 
@@ -244,12 +244,19 @@ Explosive intent whenever appropriate.
 Priority Ranking
 Front Lever
 General Relative Strength
-Handstand
+Handstand & HSPU progression
 Bench Press
 Vertical Jump
-Full Planche
+Full Planche (via Tuck Planche)
+L-Sit to Handstand (long term)
 Hypertrophy
 Muscle-Up maintenance
+
+Current skill goals:
+
+Handstand Push-Up (progressive)
+L-Sit to Handstand (progressive)
+Tuck Planche (progressive)
 
 Future goals:
 
@@ -271,7 +278,7 @@ Scapular depression endurance.
 
 Advanced tuck front lever.
 
-Handstand balance.
+Handstand balance (improving — 10-15s achieved).
 
 Prefers practicing calisthenics at home instead of in the gym.
 

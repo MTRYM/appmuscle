@@ -235,3 +235,87 @@ export function formatDateFR(dateISO) {
     year: 'numeric',
   });
 }
+
+/**
+ * Routine quotidienne de récupération, décompression & mobilité douce (12 min)
+ */
+export const RECOVERY_ROUTINE = {
+  nom: 'Routine Régénération & Mobilité (12 min)',
+  type: 'mobility',
+  description: 'Flow de décompression fasciale, mobilité d\'épaules/ischios et activation parasympathique.',
+  exercices: [
+    {
+      nom: 'Elephant Walk & Pike Décompression',
+      type: 'isometrique',
+      series: 1,
+      cible: '120',
+      cibleParsed: { min: 120, max: 120, mid: 120, raw: '120' },
+      duree_sec: '120',
+      description: 'Chaîne postérieure & ischios. Relâcher le buste, fléchir un genou puis l\'autre doucement.',
+      repos_sec: 15,
+      rpe_cible: 2,
+      groupe: 'Mobilité'
+    },
+    {
+      nom: 'Puppy Dog Pose (Ouverture Épaules)',
+      type: 'isometrique',
+      series: 1,
+      cible: '120',
+      cibleParsed: { min: 120, max: 120, mid: 120, raw: '120' },
+      duree_sec: '120',
+      description: 'Extension thoracique et flexion d\'épaules. Indispensable pour la ligne droite du Handstand.',
+      repos_sec: 15,
+      rpe_cible: 2,
+      groupe: 'Mobilité'
+    },
+    {
+      nom: 'Couch Stretch (Fléchisseurs / Psoas)',
+      type: 'isometrique',
+      series: 2,
+      cible: '60',
+      cibleParsed: { min: 60, max: 60, mid: 60, raw: '60' },
+      duree_sec: '60',
+      description: '1 min par côté. Ouvre l\'avant des hanches et rétablit le bassin neutre.',
+      repos_sec: 15,
+      rpe_cible: 2,
+      groupe: 'Mobilité'
+    },
+    {
+      nom: 'Wrist & Forearm Mobility Flow',
+      type: 'isometrique',
+      series: 1,
+      cible: '120',
+      cibleParsed: { min: 120, max: 120, mid: 120, raw: '120' },
+      duree_sec: '120',
+      description: 'Cercles doux, appuis inversés et étirement des avant-bras pour protéger les poignets.',
+      repos_sec: 15,
+      rpe_cible: 2,
+      groupe: 'Mobilité'
+    },
+    {
+      nom: '90/90 Hip Flow & Pancake doux',
+      type: 'isometrique',
+      series: 1,
+      cible: '120',
+      cibleParsed: { min: 120, max: 120, mid: 120, raw: '120' },
+      duree_sec: '120',
+      description: 'Rotations internes et externes des hanches au sol, mobilité latérale.',
+      repos_sec: 15,
+      rpe_cible: 2,
+      groupe: 'Mobilité'
+    },
+    {
+      nom: 'Child\'s Pose & Respiration Diaphragmatique',
+      type: 'isometrique',
+      series: 1,
+      cible: '120',
+      cibleParsed: { min: 120, max: 120, mid: 120, raw: '120' },
+      duree_sec: '120',
+      description: 'Décompression vertébrale complète. Inspirations nasales 4s, expirations lentes 6s.',
+      repos_sec: 0,
+      rpe_cible: 1,
+      groupe: 'Mobilité'
+    }
+  ]
+};
+

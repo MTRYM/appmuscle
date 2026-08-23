@@ -1,25 +1,28 @@
-# Programme Athlète Hybride — v2 (aligné profil + audit)
-# ─────────────────────────────────────────────────────────
-# LUNDI = REPOS COMPLET (contrainte profil)
-# 6 séances : Mardi → Dimanche
-# Handstand : 4 micro-sessions/sem (Mer, Ven, Sam, Dim)
-# Front lever : TUCK strict jusqu'à 5×20 s propres
-# Planche lean : 2×/sem (Mer, Sam) — préparation long terme
+# Programme Athlète Hybride — v2.1 (Calisthenics Skills & Hybrid Strength)
+# ─────────────────────────────────────────────────────────────────────────────
+# LUNDI = REPOS COMPLET
+# 6 séances par semaine : Mardi → Dimanche
+# - Mardi : Gym Force Upper (Bench 70kg baseline, Tractions lestées déplacées ici, Dips, OHP)
+# - Mercredi : Maison Front Lever + Handstand (10-15s) + Pike/HSPU + Tuck Planche + Core
+# - Jeudi : Gym Bas du corps + Plyo VJ + Hang Clean
+# - Vendredi : Maison Muscle-Up (qualité fluide) + Handstand + L-Sit & Core (sans doublon Face Pull)
+# - Samedi : Maison Front Lever #2 + Tuck Planche #2 + Tirage Calisthenics & Compression Core
+# - Dimanche : Récupération active + Mobilité + Handstand flow
 #
 cycles:
 
-  - nom: "Semaine 1 — Fondations"
+  - nom: "Semaine 1 — Fondations & Calibrage Skills"
 
-    # Base technique. Tuck front lever uniquement — ton AT actuel (1-2 s) ne justifie pas le volume AT.
+    # Reprise des fondations avec nouveau split : tractions lourdes à la salle (Mardi), séances maison 100% calisthenics/core.
 
     seances:
 
       ############################################################
-      # TUESDAY — Gym
+      # TUESDAY — Gym (Force Upper Body)
       ############################################################
 
       - jour: Mardi
-        nom: "Gym — Force Push"
+        nom: "Gym — Force Upper Body"
 
         exercices:
 
@@ -59,9 +62,9 @@ cycles:
             series: 4
             reps: "5"
             description: >-
-              Lift push principal. Pause 1 s poitrine, poussée explosive. Progression
-              conservative (193 cm = ROM long). +2,5 kg max si RPE cible respecté.
-              Évite l'ego lifting (profil).
+              Lift push principal. Pause 1 s poitrine, poussée explosive. Niveau
+              actuel 70kgx5 validé proprement. Progression conservative (+2,5 kg max
+              si RPE cible respecté).
             repos_sec: 180
             rpe_cible: 7
 
@@ -70,9 +73,19 @@ cycles:
             series: 2
             reps: "6"
             description: >-
-              Volume push réduit (2 séries vs 3 avant) pour limiter fatigue bench.
-              Pieds surélevés, transfert force horizontale.
+              Volume push sans pontage. Pieds surélevés, gainage strict, renforce le
+              point de blocage au développé couché.
             repos_sec: 150
+            rpe_cible: 7
+
+          - nom: "Weighted Pull-Up"
+            type: reps
+            series: 4
+            reps: "5"
+            description: >-
+              Lift pull lourd principal (déplacé à la salle). Suspension complète,
+              prise pronation/semi-pro, tirage explosif sans élan. +15kg de base.
+            repos_sec: 180
             rpe_cible: 7
 
           - nom: "Ring Dip"
@@ -80,9 +93,8 @@ cycles:
             series: 3
             reps: "5"
             description: >-
-              Règle profil : dips BW 5 reps propres × 2 semaines avant d'ajouter du
-              lest. Si fatigue ou épaules irritées → remplace par dips BW ou pompes
-              pieds surélevés. Descente contrôlée, épaules en dépression.
+              Dips aux anneaux ou barres parallèles. Descente contrôlée, épaules en
+              dépression, protège le sternum et les épaules.
             repos_sec: 120
             rpe_cible: 6
 
@@ -90,7 +102,9 @@ cycles:
             type: reps
             series: 3
             reps: "8"
-            description: Transfert handstand / force verticale.
+            description: >-
+              Force verticale push. Transfert direct sur la poussée handstand et HSPU.
+              Torse gainé, sans cambrer.
             repos_sec: 120
             rpe_cible: 7
 
@@ -98,16 +112,18 @@ cycles:
             type: reps
             series: 3
             reps: "15"
-            description: Prehab coiffe — priorité longévité épaule avec volume push + MU.
+            description: >-
+              Prehab coiffe des rotateurs. Priorité longévité épaule face au volume de
+              poussée et skills calisthenics.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # WEDNESDAY — Maison (skills + tirage)
+      # WEDNESDAY — Maison (Front Lever + HSPU + Tuck Planche)
       ############################################################
 
       - jour: Mercredi
-        nom: "Maison — Front Lever + Tirage"
+        nom: "Maison — Front Lever + Skills & HSPU"
 
         exercices:
 
@@ -116,8 +132,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Handstand.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -126,7 +142,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -135,47 +153,50 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (1/4 micro-sessions HS). Chercher l'équilibre
+              10-15 s, alignement actif des épaules et bassin rétroversé.
+            repos_sec: 75
+            rpe_cible: 6
+
+          - nom: "Handstand Chest-to-Wall"
+            type: isometrique
+            series: 2
             duree_sec: "20-30"
             description: >-
-              Session handstand 1/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Alignement et endurance posturale. Ventre face au mur, pousser fort dans
+              les épaules, côtes rentrées.
             repos_sec: 60
             rpe_cible: 6
 
-          - nom: "Wall Handstand Toe Pulls"
+          - nom: "Elevated Pike Push-Up"
             type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            series: 3
+            reps: "8"
+            description: >-
+              Progression Handstand Push-Up (HSPU). Trajectoire diagonale (tête devant
+              les mains en tripode), coudes serrés à 45°.
+            repos_sec: 90
+            rpe_cible: 7
 
           - nom: "Tuck Front Lever Hold"
             type: isometrique
             series: 5
             duree_sec: "12-15"
             description: >-
-              Skill #1 profil. Progression : passe au advanced tuck seulement quand tu
-              tiens 5×20 s en tuck strict avec bassin postérieur et coudes tendus. Ton
-              AT actuel (~1-2 s) ne justifie pas le programmer maintenant. Scapulas en
-              dépression, bassin postérieur, coudes tendus.
+              Skill #1 profil. Dépression et rétraction scapulaire, bassin
+              neutre/rétroversé, bras parfaitement tendus.
             repos_sec: 90
             rpe_cible: 7
 
@@ -184,8 +205,8 @@ cycles:
             series: 3
             reps: "4"
             description: >-
-              Renforce pattern FL sans passer prématurément à l'AT. Contrôlé, sans
-              balancement.
+              Dynamique Front Lever. Montée explosive, descente contrôlée 3 s sans
+              balancer. Bras verrouillés.
             repos_sec: 90
             rpe_cible: 7
 
@@ -194,42 +215,53 @@ cycles:
             series: 3
             duree_sec: "15-20"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
+              Progression Planche (Planche Lean vers Tuck Planche). Protraction
+              scapulaire maximale, coudes verrouillés, poids projeté vers l'avant.
+            repos_sec: 75
             rpe_cible: 6
 
-          - nom: "Weighted Pull-Up"
-            type: reps
-            series: 4
-            reps: "5"
-            description: >-
-              Force relative #2 profil. Suspension complète, pas de kip. +2 à 2,5 kg
-              si toutes reps explosives.
-            repos_sec: 180
-            rpe_cible: 7
-
-          - nom: "Chest Supported Row"
+          - nom: "Pronated Pull-Up"
             type: reps
             series: 3
             reps: "8"
             description: >-
-              Rowing scapulaire pour FL — une seule séance lourde de row/semaine.
-              Rétraction + dépression.
+              Volume tirage calisthenics au poids du corps. Amplitude complète menton
+              au-dessus de la barre, tempo 2-0-1.
             repos_sec: 90
             rpe_cible: 7
+
+          - nom: "TRX Inverted Row"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Tirage horizontal maison. Rétraction scapulaire complète, renforce le
+              haut du dos pour le Front Lever.
+            repos_sec: 75
+            rpe_cible: 7
+
+          - nom: "Hollow Body Hold"
+            type: isometrique
+            series: 3
+            duree_sec: "20-30"
+            description: >-
+              Gainage fondamental gymnastique. Bas du dos collé au sol, côtes
+              rentrées, rétroversion du bassin.
+            repos_sec: 60
+            rpe_cible: 6
 
           - nom: "Reverse Wrist Curl"
             type: reps
             series: 3
             reps: "15"
-            description: Résilience coudes/poignets (membres longs = levier élevé).
+            description: >-
+              Résilience poignets/coudes. Protection tendineuse face aux contraintes
+              du Handstand et de la Planche.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # THURSDAY — Gym
+      # THURSDAY — Gym (Bas du corps + Explosivité)
       ############################################################
 
       - jour: Jeudi
@@ -269,8 +301,8 @@ cycles:
             series: 3
             reps: "5"
             description: >-
-              Ajout audit : pattern squat axial absent avant. Force absolue bas du
-              corps pour masse athlétique 85-90 kg. Torso vertical, coudes hauts.
+              Force bas du corps axiale. Buste vertical, coudes hauts, renforce les
+              quadriceps et le core sans comprimer les lombaires.
             repos_sec: 150
             rpe_cible: 7
 
@@ -279,8 +311,8 @@ cycles:
             series: 4
             reps: "3"
             description: >-
-              Explosivité VJ (priorité #5). Intent max, arrête si hauteur baisse. Plyo
-              principal de la semaine (jeudi).
+              Explosivité détente verticale (VJ). Intention maximale sur chaque saut.
+              Arrêter si la hauteur diminue.
             repos_sec: 150
             rpe_cible: 6
 
@@ -288,7 +320,9 @@ cycles:
             type: reps
             series: 4
             reps: "3"
-            description: Production force rapide. Vitesse barre > charge.
+            description: >-
+              Production de force rapide. Extension triple explosive
+              hanches-genoux-chevilles, vitesse de barre prioritaire.
             repos_sec: 150
             rpe_cible: 7
 
@@ -296,7 +330,9 @@ cycles:
             type: reps
             series: 3
             reps: "6"
-            description: Force unilatérale, stabilité hanche. Tibia vertical, excentrique contrôlé.
+            description: >-
+              Force unilatérale. Stabilité du genou, contrôle excentrique, élimine les
+              asymétries.
             repos_sec: 120
             rpe_cible: 7
 
@@ -305,8 +341,8 @@ cycles:
             series: 3
             reps: "6"
             description: >-
-              Chaîne postérieure — remplace Jefferson curl (audit : flexion lombaire
-              chargée + inconfort dos).
+              Chaîne postérieure (ischios/fessiers). Charnière de hanche propre, dos
+              neutre, étirement contrôlé.
             repos_sec: 120
             rpe_cible: 7
 
@@ -314,115 +350,16 @@ cycles:
             type: reps
             series: 3
             reps: "12"
-            description: Anti-rotation tronc.
+            description: Anti-rotation du tronc. Résister à la torsion, stabilité du bassin.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # FRIDAY — Maison (muscle-up)
+      # FRIDAY — Maison (Handstand + L-Sit & Core)
       ############################################################
 
       - jour: Vendredi
-        nom: "Maison — Muscle-Up (maintenance)"
-
-        exercices:
-
-          - nom: "Dead Hang"
-            type: isometrique
-            series: 2
-            duree_sec: "20"
-            description: Échauffement MU. Ouverture épaules et préparation grip.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Scapular Pull-Up"
-            type: reps
-            series: 2
-            reps: "8"
-            description: Échauffement MU. Pattern tirage scapulaire avant transitions.
-            repos_sec: 45
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Face Pull"
-            type: reps
-            series: 2
-            reps: "12"
-            description: Échauffement MU. Coiffe et rotateurs — charge légère, contrôle.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Handstand Chest-to-Wall"
-            type: isometrique
-            series: 3
-            duree_sec: "20-30"
-            description: >-
-              Session handstand 2/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "False Grip Hang"
-            type: isometrique
-            series: 3
-            duree_sec: "15-20"
-            description: >-
-              Endurance false grip — volume minimal (MU = maintenance #8 profil). Sans
-              aller à l'échec.
-            repos_sec: 60
-            rpe_cible: 5
-
-          - nom: "Low Bar Muscle-Up Transition"
-            type: reps
-            series: 3
-            reps: "3"
-            description: Travail technique transition. Coudes près du corps, lent et propre.
-            repos_sec: 90
-            rpe_cible: 6
-
-          - nom: "Negative Muscle-Up"
-            type: reps
-            series: 2
-            reps: "2"
-            description: >-
-              Excentrique contrôlé 5-6 s — volume réduit vs ancien prog (audit :
-              stress coude). Max 2 séries en semaine lourde.
-            repos_sec: 120
-            rpe_cible: 6
-
-          - nom: "Face Pull"
-            type: reps
-            series: 3
-            reps: "15"
-            description: Prehab épaule post-MU.
-            repos_sec: 60
-            rpe_cible: 6
-
-      ############################################################
-      # SATURDAY — Maison (tirage + skills)
-      ############################################################
-
-      - jour: Samedi
-        nom: "Maison — Tirage + Skills"
+        nom: "Maison — Handstand & L-Sit Core"
 
         exercices:
 
@@ -431,8 +368,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Handstand et L-Sit.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -441,7 +378,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -450,35 +389,142 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 3/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
+              Travail d'équilibre libre (2/4 micro-sessions HS). Focus sur les
+              micro-ajustements des doigts et la ligne droite.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Wall Handstand Toe Pulls"
             type: reps
             series: 2
             reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
+            description: >-
+              Contrôle de l'équilibre. Face au mur, décoller un pied puis l'autre avec
+              la pression des doigts sans arquer.
             repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Tuck L-Sit Hold"
+            type: isometrique
+            series: 3
+            duree_sec: "10-15"
+            description: >-
+              Progression L-Sit et préparation à l'enchaînement L-Sit to Handstand.
+              Dépression scapulaire active, compression abdominale, jambes tendues.
+            repos_sec: 75
+            rpe_cible: 6
+
+          - nom: "Wall Handstand Shoulder Taps"
+            type: reps
+            series: 3
+            reps: "6-8"
+            description: >-
+              Mouvement autour du Handstand & stabilité unilatérale. Face au mur,
+              transférer le poids et toucher l'épaule opposée sans désaxer le bassin.
+            repos_sec: 75
+            rpe_cible: 6.5
+
+          - nom: "Dragon Flag (Négatives / Holds)"
+            type: reps
+            series: 3
+            reps: "5"
+            description: >-
+              Force de compression et anti-extension lourde. Corps rigide aligné,
+              descente lente contrôlée 3-4 s sans casser les hanches.
+            repos_sec: 90
+            rpe_cible: 6
+
+          - nom: "Hanging Knee-to-Chest Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Compression abdominale et flexion de hanche suspendu à la barre. Montée
+              explosive des genoux vers la poitrine sans balancer.
+            repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Copenhagen Side Plank"
+            type: isometrique
+            series: 2
+            duree_sec: "15-20"
+            description: >-
+              Stabilité pelvienne et adducteurs. Renforcement du bassin pour les
+              maintiens gymniques.
+            repos_sec: 45
+            rpe_cible: 5
+
+      ############################################################
+      # SATURDAY — Maison (Front Lever #2 + Planche #2 + Tirage Skills)
+      ############################################################
+
+      - jour: Samedi
+        nom: "Maison — Front Lever & Planche Skills"
+
+        exercices:
+
+          - nom: "Dead Hang"
+            type: isometrique
+            series: 2
+            duree_sec: "20-30"
+            description: >-
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Planche.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Scapular Pull-Up"
+            type: reps
+            series: 2
+            reps: "8-10"
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
+            repos_sec: 45
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Band Pull-Apart"
+            type: reps
+            series: 2
+            reps: "15"
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Handstand Freestanding Practice"
+            type: isometrique
+            series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (3/4 micro-sessions HS). Répétition des
+              montées (kick-up) propres et recherche du point d'équilibre.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Scapular Handstand Shrugs"
             type: reps
             series: 2
             reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
+            description: >-
+              Endurance scapulaire en élévation. Coudes verrouillés, pousser le sol
+              pour élever et abaisser les omoplates.
             repos_sec: 60
             rpe_cible: 6
 
@@ -487,8 +533,8 @@ cycles:
             series: 4
             duree_sec: "12-15"
             description: >-
-              2e exposition FL/semaine (profil : 2-3×). Qualité technique, RPE plus
-              bas qu'en mercredi.
+              2e exposition FL de la semaine. Focus sur la pureté posturale et la
+              tenue isométrique sans compensation lombaire.
             repos_sec: 90
             rpe_cible: 6
 
@@ -496,7 +542,9 @@ cycles:
             type: reps
             series: 3
             reps: "8"
-            description: Endurance dépression scapulaire (faiblesse profil).
+            description: >-
+              Endurance dépression scapulaire. Initier la traction bras tendus
+              uniquement avec les grands dorsaux et abaisseurs d'omoplates.
             repos_sec: 75
             rpe_cible: 6
 
@@ -505,10 +553,9 @@ cycles:
             series: 3
             duree_sec: "15-20"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
+              2e exposition Planche de la semaine. Protraction scapulaire et avancée
+              maximale des épaules.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Pronated Pull-Up"
@@ -516,21 +563,43 @@ cycles:
             series: 3
             reps: "8"
             description: >-
-              Volume tirage modéré — C2B et rows redondants retirés (audit : ~50 sets
-              pull/sem). Excentrique contrôlé.
+              Force unilatérale de tirage calisthenics. Tirer vers un bras pendant que
+              l'autre assiste bras tendu sur la barre.
             repos_sec: 90
             rpe_cible: 7
 
-          - nom: "Bayesian Cable Curl"
+          - nom: "Band Biceps Curl"
             type: reps
             series: 2
-            reps: "10-12"
-            description: Seul curl direct/semaine.
+            reps: "12-15"
+            description: >-
+              Hypertrophie et protection des tendons du coude avec bande élastique.
+              Maintien du pic de contraction 1 s.
             repos_sec: 60
             rpe_cible: 7
 
+          - nom: "Seated Pike Compression Leg Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Force de compression active abdos/psoas. Assis jambes tendues au sol,
+              lever les pieds sans reculer le buste (transfert L-Sit & Press to HS).
+            repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Reverse Wrist Curl"
+            type: reps
+            series: 3
+            reps: "15"
+            description: >-
+              Renforcement fléchisseurs/extenseurs poignets avec bande ou léger lest
+              maison.
+            repos_sec: 45
+            rpe_cible: 6
+
       ############################################################
-      # SUNDAY — Récupération active
+      # SUNDAY — Gym (Récupération active + Muscle-Up + Mobilité)
       ############################################################
 
       - jour: Dimanche
@@ -556,40 +625,33 @@ cycles:
             rpe_cible: 2
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Strict Muscle-Up (Qualité)"
+            type: reps
+            series: 3
+            reps: "1-2"
+            description: >-
+              Maintenance Muscle-Up à la salle sur barre haute. Mouvement fluide et
+              propre, transition symétrique sans élan excessif, descente contrôlée.
+            repos_sec: 120
+            rpe_cible: 6
+
+          - nom: "Handstand Balance Flow"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 4/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Session handstand légère (4/4 de la semaine). Sensation de balance libre
+              sans fatigue ni échec, plaisir du mouvement.
             repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            rpe_cible: 5
 
           - nom: "Shoulder Mobility Flow"
             type: isometrique
             series: 1
             duree_sec: "600"
             description: >-
-              Mobilité épaule — extension thoracique, flexion, rotation externe. RPE 2
-              = récupération, jamais effort.
+              Mobilité active des épaules (10 min). Ouverture thoracique, flexion
+              complète, rotation externe. Récupération sans forcer.
             repos_sec: 0
             rpe_cible: 2
 
@@ -597,7 +659,9 @@ cycles:
             type: isometrique
             series: 1
             duree_sec: "600"
-            description: Mobilité hanche — RI, adducteurs, fléchisseurs, chevilles.
+            description: >-
+              Mobilité hanches et chevilles (10 min). Rotation interne/externe,
+              fléchisseurs, grand écart facial préparatoire.
             repos_sec: 0
             rpe_cible: 2
 
@@ -605,7 +669,9 @@ cycles:
             type: reps
             series: 3
             reps: "10"
-            description: Core léger — déplacé du lundi (repos).
+            description: >-
+              Coordination motrice et activation transverse/obliques. Respiration
+              lente diaphragmatique.
             repos_sec: 45
             rpe_cible: 4
 
@@ -613,7 +679,7 @@ cycles:
             type: isometrique
             series: 2
             duree_sec: "15-20"
-            description: Adducteurs / stabilité pelvienne — volume minimal.
+            description: Stabilité pelvienne latérale.
             repos_sec: 45
             rpe_cible: 5
 
@@ -622,24 +688,24 @@ cycles:
             series: 2
             reps: "15"
             description: >-
-              Plyo légère uniquement S1-S2. Pas de sprints/VJ le dimanche — plyo max
-              jeudi (audit overlap SNC).
+              Plyo légère de réactivité de cheville. Contact sol minimal, genoux
+              verrouillés.
             repos_sec: 60
             rpe_cible: 5
 
 
-  - nom: "Semaine 2 — Consolidation"
+  - nom: "Semaine 2 — Consolidation & Montée en Charge"
 
-    # Consolide S1. +2,5 kg bench seulement si S1 ≤ RPE 7.
+    # Consolidation technique et régularité handstand (10-15s). Progression des maintiens FL tuck.
 
     seances:
 
       ############################################################
-      # TUESDAY — Gym
+      # TUESDAY — Gym (Force Upper Body)
       ############################################################
 
       - jour: Mardi
-        nom: "Gym — Force Push"
+        nom: "Gym — Force Upper Body"
 
         exercices:
 
@@ -679,9 +745,9 @@ cycles:
             series: 4
             reps: "5"
             description: >-
-              Lift push principal. Pause 1 s poitrine, poussée explosive. Progression
-              conservative (193 cm = ROM long). +2,5 kg max si RPE cible respecté.
-              Évite l'ego lifting (profil).
+              Lift push principal. Pause 1 s poitrine, poussée explosive. Niveau
+              actuel 70kgx5 validé proprement. Progression conservative (+2,5 kg max
+              si RPE cible respecté).
             repos_sec: 180
             rpe_cible: 7.5
 
@@ -690,9 +756,19 @@ cycles:
             series: 2
             reps: "6"
             description: >-
-              Volume push réduit (2 séries vs 3 avant) pour limiter fatigue bench.
-              Pieds surélevés, transfert force horizontale.
+              Volume push sans pontage. Pieds surélevés, gainage strict, renforce le
+              point de blocage au développé couché.
             repos_sec: 150
+            rpe_cible: 7.5
+
+          - nom: "Weighted Pull-Up"
+            type: reps
+            series: 4
+            reps: "5"
+            description: >-
+              Lift pull lourd principal (déplacé à la salle). Suspension complète,
+              prise pronation/semi-pro, tirage explosif sans élan. +15kg de base.
+            repos_sec: 180
             rpe_cible: 7.5
 
           - nom: "Ring Dip"
@@ -700,9 +776,8 @@ cycles:
             series: 3
             reps: "5"
             description: >-
-              Règle profil : dips BW 5 reps propres × 2 semaines avant d'ajouter du
-              lest. Si fatigue ou épaules irritées → remplace par dips BW ou pompes
-              pieds surélevés. Descente contrôlée, épaules en dépression.
+              Dips aux anneaux ou barres parallèles. Descente contrôlée, épaules en
+              dépression, protège le sternum et les épaules.
             repos_sec: 120
             rpe_cible: 6.5
 
@@ -710,7 +785,9 @@ cycles:
             type: reps
             series: 3
             reps: "8"
-            description: Transfert handstand / force verticale.
+            description: >-
+              Force verticale push. Transfert direct sur la poussée handstand et HSPU.
+              Torse gainé, sans cambrer.
             repos_sec: 120
             rpe_cible: 7.5
 
@@ -718,16 +795,18 @@ cycles:
             type: reps
             series: 3
             reps: "15"
-            description: Prehab coiffe — priorité longévité épaule avec volume push + MU.
+            description: >-
+              Prehab coiffe des rotateurs. Priorité longévité épaule face au volume de
+              poussée et skills calisthenics.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # WEDNESDAY — Maison (skills + tirage)
+      # WEDNESDAY — Maison (Front Lever + HSPU + Tuck Planche)
       ############################################################
 
       - jour: Mercredi
-        nom: "Maison — Front Lever + Tirage"
+        nom: "Maison — Front Lever + Skills & HSPU"
 
         exercices:
 
@@ -736,8 +815,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Handstand.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -746,7 +825,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -755,47 +836,50 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (1/4 micro-sessions HS). Chercher l'équilibre
+              10-15 s, alignement actif des épaules et bassin rétroversé.
+            repos_sec: 75
+            rpe_cible: 6
+
+          - nom: "Handstand Chest-to-Wall"
+            type: isometrique
+            series: 2
             duree_sec: "20-30"
             description: >-
-              Session handstand 1/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Alignement et endurance posturale. Ventre face au mur, pousser fort dans
+              les épaules, côtes rentrées.
             repos_sec: 60
             rpe_cible: 6
 
-          - nom: "Wall Handstand Toe Pulls"
+          - nom: "Elevated Pike Push-Up"
             type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
+            series: 3
             reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            description: >-
+              Progression Handstand Push-Up (HSPU). Trajectoire diagonale (tête devant
+              les mains en tripode), coudes serrés à 45°.
+            repos_sec: 90
+            rpe_cible: 7.5
 
           - nom: "Tuck Front Lever Hold"
             type: isometrique
             series: 5
             duree_sec: "15-20"
             description: >-
-              Skill #1 profil. Progression : passe au advanced tuck seulement quand tu
-              tiens 5×20 s en tuck strict avec bassin postérieur et coudes tendus. Ton
-              AT actuel (~1-2 s) ne justifie pas le programmer maintenant. Scapulas en
-              dépression, bassin postérieur, coudes tendus.
+              Skill #1 profil. Dépression et rétraction scapulaire, bassin
+              neutre/rétroversé, bras parfaitement tendus.
             repos_sec: 90
             rpe_cible: 7
 
@@ -804,52 +888,63 @@ cycles:
             series: 3
             reps: "4"
             description: >-
-              Renforce pattern FL sans passer prématurément à l'AT. Contrôlé, sans
-              balancement.
+              Dynamique Front Lever. Montée explosive, descente contrôlée 3 s sans
+              balancer. Bras verrouillés.
             repos_sec: 90
             rpe_cible: 7
 
-          - nom: "Planche Lean"
+          - nom: "Planche Lean (Protraction Active)"
             type: isometrique
             series: 3
             duree_sec: "15-20"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              Progression Planche (Planche Lean vers Tuck Planche). Protraction
+              scapulaire maximale, coudes verrouillés, poids projeté vers l'avant.
+            repos_sec: 75
+            rpe_cible: 6.5
 
-          - nom: "Weighted Pull-Up"
-            type: reps
-            series: 4
-            reps: "5"
-            description: >-
-              Force relative #2 profil. Suspension complète, pas de kip. +2 à 2,5 kg
-              si toutes reps explosives.
-            repos_sec: 180
-            rpe_cible: 7.5
-
-          - nom: "Chest Supported Row"
+          - nom: "Pronated Pull-Up"
             type: reps
             series: 3
             reps: "8"
             description: >-
-              Rowing scapulaire pour FL — une seule séance lourde de row/semaine.
-              Rétraction + dépression.
+              Volume tirage calisthenics au poids du corps. Amplitude complète menton
+              au-dessus de la barre, tempo 2-0-1.
             repos_sec: 90
-            rpe_cible: 7.5
+            rpe_cible: 7
+
+          - nom: "TRX Inverted Row"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Tirage horizontal maison. Rétraction scapulaire complète, renforce le
+              haut du dos pour le Front Lever.
+            repos_sec: 75
+            rpe_cible: 7
+
+          - nom: "Hollow Body Hold"
+            type: isometrique
+            series: 3
+            duree_sec: "25-30"
+            description: >-
+              Gainage fondamental gymnastique. Bas du dos collé au sol, côtes
+              rentrées, rétroversion du bassin.
+            repos_sec: 60
+            rpe_cible: 6.5
 
           - nom: "Reverse Wrist Curl"
             type: reps
             series: 3
             reps: "15"
-            description: Résilience coudes/poignets (membres longs = levier élevé).
+            description: >-
+              Résilience poignets/coudes. Protection tendineuse face aux contraintes
+              du Handstand et de la Planche.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # THURSDAY — Gym
+      # THURSDAY — Gym (Bas du corps + Explosivité)
       ############################################################
 
       - jour: Jeudi
@@ -889,8 +984,8 @@ cycles:
             series: 3
             reps: "5"
             description: >-
-              Ajout audit : pattern squat axial absent avant. Force absolue bas du
-              corps pour masse athlétique 85-90 kg. Torso vertical, coudes hauts.
+              Force bas du corps axiale. Buste vertical, coudes hauts, renforce les
+              quadriceps et le core sans comprimer les lombaires.
             repos_sec: 150
             rpe_cible: 7.5
 
@@ -899,8 +994,8 @@ cycles:
             series: 4
             reps: "3"
             description: >-
-              Explosivité VJ (priorité #5). Intent max, arrête si hauteur baisse. Plyo
-              principal de la semaine (jeudi).
+              Explosivité détente verticale (VJ). Intention maximale sur chaque saut.
+              Arrêter si la hauteur diminue.
             repos_sec: 150
             rpe_cible: 6
 
@@ -908,7 +1003,9 @@ cycles:
             type: reps
             series: 4
             reps: "3"
-            description: Production force rapide. Vitesse barre > charge.
+            description: >-
+              Production de force rapide. Extension triple explosive
+              hanches-genoux-chevilles, vitesse de barre prioritaire.
             repos_sec: 150
             rpe_cible: 7.5
 
@@ -916,7 +1013,9 @@ cycles:
             type: reps
             series: 3
             reps: "6"
-            description: Force unilatérale, stabilité hanche. Tibia vertical, excentrique contrôlé.
+            description: >-
+              Force unilatérale. Stabilité du genou, contrôle excentrique, élimine les
+              asymétries.
             repos_sec: 120
             rpe_cible: 7.5
 
@@ -925,8 +1024,8 @@ cycles:
             series: 3
             reps: "6"
             description: >-
-              Chaîne postérieure — remplace Jefferson curl (audit : flexion lombaire
-              chargée + inconfort dos).
+              Chaîne postérieure (ischios/fessiers). Charnière de hanche propre, dos
+              neutre, étirement contrôlé.
             repos_sec: 120
             rpe_cible: 7.5
 
@@ -934,115 +1033,16 @@ cycles:
             type: reps
             series: 3
             reps: "12"
-            description: Anti-rotation tronc.
+            description: Anti-rotation du tronc. Résister à la torsion, stabilité du bassin.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # FRIDAY — Maison (muscle-up)
+      # FRIDAY — Maison (Handstand + L-Sit & Core)
       ############################################################
 
       - jour: Vendredi
-        nom: "Maison — Muscle-Up (maintenance)"
-
-        exercices:
-
-          - nom: "Dead Hang"
-            type: isometrique
-            series: 2
-            duree_sec: "20"
-            description: Échauffement MU. Ouverture épaules et préparation grip.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Scapular Pull-Up"
-            type: reps
-            series: 2
-            reps: "8"
-            description: Échauffement MU. Pattern tirage scapulaire avant transitions.
-            repos_sec: 45
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Face Pull"
-            type: reps
-            series: 2
-            reps: "12"
-            description: Échauffement MU. Coiffe et rotateurs — charge légère, contrôle.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Handstand Chest-to-Wall"
-            type: isometrique
-            series: 3
-            duree_sec: "20-30"
-            description: >-
-              Session handstand 2/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "False Grip Hang"
-            type: isometrique
-            series: 3
-            duree_sec: "15-20"
-            description: >-
-              Endurance false grip — volume minimal (MU = maintenance #8 profil). Sans
-              aller à l'échec.
-            repos_sec: 60
-            rpe_cible: 5
-
-          - nom: "Low Bar Muscle-Up Transition"
-            type: reps
-            series: 3
-            reps: "3"
-            description: Travail technique transition. Coudes près du corps, lent et propre.
-            repos_sec: 90
-            rpe_cible: 6
-
-          - nom: "Negative Muscle-Up"
-            type: reps
-            series: 2
-            reps: "2"
-            description: >-
-              Excentrique contrôlé 5-6 s — volume réduit vs ancien prog (audit :
-              stress coude). Max 2 séries en semaine lourde.
-            repos_sec: 120
-            rpe_cible: 6
-
-          - nom: "Face Pull"
-            type: reps
-            series: 3
-            reps: "15"
-            description: Prehab épaule post-MU.
-            repos_sec: 60
-            rpe_cible: 6
-
-      ############################################################
-      # SATURDAY — Maison (tirage + skills)
-      ############################################################
-
-      - jour: Samedi
-        nom: "Maison — Tirage + Skills"
+        nom: "Maison — Handstand & L-Sit Core"
 
         exercices:
 
@@ -1051,8 +1051,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Handstand et L-Sit.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1061,7 +1061,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1070,35 +1072,142 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 3/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
+              Travail d'équilibre libre (2/4 micro-sessions HS). Focus sur les
+              micro-ajustements des doigts et la ligne droite.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Wall Handstand Toe Pulls"
             type: reps
             series: 2
             reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
+            description: >-
+              Contrôle de l'équilibre. Face au mur, décoller un pied puis l'autre avec
+              la pression des doigts sans arquer.
             repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Tuck L-Sit Hold"
+            type: isometrique
+            series: 3
+            duree_sec: "15"
+            description: >-
+              Progression L-Sit et préparation à l'enchaînement L-Sit to Handstand.
+              Dépression scapulaire active, compression abdominale, jambes tendues.
+            repos_sec: 75
+            rpe_cible: 6.5
+
+          - nom: "Wall Handstand Shoulder Taps"
+            type: reps
+            series: 3
+            reps: "6-8"
+            description: >-
+              Mouvement autour du Handstand & stabilité unilatérale. Face au mur,
+              transférer le poids et toucher l'épaule opposée sans désaxer le bassin.
+            repos_sec: 75
+            rpe_cible: 6.5
+
+          - nom: "Dragon Flag (Négatives / Holds)"
+            type: reps
+            series: 3
+            reps: "5"
+            description: >-
+              Force de compression et anti-extension lourde. Corps rigide aligné,
+              descente lente contrôlée 3-4 s sans casser les hanches.
+            repos_sec: 90
+            rpe_cible: 6.5
+
+          - nom: "Hanging Knee-to-Chest Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Compression abdominale et flexion de hanche suspendu à la barre. Montée
+              explosive des genoux vers la poitrine sans balancer.
+            repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Copenhagen Side Plank"
+            type: isometrique
+            series: 2
+            duree_sec: "15-20"
+            description: >-
+              Stabilité pelvienne et adducteurs. Renforcement du bassin pour les
+              maintiens gymniques.
+            repos_sec: 45
+            rpe_cible: 5
+
+      ############################################################
+      # SATURDAY — Maison (Front Lever #2 + Planche #2 + Tirage Skills)
+      ############################################################
+
+      - jour: Samedi
+        nom: "Maison — Front Lever & Planche Skills"
+
+        exercices:
+
+          - nom: "Dead Hang"
+            type: isometrique
+            series: 2
+            duree_sec: "20-30"
+            description: >-
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Planche.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Scapular Pull-Up"
+            type: reps
+            series: 2
+            reps: "8-10"
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
+            repos_sec: 45
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Band Pull-Apart"
+            type: reps
+            series: 2
+            reps: "15"
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Handstand Freestanding Practice"
+            type: isometrique
+            series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (3/4 micro-sessions HS). Répétition des
+              montées (kick-up) propres et recherche du point d'équilibre.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Scapular Handstand Shrugs"
             type: reps
             series: 2
             reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
+            description: >-
+              Endurance scapulaire en élévation. Coudes verrouillés, pousser le sol
+              pour élever et abaisser les omoplates.
             repos_sec: 60
             rpe_cible: 6
 
@@ -1107,8 +1216,8 @@ cycles:
             series: 4
             duree_sec: "15-20"
             description: >-
-              2e exposition FL/semaine (profil : 2-3×). Qualité technique, RPE plus
-              bas qu'en mercredi.
+              2e exposition FL de la semaine. Focus sur la pureté posturale et la
+              tenue isométrique sans compensation lombaire.
             repos_sec: 90
             rpe_cible: 6
 
@@ -1116,41 +1225,64 @@ cycles:
             type: reps
             series: 3
             reps: "8"
-            description: Endurance dépression scapulaire (faiblesse profil).
+            description: >-
+              Endurance dépression scapulaire. Initier la traction bras tendus
+              uniquement avec les grands dorsaux et abaisseurs d'omoplates.
             repos_sec: 75
             rpe_cible: 6
 
-          - nom: "Planche Lean"
+          - nom: "Planche Lean (Protraction Active)"
             type: isometrique
             series: 3
             duree_sec: "15-20"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              2e exposition Planche de la semaine. Protraction scapulaire et avancée
+              maximale des épaules.
+            repos_sec: 75
+            rpe_cible: 6.5
 
           - nom: "Pronated Pull-Up"
             type: reps
             series: 3
             reps: "8"
             description: >-
-              Volume tirage modéré — C2B et rows redondants retirés (audit : ~50 sets
-              pull/sem). Excentrique contrôlé.
+              Force unilatérale de tirage calisthenics. Tirer vers un bras pendant que
+              l'autre assiste bras tendu sur la barre.
             repos_sec: 90
             rpe_cible: 7
 
-          - nom: "Bayesian Cable Curl"
+          - nom: "Band Biceps Curl"
             type: reps
             series: 2
-            reps: "10-12"
-            description: Seul curl direct/semaine.
+            reps: "12-15"
+            description: >-
+              Hypertrophie et protection des tendons du coude avec bande élastique.
+              Maintien du pic de contraction 1 s.
             repos_sec: 60
             rpe_cible: 7
 
+          - nom: "Seated Pike Compression Leg Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Force de compression active abdos/psoas. Assis jambes tendues au sol,
+              lever les pieds sans reculer le buste (transfert L-Sit & Press to HS).
+            repos_sec: 60
+            rpe_cible: 6.5
+
+          - nom: "Reverse Wrist Curl"
+            type: reps
+            series: 3
+            reps: "15"
+            description: >-
+              Renforcement fléchisseurs/extenseurs poignets avec bande ou léger lest
+              maison.
+            repos_sec: 45
+            rpe_cible: 6
+
       ############################################################
-      # SUNDAY — Récupération active
+      # SUNDAY — Gym (Récupération active + Muscle-Up + Mobilité)
       ############################################################
 
       - jour: Dimanche
@@ -1176,40 +1308,33 @@ cycles:
             rpe_cible: 2
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Strict Muscle-Up (Qualité)"
+            type: reps
+            series: 3
+            reps: "2"
+            description: >-
+              Maintenance Muscle-Up à la salle sur barre haute. Mouvement fluide et
+              propre, transition symétrique sans élan excessif, descente contrôlée.
+            repos_sec: 120
+            rpe_cible: 6.5
+
+          - nom: "Handstand Balance Flow"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 4/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Session handstand légère (4/4 de la semaine). Sensation de balance libre
+              sans fatigue ni échec, plaisir du mouvement.
             repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            rpe_cible: 5
 
           - nom: "Shoulder Mobility Flow"
             type: isometrique
             series: 1
             duree_sec: "600"
             description: >-
-              Mobilité épaule — extension thoracique, flexion, rotation externe. RPE 2
-              = récupération, jamais effort.
+              Mobilité active des épaules (10 min). Ouverture thoracique, flexion
+              complète, rotation externe. Récupération sans forcer.
             repos_sec: 0
             rpe_cible: 2
 
@@ -1217,7 +1342,9 @@ cycles:
             type: isometrique
             series: 1
             duree_sec: "600"
-            description: Mobilité hanche — RI, adducteurs, fléchisseurs, chevilles.
+            description: >-
+              Mobilité hanches et chevilles (10 min). Rotation interne/externe,
+              fléchisseurs, grand écart facial préparatoire.
             repos_sec: 0
             rpe_cible: 2
 
@@ -1225,7 +1352,9 @@ cycles:
             type: reps
             series: 3
             reps: "10"
-            description: Core léger — déplacé du lundi (repos).
+            description: >-
+              Coordination motrice et activation transverse/obliques. Respiration
+              lente diaphragmatique.
             repos_sec: 45
             rpe_cible: 4
 
@@ -1233,7 +1362,7 @@ cycles:
             type: isometrique
             series: 2
             duree_sec: "15-20"
-            description: Adducteurs / stabilité pelvienne — volume minimal.
+            description: Stabilité pelvienne latérale.
             repos_sec: 45
             rpe_cible: 5
 
@@ -1242,24 +1371,24 @@ cycles:
             series: 2
             reps: "15"
             description: >-
-              Plyo légère uniquement S1-S2. Pas de sprints/VJ le dimanche — plyo max
-              jeudi (audit overlap SNC).
+              Plyo légère de réactivité de cheville. Contact sol minimal, genoux
+              verrouillés.
             repos_sec: 60
             rpe_cible: 5
 
 
-  - nom: "Semaine 3 — Surcharge progressive"
+  - nom: "Semaine 3 — Surcharge Progressive & Nouveaux Skills"
 
-    # Dimanche = mobilité seule (plyo retiré pour récupérer le SNC après S1-S2).
+    # Introduction des négatives HSPU contre le mur et du Tuck Planche hold. Dimanche = mobilité seule.
 
     seances:
 
       ############################################################
-      # TUESDAY — Gym
+      # TUESDAY — Gym (Force Upper Body)
       ############################################################
 
       - jour: Mardi
-        nom: "Gym — Force Push"
+        nom: "Gym — Force Upper Body"
 
         exercices:
 
@@ -1299,9 +1428,9 @@ cycles:
             series: 4
             reps: "4"
             description: >-
-              Lift push principal. Pause 1 s poitrine, poussée explosive. Progression
-              conservative (193 cm = ROM long). +2,5 kg max si RPE cible respecté.
-              Évite l'ego lifting (profil).
+              Lift push principal. Pause 1 s poitrine, poussée explosive. Niveau
+              actuel 70kgx5 validé proprement. Progression conservative (+2,5 kg max
+              si RPE cible respecté).
             repos_sec: 180
             rpe_cible: 8
 
@@ -1310,9 +1439,19 @@ cycles:
             series: 2
             reps: "5"
             description: >-
-              Volume push réduit (2 séries vs 3 avant) pour limiter fatigue bench.
-              Pieds surélevés, transfert force horizontale.
+              Volume push sans pontage. Pieds surélevés, gainage strict, renforce le
+              point de blocage au développé couché.
             repos_sec: 150
+            rpe_cible: 8
+
+          - nom: "Weighted Pull-Up"
+            type: reps
+            series: 4
+            reps: "4"
+            description: >-
+              Lift pull lourd principal (déplacé à la salle). Suspension complète,
+              prise pronation/semi-pro, tirage explosif sans élan. +15kg de base.
+            repos_sec: 180
             rpe_cible: 8
 
           - nom: "Ring Dip"
@@ -1320,9 +1459,8 @@ cycles:
             series: 3
             reps: "4"
             description: >-
-              Règle profil : dips BW 5 reps propres × 2 semaines avant d'ajouter du
-              lest. Si fatigue ou épaules irritées → remplace par dips BW ou pompes
-              pieds surélevés. Descente contrôlée, épaules en dépression.
+              Dips aux anneaux ou barres parallèles. Descente contrôlée, épaules en
+              dépression, protège le sternum et les épaules.
             repos_sec: 120
             rpe_cible: 7
 
@@ -1330,7 +1468,9 @@ cycles:
             type: reps
             series: 2
             reps: "8"
-            description: Transfert handstand / force verticale.
+            description: >-
+              Force verticale push. Transfert direct sur la poussée handstand et HSPU.
+              Torse gainé, sans cambrer.
             repos_sec: 120
             rpe_cible: 7.5
 
@@ -1338,16 +1478,18 @@ cycles:
             type: reps
             series: 3
             reps: "15"
-            description: Prehab coiffe — priorité longévité épaule avec volume push + MU.
+            description: >-
+              Prehab coiffe des rotateurs. Priorité longévité épaule face au volume de
+              poussée et skills calisthenics.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # WEDNESDAY — Maison (skills + tirage)
+      # WEDNESDAY — Maison (Front Lever + HSPU + Tuck Planche)
       ############################################################
 
       - jour: Mercredi
-        nom: "Maison — Front Lever + Tirage"
+        nom: "Maison — Front Lever + Skills & HSPU"
 
         exercices:
 
@@ -1356,8 +1498,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Handstand.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1366,7 +1508,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1375,101 +1519,115 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (1/4 micro-sessions HS). Chercher l'équilibre
+              10-15 s, alignement actif des épaules et bassin rétroversé.
+            repos_sec: 75
+            rpe_cible: 6
+
+          - nom: "Handstand Chest-to-Wall"
+            type: isometrique
+            series: 2
             duree_sec: "20-30"
             description: >-
-              Session handstand 1/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Alignement et endurance posturale. Ventre face au mur, pousser fort dans
+              les épaules, côtes rentrées.
             repos_sec: 60
             rpe_cible: 6
 
-          - nom: "Wall Handstand Toe Pulls"
+          - nom: "Wall Handstand Push-Up (Négatives)"
             type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            series: 3
+            reps: "3-4"
+            description: >-
+              Progression Handstand Push-Up (HSPU). Trajectoire diagonale (tête devant
+              les mains en tripode), coudes serrés à 45°.
+            repos_sec: 90
+            rpe_cible: 7.5
 
           - nom: "Tuck Front Lever Hold"
             type: isometrique
             series: 5
             duree_sec: "15-20"
             description: >-
-              Skill #1 profil. Progression : passe au advanced tuck seulement quand tu
-              tiens 5×20 s en tuck strict avec bassin postérieur et coudes tendus. Ton
-              AT actuel (~1-2 s) ne justifie pas le programmer maintenant. Scapulas en
-              dépression, bassin postérieur, coudes tendus.
+              Skill #1 profil. Dépression et rétraction scapulaire, bassin
+              neutre/rétroversé, bras parfaitement tendus.
             repos_sec: 90
-            rpe_cible: 7
+            rpe_cible: 7.5
 
           - nom: "Front Lever Raises (Tuck)"
             type: reps
             series: 3
             reps: "4"
             description: >-
-              Renforce pattern FL sans passer prématurément à l'AT. Contrôlé, sans
-              balancement.
+              Dynamique Front Lever. Montée explosive, descente contrôlée 3 s sans
+              balancer. Bras verrouillés.
             repos_sec: 90
-            rpe_cible: 7
+            rpe_cible: 7.5
 
-          - nom: "Planche Lean"
+          - nom: "Tuck Planche Hold"
             type: isometrique
             series: 3
-            duree_sec: "15-20"
+            duree_sec: "8-12"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              Progression Planche (Planche Lean vers Tuck Planche). Protraction
+              scapulaire maximale, coudes verrouillés, poids projeté vers l'avant.
+            repos_sec: 75
+            rpe_cible: 7
 
-          - nom: "Weighted Pull-Up"
-            type: reps
-            series: 4
-            reps: "4"
-            description: >-
-              Force relative #2 profil. Suspension complète, pas de kip. +2 à 2,5 kg
-              si toutes reps explosives.
-            repos_sec: 180
-            rpe_cible: 8
-
-          - nom: "Chest Supported Row"
+          - nom: "Pronated Pull-Up"
             type: reps
             series: 3
             reps: "8"
             description: >-
-              Rowing scapulaire pour FL — une seule séance lourde de row/semaine.
-              Rétraction + dépression.
+              Volume tirage calisthenics au poids du corps. Amplitude complète menton
+              au-dessus de la barre, tempo 2-0-1.
             repos_sec: 90
             rpe_cible: 7.5
+
+          - nom: "TRX Inverted Row"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Tirage horizontal maison. Rétraction scapulaire complète, renforce le
+              haut du dos pour le Front Lever.
+            repos_sec: 75
+            rpe_cible: 7.5
+
+          - nom: "Hollow Body Hold"
+            type: isometrique
+            series: 3
+            duree_sec: "30"
+            description: >-
+              Gainage fondamental gymnastique. Bas du dos collé au sol, côtes
+              rentrées, rétroversion du bassin.
+            repos_sec: 60
+            rpe_cible: 7
 
           - nom: "Reverse Wrist Curl"
             type: reps
             series: 3
             reps: "15"
-            description: Résilience coudes/poignets (membres longs = levier élevé).
+            description: >-
+              Résilience poignets/coudes. Protection tendineuse face aux contraintes
+              du Handstand et de la Planche.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # THURSDAY — Gym
+      # THURSDAY — Gym (Bas du corps + Explosivité)
       ############################################################
 
       - jour: Jeudi
@@ -1509,8 +1667,8 @@ cycles:
             series: 3
             reps: "5"
             description: >-
-              Ajout audit : pattern squat axial absent avant. Force absolue bas du
-              corps pour masse athlétique 85-90 kg. Torso vertical, coudes hauts.
+              Force bas du corps axiale. Buste vertical, coudes hauts, renforce les
+              quadriceps et le core sans comprimer les lombaires.
             repos_sec: 150
             rpe_cible: 8
 
@@ -1519,8 +1677,8 @@ cycles:
             series: 4
             reps: "3"
             description: >-
-              Explosivité VJ (priorité #5). Intent max, arrête si hauteur baisse. Plyo
-              principal de la semaine (jeudi).
+              Explosivité détente verticale (VJ). Intention maximale sur chaque saut.
+              Arrêter si la hauteur diminue.
             repos_sec: 150
             rpe_cible: 6
 
@@ -1528,7 +1686,9 @@ cycles:
             type: reps
             series: 4
             reps: "2"
-            description: Production force rapide. Vitesse barre > charge.
+            description: >-
+              Production de force rapide. Extension triple explosive
+              hanches-genoux-chevilles, vitesse de barre prioritaire.
             repos_sec: 150
             rpe_cible: 8
 
@@ -1536,7 +1696,9 @@ cycles:
             type: reps
             series: 3
             reps: "6"
-            description: Force unilatérale, stabilité hanche. Tibia vertical, excentrique contrôlé.
+            description: >-
+              Force unilatérale. Stabilité du genou, contrôle excentrique, élimine les
+              asymétries.
             repos_sec: 120
             rpe_cible: 8
 
@@ -1545,8 +1707,8 @@ cycles:
             series: 3
             reps: "6"
             description: >-
-              Chaîne postérieure — remplace Jefferson curl (audit : flexion lombaire
-              chargée + inconfort dos).
+              Chaîne postérieure (ischios/fessiers). Charnière de hanche propre, dos
+              neutre, étirement contrôlé.
             repos_sec: 120
             rpe_cible: 7.5
 
@@ -1554,115 +1716,16 @@ cycles:
             type: reps
             series: 3
             reps: "12"
-            description: Anti-rotation tronc.
+            description: Anti-rotation du tronc. Résister à la torsion, stabilité du bassin.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # FRIDAY — Maison (muscle-up)
+      # FRIDAY — Maison (Handstand + L-Sit & Core)
       ############################################################
 
       - jour: Vendredi
-        nom: "Maison — Muscle-Up (maintenance)"
-
-        exercices:
-
-          - nom: "Dead Hang"
-            type: isometrique
-            series: 2
-            duree_sec: "20"
-            description: Échauffement MU. Ouverture épaules et préparation grip.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Scapular Pull-Up"
-            type: reps
-            series: 2
-            reps: "8"
-            description: Échauffement MU. Pattern tirage scapulaire avant transitions.
-            repos_sec: 45
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Face Pull"
-            type: reps
-            series: 2
-            reps: "12"
-            description: Échauffement MU. Coiffe et rotateurs — charge légère, contrôle.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Handstand Chest-to-Wall"
-            type: isometrique
-            series: 3
-            duree_sec: "20-30"
-            description: >-
-              Session handstand 2/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "False Grip Hang"
-            type: isometrique
-            series: 3
-            duree_sec: "15-20"
-            description: >-
-              Endurance false grip — volume minimal (MU = maintenance #8 profil). Sans
-              aller à l'échec.
-            repos_sec: 60
-            rpe_cible: 5
-
-          - nom: "Low Bar Muscle-Up Transition"
-            type: reps
-            series: 3
-            reps: "3"
-            description: Travail technique transition. Coudes près du corps, lent et propre.
-            repos_sec: 90
-            rpe_cible: 6
-
-          - nom: "Negative Muscle-Up"
-            type: reps
-            series: 2
-            reps: "2"
-            description: >-
-              Excentrique contrôlé 5-6 s — volume réduit vs ancien prog (audit :
-              stress coude). Max 2 séries en semaine lourde.
-            repos_sec: 120
-            rpe_cible: 7
-
-          - nom: "Face Pull"
-            type: reps
-            series: 3
-            reps: "15"
-            description: Prehab épaule post-MU.
-            repos_sec: 60
-            rpe_cible: 6
-
-      ############################################################
-      # SATURDAY — Maison (tirage + skills)
-      ############################################################
-
-      - jour: Samedi
-        nom: "Maison — Tirage + Skills"
+        nom: "Maison — Handstand & L-Sit Core"
 
         exercices:
 
@@ -1671,8 +1734,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Handstand et L-Sit.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1681,7 +1744,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1690,35 +1755,142 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 3/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
+              Travail d'équilibre libre (2/4 micro-sessions HS). Focus sur les
+              micro-ajustements des doigts et la ligne droite.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Wall Handstand Toe Pulls"
             type: reps
             series: 2
             reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
+            description: >-
+              Contrôle de l'équilibre. Face au mur, décoller un pied puis l'autre avec
+              la pression des doigts sans arquer.
             repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "L-Sit Hold (Parallettes ou Sol)"
+            type: isometrique
+            series: 3
+            duree_sec: "10-15"
+            description: >-
+              Progression L-Sit et préparation à l'enchaînement L-Sit to Handstand.
+              Dépression scapulaire active, compression abdominale, jambes tendues.
+            repos_sec: 75
+            rpe_cible: 7
+
+          - nom: "Wall Handstand Shoulder Taps"
+            type: reps
+            series: 3
+            reps: "6-8"
+            description: >-
+              Mouvement autour du Handstand & stabilité unilatérale. Face au mur,
+              transférer le poids et toucher l'épaule opposée sans désaxer le bassin.
+            repos_sec: 75
+            rpe_cible: 6.5
+
+          - nom: "Dragon Flag (Négatives / Holds)"
+            type: reps
+            series: 3
+            reps: "5-6"
+            description: >-
+              Force de compression et anti-extension lourde. Corps rigide aligné,
+              descente lente contrôlée 3-4 s sans casser les hanches.
+            repos_sec: 90
+            rpe_cible: 7
+
+          - nom: "Hanging Knee-to-Chest Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Compression abdominale et flexion de hanche suspendu à la barre. Montée
+              explosive des genoux vers la poitrine sans balancer.
+            repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Copenhagen Side Plank"
+            type: isometrique
+            series: 2
+            duree_sec: "15-20"
+            description: >-
+              Stabilité pelvienne et adducteurs. Renforcement du bassin pour les
+              maintiens gymniques.
+            repos_sec: 45
+            rpe_cible: 5
+
+      ############################################################
+      # SATURDAY — Maison (Front Lever #2 + Planche #2 + Tirage Skills)
+      ############################################################
+
+      - jour: Samedi
+        nom: "Maison — Front Lever & Planche Skills"
+
+        exercices:
+
+          - nom: "Dead Hang"
+            type: isometrique
+            series: 2
+            duree_sec: "20-30"
+            description: >-
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Planche.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Scapular Pull-Up"
+            type: reps
+            series: 2
+            reps: "8-10"
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
+            repos_sec: 45
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Band Pull-Apart"
+            type: reps
+            series: 2
+            reps: "15"
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Handstand Freestanding Practice"
+            type: isometrique
+            series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (3/4 micro-sessions HS). Répétition des
+              montées (kick-up) propres et recherche du point d'équilibre.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Scapular Handstand Shrugs"
             type: reps
             series: 2
             reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
+            description: >-
+              Endurance scapulaire en élévation. Coudes verrouillés, pousser le sol
+              pour élever et abaisser les omoplates.
             repos_sec: 60
             rpe_cible: 6
 
@@ -1727,50 +1899,73 @@ cycles:
             series: 4
             duree_sec: "15-20"
             description: >-
-              2e exposition FL/semaine (profil : 2-3×). Qualité technique, RPE plus
-              bas qu'en mercredi.
+              2e exposition FL de la semaine. Focus sur la pureté posturale et la
+              tenue isométrique sans compensation lombaire.
             repos_sec: 90
-            rpe_cible: 6
+            rpe_cible: 6.5
 
           - nom: "Front Lever Scapular Pull"
             type: reps
             series: 3
             reps: "8"
-            description: Endurance dépression scapulaire (faiblesse profil).
+            description: >-
+              Endurance dépression scapulaire. Initier la traction bras tendus
+              uniquement avec les grands dorsaux et abaisseurs d'omoplates.
             repos_sec: 75
             rpe_cible: 6
 
-          - nom: "Planche Lean"
+          - nom: "Tuck Planche Hold"
             type: isometrique
             series: 3
-            duree_sec: "15-20"
+            duree_sec: "8-12"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              2e exposition Planche de la semaine. Protraction scapulaire et avancée
+              maximale des épaules.
+            repos_sec: 75
+            rpe_cible: 7
 
-          - nom: "Pronated Pull-Up"
+          - nom: "Archer Pull-Up (Progression)"
             type: reps
             series: 3
-            reps: "8"
+            reps: "4-5"
             description: >-
-              Volume tirage modéré — C2B et rows redondants retirés (audit : ~50 sets
-              pull/sem). Excentrique contrôlé.
+              Force unilatérale de tirage calisthenics. Tirer vers un bras pendant que
+              l'autre assiste bras tendu sur la barre.
             repos_sec: 90
             rpe_cible: 7.5
 
-          - nom: "Bayesian Cable Curl"
+          - nom: "Band Biceps Curl"
             type: reps
-            series: 2
-            reps: "10-12"
-            description: Seul curl direct/semaine.
+            series: 3
+            reps: "12-15"
+            description: >-
+              Hypertrophie et protection des tendons du coude avec bande élastique.
+              Maintien du pic de contraction 1 s.
+            repos_sec: 60
+            rpe_cible: 7.5
+
+          - nom: "Seated Pike Compression Leg Lift"
+            type: reps
+            series: 3
+            reps: "12"
+            description: >-
+              Force de compression active abdos/psoas. Assis jambes tendues au sol,
+              lever les pieds sans reculer le buste (transfert L-Sit & Press to HS).
             repos_sec: 60
             rpe_cible: 7
 
+          - nom: "Reverse Wrist Curl"
+            type: reps
+            series: 3
+            reps: "15"
+            description: >-
+              Renforcement fléchisseurs/extenseurs poignets avec bande ou léger lest
+              maison.
+            repos_sec: 45
+            rpe_cible: 6
+
       ############################################################
-      # SUNDAY — Récupération active
+      # SUNDAY — Gym (Récupération active + Muscle-Up + Mobilité)
       ############################################################
 
       - jour: Dimanche
@@ -1796,40 +1991,33 @@ cycles:
             rpe_cible: 2
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Strict Muscle-Up (Qualité)"
+            type: reps
+            series: 3
+            reps: "2"
+            description: >-
+              Maintenance Muscle-Up à la salle sur barre haute. Mouvement fluide et
+              propre, transition symétrique sans élan excessif, descente contrôlée.
+            repos_sec: 120
+            rpe_cible: 7
+
+          - nom: "Handstand Balance Flow"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 4/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Session handstand légère (4/4 de la semaine). Sensation de balance libre
+              sans fatigue ni échec, plaisir du mouvement.
             repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            rpe_cible: 5
 
           - nom: "Shoulder Mobility Flow"
             type: isometrique
             series: 1
             duree_sec: "600"
             description: >-
-              Mobilité épaule — extension thoracique, flexion, rotation externe. RPE 2
-              = récupération, jamais effort.
+              Mobilité active des épaules (10 min). Ouverture thoracique, flexion
+              complète, rotation externe. Récupération sans forcer.
             repos_sec: 0
             rpe_cible: 2
 
@@ -1837,7 +2025,9 @@ cycles:
             type: isometrique
             series: 1
             duree_sec: "600"
-            description: Mobilité hanche — RI, adducteurs, fléchisseurs, chevilles.
+            description: >-
+              Mobilité hanches et chevilles (10 min). Rotation interne/externe,
+              fléchisseurs, grand écart facial préparatoire.
             repos_sec: 0
             rpe_cible: 2
 
@@ -1845,7 +2035,9 @@ cycles:
             type: reps
             series: 3
             reps: "10"
-            description: Core léger — déplacé du lundi (repos).
+            description: >-
+              Coordination motrice et activation transverse/obliques. Respiration
+              lente diaphragmatique.
             repos_sec: 45
             rpe_cible: 4
 
@@ -1853,23 +2045,23 @@ cycles:
             type: isometrique
             series: 2
             duree_sec: "15-20"
-            description: Adducteurs / stabilité pelvienne — volume minimal.
+            description: Stabilité pelvienne latérale.
             repos_sec: 45
             rpe_cible: 5
 
 
-  - nom: "Semaine 4 — Volume productif"
+  - nom: "Semaine 4 — Volume Productif & Renforcement Spécifique"
 
-    # Pic modéré du bloc — volume tirage plafonné vs ancien programme.
+    # Pic de volume du bloc. Répétition des schémas moteurs sous fatigue modérée.
 
     seances:
 
       ############################################################
-      # TUESDAY — Gym
+      # TUESDAY — Gym (Force Upper Body)
       ############################################################
 
       - jour: Mardi
-        nom: "Gym — Force Push"
+        nom: "Gym — Force Upper Body"
 
         exercices:
 
@@ -1909,9 +2101,9 @@ cycles:
             series: 4
             reps: "4"
             description: >-
-              Lift push principal. Pause 1 s poitrine, poussée explosive. Progression
-              conservative (193 cm = ROM long). +2,5 kg max si RPE cible respecté.
-              Évite l'ego lifting (profil).
+              Lift push principal. Pause 1 s poitrine, poussée explosive. Niveau
+              actuel 70kgx5 validé proprement. Progression conservative (+2,5 kg max
+              si RPE cible respecté).
             repos_sec: 180
             rpe_cible: 8
 
@@ -1920,9 +2112,19 @@ cycles:
             series: 2
             reps: "5"
             description: >-
-              Volume push réduit (2 séries vs 3 avant) pour limiter fatigue bench.
-              Pieds surélevés, transfert force horizontale.
+              Volume push sans pontage. Pieds surélevés, gainage strict, renforce le
+              point de blocage au développé couché.
             repos_sec: 150
+            rpe_cible: 8
+
+          - nom: "Weighted Pull-Up"
+            type: reps
+            series: 4
+            reps: "4"
+            description: >-
+              Lift pull lourd principal (déplacé à la salle). Suspension complète,
+              prise pronation/semi-pro, tirage explosif sans élan. +15kg de base.
+            repos_sec: 180
             rpe_cible: 8
 
           - nom: "Ring Dip"
@@ -1930,9 +2132,8 @@ cycles:
             series: 3
             reps: "4"
             description: >-
-              Règle profil : dips BW 5 reps propres × 2 semaines avant d'ajouter du
-              lest. Si fatigue ou épaules irritées → remplace par dips BW ou pompes
-              pieds surélevés. Descente contrôlée, épaules en dépression.
+              Dips aux anneaux ou barres parallèles. Descente contrôlée, épaules en
+              dépression, protège le sternum et les épaules.
             repos_sec: 120
             rpe_cible: 7.5
 
@@ -1940,7 +2141,9 @@ cycles:
             type: reps
             series: 2
             reps: "8"
-            description: Transfert handstand / force verticale.
+            description: >-
+              Force verticale push. Transfert direct sur la poussée handstand et HSPU.
+              Torse gainé, sans cambrer.
             repos_sec: 120
             rpe_cible: 8
 
@@ -1948,16 +2151,18 @@ cycles:
             type: reps
             series: 3
             reps: "15"
-            description: Prehab coiffe — priorité longévité épaule avec volume push + MU.
+            description: >-
+              Prehab coiffe des rotateurs. Priorité longévité épaule face au volume de
+              poussée et skills calisthenics.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # WEDNESDAY — Maison (skills + tirage)
+      # WEDNESDAY — Maison (Front Lever + HSPU + Tuck Planche)
       ############################################################
 
       - jour: Mercredi
-        nom: "Maison — Front Lever + Tirage"
+        nom: "Maison — Front Lever + Skills & HSPU"
 
         exercices:
 
@@ -1966,8 +2171,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Handstand.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1976,7 +2181,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -1985,101 +2192,115 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (1/4 micro-sessions HS). Chercher l'équilibre
+              10-15 s, alignement actif des épaules et bassin rétroversé.
+            repos_sec: 75
+            rpe_cible: 6
+
+          - nom: "Handstand Chest-to-Wall"
+            type: isometrique
+            series: 2
             duree_sec: "20-30"
             description: >-
-              Session handstand 1/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Alignement et endurance posturale. Ventre face au mur, pousser fort dans
+              les épaules, côtes rentrées.
             repos_sec: 60
             rpe_cible: 6
 
-          - nom: "Wall Handstand Toe Pulls"
+          - nom: "Wall Handstand Push-Up (Négatives)"
             type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            series: 3
+            reps: "4"
+            description: >-
+              Progression Handstand Push-Up (HSPU). Trajectoire diagonale (tête devant
+              les mains en tripode), coudes serrés à 45°.
+            repos_sec: 90
+            rpe_cible: 8
 
           - nom: "Tuck Front Lever Hold"
             type: isometrique
             series: 5
             duree_sec: "18-22"
             description: >-
-              Skill #1 profil. Progression : passe au advanced tuck seulement quand tu
-              tiens 5×20 s en tuck strict avec bassin postérieur et coudes tendus. Ton
-              AT actuel (~1-2 s) ne justifie pas le programmer maintenant. Scapulas en
-              dépression, bassin postérieur, coudes tendus.
+              Skill #1 profil. Dépression et rétraction scapulaire, bassin
+              neutre/rétroversé, bras parfaitement tendus.
             repos_sec: 90
-            rpe_cible: 7
+            rpe_cible: 7.5
 
           - nom: "Front Lever Raises (Tuck)"
             type: reps
             series: 3
             reps: "4"
             description: >-
-              Renforce pattern FL sans passer prématurément à l'AT. Contrôlé, sans
-              balancement.
+              Dynamique Front Lever. Montée explosive, descente contrôlée 3 s sans
+              balancer. Bras verrouillés.
             repos_sec: 90
-            rpe_cible: 7
+            rpe_cible: 7.5
 
-          - nom: "Planche Lean"
+          - nom: "Tuck Planche Hold"
             type: isometrique
             series: 3
-            duree_sec: "15-20"
+            duree_sec: "10-12"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              Progression Planche (Planche Lean vers Tuck Planche). Protraction
+              scapulaire maximale, coudes verrouillés, poids projeté vers l'avant.
+            repos_sec: 75
+            rpe_cible: 7
 
-          - nom: "Weighted Pull-Up"
-            type: reps
-            series: 4
-            reps: "4"
-            description: >-
-              Force relative #2 profil. Suspension complète, pas de kip. +2 à 2,5 kg
-              si toutes reps explosives.
-            repos_sec: 180
-            rpe_cible: 8
-
-          - nom: "Chest Supported Row"
+          - nom: "Pronated Pull-Up"
             type: reps
             series: 3
             reps: "8"
             description: >-
-              Rowing scapulaire pour FL — une seule séance lourde de row/semaine.
-              Rétraction + dépression.
+              Volume tirage calisthenics au poids du corps. Amplitude complète menton
+              au-dessus de la barre, tempo 2-0-1.
             repos_sec: 90
+            rpe_cible: 7.5
+
+          - nom: "TRX Inverted Row"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Tirage horizontal maison. Rétraction scapulaire complète, renforce le
+              haut du dos pour le Front Lever.
+            repos_sec: 75
             rpe_cible: 8
+
+          - nom: "Hollow Body Hold"
+            type: isometrique
+            series: 3
+            duree_sec: "30-35"
+            description: >-
+              Gainage fondamental gymnastique. Bas du dos collé au sol, côtes
+              rentrées, rétroversion du bassin.
+            repos_sec: 60
+            rpe_cible: 7
 
           - nom: "Reverse Wrist Curl"
             type: reps
             series: 3
             reps: "15"
-            description: Résilience coudes/poignets (membres longs = levier élevé).
+            description: >-
+              Résilience poignets/coudes. Protection tendineuse face aux contraintes
+              du Handstand et de la Planche.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # THURSDAY — Gym
+      # THURSDAY — Gym (Bas du corps + Explosivité)
       ############################################################
 
       - jour: Jeudi
@@ -2119,8 +2340,8 @@ cycles:
             series: 3
             reps: "5"
             description: >-
-              Ajout audit : pattern squat axial absent avant. Force absolue bas du
-              corps pour masse athlétique 85-90 kg. Torso vertical, coudes hauts.
+              Force bas du corps axiale. Buste vertical, coudes hauts, renforce les
+              quadriceps et le core sans comprimer les lombaires.
             repos_sec: 150
             rpe_cible: 8
 
@@ -2129,8 +2350,8 @@ cycles:
             series: 4
             reps: "3"
             description: >-
-              Explosivité VJ (priorité #5). Intent max, arrête si hauteur baisse. Plyo
-              principal de la semaine (jeudi).
+              Explosivité détente verticale (VJ). Intention maximale sur chaque saut.
+              Arrêter si la hauteur diminue.
             repos_sec: 150
             rpe_cible: 6
 
@@ -2138,7 +2359,9 @@ cycles:
             type: reps
             series: 4
             reps: "2"
-            description: Production force rapide. Vitesse barre > charge.
+            description: >-
+              Production de force rapide. Extension triple explosive
+              hanches-genoux-chevilles, vitesse de barre prioritaire.
             repos_sec: 150
             rpe_cible: 8
 
@@ -2146,7 +2369,9 @@ cycles:
             type: reps
             series: 3
             reps: "6"
-            description: Force unilatérale, stabilité hanche. Tibia vertical, excentrique contrôlé.
+            description: >-
+              Force unilatérale. Stabilité du genou, contrôle excentrique, élimine les
+              asymétries.
             repos_sec: 120
             rpe_cible: 8
 
@@ -2155,8 +2380,8 @@ cycles:
             series: 3
             reps: "6"
             description: >-
-              Chaîne postérieure — remplace Jefferson curl (audit : flexion lombaire
-              chargée + inconfort dos).
+              Chaîne postérieure (ischios/fessiers). Charnière de hanche propre, dos
+              neutre, étirement contrôlé.
             repos_sec: 120
             rpe_cible: 8
 
@@ -2164,115 +2389,16 @@ cycles:
             type: reps
             series: 3
             reps: "12"
-            description: Anti-rotation tronc.
+            description: Anti-rotation du tronc. Résister à la torsion, stabilité du bassin.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # FRIDAY — Maison (muscle-up)
+      # FRIDAY — Maison (Handstand + L-Sit & Core)
       ############################################################
 
       - jour: Vendredi
-        nom: "Maison — Muscle-Up (maintenance)"
-
-        exercices:
-
-          - nom: "Dead Hang"
-            type: isometrique
-            series: 2
-            duree_sec: "20"
-            description: Échauffement MU. Ouverture épaules et préparation grip.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Scapular Pull-Up"
-            type: reps
-            series: 2
-            reps: "8"
-            description: Échauffement MU. Pattern tirage scapulaire avant transitions.
-            repos_sec: 45
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Face Pull"
-            type: reps
-            series: 2
-            reps: "12"
-            description: Échauffement MU. Coiffe et rotateurs — charge légère, contrôle.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Handstand Chest-to-Wall"
-            type: isometrique
-            series: 3
-            duree_sec: "20-30"
-            description: >-
-              Session handstand 2/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "False Grip Hang"
-            type: isometrique
-            series: 3
-            duree_sec: "15-20"
-            description: >-
-              Endurance false grip — volume minimal (MU = maintenance #8 profil). Sans
-              aller à l'échec.
-            repos_sec: 60
-            rpe_cible: 5
-
-          - nom: "Low Bar Muscle-Up Transition"
-            type: reps
-            series: 3
-            reps: "3"
-            description: Travail technique transition. Coudes près du corps, lent et propre.
-            repos_sec: 90
-            rpe_cible: 6
-
-          - nom: "Negative Muscle-Up"
-            type: reps
-            series: 2
-            reps: "2"
-            description: >-
-              Excentrique contrôlé 5-6 s — volume réduit vs ancien prog (audit :
-              stress coude). Max 2 séries en semaine lourde.
-            repos_sec: 120
-            rpe_cible: 7
-
-          - nom: "Face Pull"
-            type: reps
-            series: 3
-            reps: "15"
-            description: Prehab épaule post-MU.
-            repos_sec: 60
-            rpe_cible: 6
-
-      ############################################################
-      # SATURDAY — Maison (tirage + skills)
-      ############################################################
-
-      - jour: Samedi
-        nom: "Maison — Tirage + Skills"
+        nom: "Maison — Handstand & L-Sit Core"
 
         exercices:
 
@@ -2281,8 +2407,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Handstand et L-Sit.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -2291,7 +2417,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -2300,35 +2428,142 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 3/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
+              Travail d'équilibre libre (2/4 micro-sessions HS). Focus sur les
+              micro-ajustements des doigts et la ligne droite.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Wall Handstand Toe Pulls"
             type: reps
             series: 2
             reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
+            description: >-
+              Contrôle de l'équilibre. Face au mur, décoller un pied puis l'autre avec
+              la pression des doigts sans arquer.
             repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "L-Sit Hold (Parallettes ou Sol)"
+            type: isometrique
+            series: 3
+            duree_sec: "12-15"
+            description: >-
+              Progression L-Sit et préparation à l'enchaînement L-Sit to Handstand.
+              Dépression scapulaire active, compression abdominale, jambes tendues.
+            repos_sec: 75
+            rpe_cible: 7
+
+          - nom: "Wall Handstand Shoulder Taps"
+            type: reps
+            series: 3
+            reps: "6-8"
+            description: >-
+              Mouvement autour du Handstand & stabilité unilatérale. Face au mur,
+              transférer le poids et toucher l'épaule opposée sans désaxer le bassin.
+            repos_sec: 75
+            rpe_cible: 6.5
+
+          - nom: "Dragon Flag (Négatives / Holds)"
+            type: reps
+            series: 3
+            reps: "6"
+            description: >-
+              Force de compression et anti-extension lourde. Corps rigide aligné,
+              descente lente contrôlée 3-4 s sans casser les hanches.
+            repos_sec: 90
+            rpe_cible: 7.5
+
+          - nom: "Hanging Knee-to-Chest Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Compression abdominale et flexion de hanche suspendu à la barre. Montée
+              explosive des genoux vers la poitrine sans balancer.
+            repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Copenhagen Side Plank"
+            type: isometrique
+            series: 2
+            duree_sec: "15-20"
+            description: >-
+              Stabilité pelvienne et adducteurs. Renforcement du bassin pour les
+              maintiens gymniques.
+            repos_sec: 45
+            rpe_cible: 5
+
+      ############################################################
+      # SATURDAY — Maison (Front Lever #2 + Planche #2 + Tirage Skills)
+      ############################################################
+
+      - jour: Samedi
+        nom: "Maison — Front Lever & Planche Skills"
+
+        exercices:
+
+          - nom: "Dead Hang"
+            type: isometrique
+            series: 2
+            duree_sec: "20-30"
+            description: >-
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Planche.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Scapular Pull-Up"
+            type: reps
+            series: 2
+            reps: "8-10"
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
+            repos_sec: 45
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Band Pull-Apart"
+            type: reps
+            series: 2
+            reps: "15"
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Handstand Freestanding Practice"
+            type: isometrique
+            series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (3/4 micro-sessions HS). Répétition des
+              montées (kick-up) propres et recherche du point d'équilibre.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Scapular Handstand Shrugs"
             type: reps
             series: 2
             reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
+            description: >-
+              Endurance scapulaire en élévation. Coudes verrouillés, pousser le sol
+              pour élever et abaisser les omoplates.
             repos_sec: 60
             rpe_cible: 6
 
@@ -2337,50 +2572,73 @@ cycles:
             series: 4
             duree_sec: "18-22"
             description: >-
-              2e exposition FL/semaine (profil : 2-3×). Qualité technique, RPE plus
-              bas qu'en mercredi.
+              2e exposition FL de la semaine. Focus sur la pureté posturale et la
+              tenue isométrique sans compensation lombaire.
             repos_sec: 90
-            rpe_cible: 6
+            rpe_cible: 6.5
 
           - nom: "Front Lever Scapular Pull"
             type: reps
             series: 3
             reps: "8"
-            description: Endurance dépression scapulaire (faiblesse profil).
+            description: >-
+              Endurance dépression scapulaire. Initier la traction bras tendus
+              uniquement avec les grands dorsaux et abaisseurs d'omoplates.
             repos_sec: 75
             rpe_cible: 6
 
-          - nom: "Planche Lean"
+          - nom: "Tuck Planche Hold"
             type: isometrique
             series: 3
-            duree_sec: "15-20"
+            duree_sec: "10-12"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              2e exposition Planche de la semaine. Protraction scapulaire et avancée
+              maximale des épaules.
+            repos_sec: 75
+            rpe_cible: 7
 
-          - nom: "Pronated Pull-Up"
+          - nom: "Archer Pull-Up (Progression)"
             type: reps
             series: 3
-            reps: "8"
+            reps: "5"
             description: >-
-              Volume tirage modéré — C2B et rows redondants retirés (audit : ~50 sets
-              pull/sem). Excentrique contrôlé.
+              Force unilatérale de tirage calisthenics. Tirer vers un bras pendant que
+              l'autre assiste bras tendu sur la barre.
             repos_sec: 90
             rpe_cible: 7.5
 
-          - nom: "Bayesian Cable Curl"
+          - nom: "Band Biceps Curl"
             type: reps
-            series: 2
-            reps: "10-12"
-            description: Seul curl direct/semaine.
+            series: 3
+            reps: "12-15"
+            description: >-
+              Hypertrophie et protection des tendons du coude avec bande élastique.
+              Maintien du pic de contraction 1 s.
+            repos_sec: 60
+            rpe_cible: 7.5
+
+          - nom: "Seated Pike Compression Leg Lift"
+            type: reps
+            series: 3
+            reps: "12"
+            description: >-
+              Force de compression active abdos/psoas. Assis jambes tendues au sol,
+              lever les pieds sans reculer le buste (transfert L-Sit & Press to HS).
             repos_sec: 60
             rpe_cible: 7
 
+          - nom: "Reverse Wrist Curl"
+            type: reps
+            series: 3
+            reps: "15"
+            description: >-
+              Renforcement fléchisseurs/extenseurs poignets avec bande ou léger lest
+              maison.
+            repos_sec: 45
+            rpe_cible: 6
+
       ############################################################
-      # SUNDAY — Récupération active
+      # SUNDAY — Gym (Récupération active + Muscle-Up + Mobilité)
       ############################################################
 
       - jour: Dimanche
@@ -2406,40 +2664,33 @@ cycles:
             rpe_cible: 2
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Strict Muscle-Up (Qualité)"
+            type: reps
+            series: 3
+            reps: "2"
+            description: >-
+              Maintenance Muscle-Up à la salle sur barre haute. Mouvement fluide et
+              propre, transition symétrique sans élan excessif, descente contrôlée.
+            repos_sec: 120
+            rpe_cible: 7
+
+          - nom: "Handstand Balance Flow"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 4/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Session handstand légère (4/4 de la semaine). Sensation de balance libre
+              sans fatigue ni échec, plaisir du mouvement.
             repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            rpe_cible: 5
 
           - nom: "Shoulder Mobility Flow"
             type: isometrique
             series: 1
             duree_sec: "600"
             description: >-
-              Mobilité épaule — extension thoracique, flexion, rotation externe. RPE 2
-              = récupération, jamais effort.
+              Mobilité active des épaules (10 min). Ouverture thoracique, flexion
+              complète, rotation externe. Récupération sans forcer.
             repos_sec: 0
             rpe_cible: 2
 
@@ -2447,7 +2698,9 @@ cycles:
             type: isometrique
             series: 1
             duree_sec: "600"
-            description: Mobilité hanche — RI, adducteurs, fléchisseurs, chevilles.
+            description: >-
+              Mobilité hanches et chevilles (10 min). Rotation interne/externe,
+              fléchisseurs, grand écart facial préparatoire.
             repos_sec: 0
             rpe_cible: 2
 
@@ -2455,7 +2708,9 @@ cycles:
             type: reps
             series: 3
             reps: "10"
-            description: Core léger — déplacé du lundi (repos).
+            description: >-
+              Coordination motrice et activation transverse/obliques. Respiration
+              lente diaphragmatique.
             repos_sec: 45
             rpe_cible: 4
 
@@ -2463,23 +2718,23 @@ cycles:
             type: isometrique
             series: 2
             duree_sec: "15-20"
-            description: Adducteurs / stabilité pelvienne — volume minimal.
+            description: Stabilité pelvienne latérale.
             repos_sec: 45
             rpe_cible: 5
 
 
-  - nom: "Semaine 5 — Intensification"
+  - nom: "Semaine 5 — Intensification & Transfert Maximal"
 
-    # Charges max du bloc. Accessoires réduits pour protéger épaules/coudes.
+    # Charges max sur Bench et Tractions lestées. Initiation à la transition L-Sit to HS prep.
 
     seances:
 
       ############################################################
-      # TUESDAY — Gym
+      # TUESDAY — Gym (Force Upper Body)
       ############################################################
 
       - jour: Mardi
-        nom: "Gym — Force Push"
+        nom: "Gym — Force Upper Body"
 
         exercices:
 
@@ -2519,9 +2774,9 @@ cycles:
             series: 4
             reps: "3"
             description: >-
-              Lift push principal. Pause 1 s poitrine, poussée explosive. Progression
-              conservative (193 cm = ROM long). +2,5 kg max si RPE cible respecté.
-              Évite l'ego lifting (profil).
+              Lift push principal. Pause 1 s poitrine, poussée explosive. Niveau
+              actuel 70kgx5 validé proprement. Progression conservative (+2,5 kg max
+              si RPE cible respecté).
             repos_sec: 180
             rpe_cible: 8.5
 
@@ -2530,19 +2785,28 @@ cycles:
             series: 2
             reps: "5"
             description: >-
-              Volume push réduit (2 séries vs 3 avant) pour limiter fatigue bench.
-              Pieds surélevés, transfert force horizontale.
+              Volume push sans pontage. Pieds surélevés, gainage strict, renforce le
+              point de blocage au développé couché.
             repos_sec: 150
             rpe_cible: 8
+
+          - nom: "Weighted Pull-Up"
+            type: reps
+            series: 4
+            reps: "3"
+            description: >-
+              Lift pull lourd principal (déplacé à la salle). Suspension complète,
+              prise pronation/semi-pro, tirage explosif sans élan. +15kg de base.
+            repos_sec: 180
+            rpe_cible: 8.5
 
           - nom: "Ring Dip"
             type: reps
             series: 3
             reps: "4"
             description: >-
-              Règle profil : dips BW 5 reps propres × 2 semaines avant d'ajouter du
-              lest. Si fatigue ou épaules irritées → remplace par dips BW ou pompes
-              pieds surélevés. Descente contrôlée, épaules en dépression.
+              Dips aux anneaux ou barres parallèles. Descente contrôlée, épaules en
+              dépression, protège le sternum et les épaules.
             repos_sec: 120
             rpe_cible: 8
 
@@ -2550,7 +2814,9 @@ cycles:
             type: reps
             series: 2
             reps: "6"
-            description: Transfert handstand / force verticale.
+            description: >-
+              Force verticale push. Transfert direct sur la poussée handstand et HSPU.
+              Torse gainé, sans cambrer.
             repos_sec: 120
             rpe_cible: 8
 
@@ -2558,16 +2824,18 @@ cycles:
             type: reps
             series: 3
             reps: "15"
-            description: Prehab coiffe — priorité longévité épaule avec volume push + MU.
+            description: >-
+              Prehab coiffe des rotateurs. Priorité longévité épaule face au volume de
+              poussée et skills calisthenics.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # WEDNESDAY — Maison (skills + tirage)
+      # WEDNESDAY — Maison (Front Lever + HSPU + Tuck Planche)
       ############################################################
 
       - jour: Mercredi
-        nom: "Maison — Front Lever + Tirage"
+        nom: "Maison — Front Lever + Skills & HSPU"
 
         exercices:
 
@@ -2576,8 +2844,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Handstand.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -2586,7 +2854,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -2595,101 +2865,115 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (1/4 micro-sessions HS). Chercher l'équilibre
+              10-15 s, alignement actif des épaules et bassin rétroversé.
+            repos_sec: 75
+            rpe_cible: 6
+
+          - nom: "Handstand Chest-to-Wall"
+            type: isometrique
+            series: 2
             duree_sec: "20-30"
             description: >-
-              Session handstand 1/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Alignement et endurance posturale. Ventre face au mur, pousser fort dans
+              les épaules, côtes rentrées.
             repos_sec: 60
             rpe_cible: 6
 
-          - nom: "Wall Handstand Toe Pulls"
+          - nom: "Wall Handstand Push-Up"
             type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            series: 3
+            reps: "3-5"
+            description: >-
+              Progression Handstand Push-Up (HSPU). Trajectoire diagonale (tête devant
+              les mains en tripode), coudes serrés à 45°.
+            repos_sec: 90
+            rpe_cible: 8
 
           - nom: "Tuck Front Lever Hold"
             type: isometrique
             series: 4
             duree_sec: "15-20"
             description: >-
-              Skill #1 profil. Progression : passe au advanced tuck seulement quand tu
-              tiens 5×20 s en tuck strict avec bassin postérieur et coudes tendus. Ton
-              AT actuel (~1-2 s) ne justifie pas le programmer maintenant. Scapulas en
-              dépression, bassin postérieur, coudes tendus.
+              Skill #1 profil. Dépression et rétraction scapulaire, bassin
+              neutre/rétroversé, bras parfaitement tendus.
             repos_sec: 90
-            rpe_cible: 7
+            rpe_cible: 7.5
 
           - nom: "Front Lever Raises (Tuck)"
             type: reps
             series: 3
             reps: "4"
             description: >-
-              Renforce pattern FL sans passer prématurément à l'AT. Contrôlé, sans
-              balancement.
+              Dynamique Front Lever. Montée explosive, descente contrôlée 3 s sans
+              balancer. Bras verrouillés.
             repos_sec: 90
-            rpe_cible: 7
+            rpe_cible: 7.5
 
-          - nom: "Planche Lean"
+          - nom: "Tuck Planche Hold"
             type: isometrique
             series: 3
-            duree_sec: "15-20"
+            duree_sec: "10-15"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              Progression Planche (Planche Lean vers Tuck Planche). Protraction
+              scapulaire maximale, coudes verrouillés, poids projeté vers l'avant.
+            repos_sec: 75
+            rpe_cible: 7.5
 
-          - nom: "Weighted Pull-Up"
-            type: reps
-            series: 4
-            reps: "3"
-            description: >-
-              Force relative #2 profil. Suspension complète, pas de kip. +2 à 2,5 kg
-              si toutes reps explosives.
-            repos_sec: 180
-            rpe_cible: 8.5
-
-          - nom: "Chest Supported Row"
+          - nom: "Pronated Pull-Up"
             type: reps
             series: 2
             reps: "8"
             description: >-
-              Rowing scapulaire pour FL — une seule séance lourde de row/semaine.
-              Rétraction + dépression.
+              Volume tirage calisthenics au poids du corps. Amplitude complète menton
+              au-dessus de la barre, tempo 2-0-1.
             repos_sec: 90
+            rpe_cible: 7.5
+
+          - nom: "TRX Inverted Row"
+            type: reps
+            series: 2
+            reps: "10"
+            description: >-
+              Tirage horizontal maison. Rétraction scapulaire complète, renforce le
+              haut du dos pour le Front Lever.
+            repos_sec: 75
             rpe_cible: 8
+
+          - nom: "Hollow Body Hold"
+            type: isometrique
+            series: 3
+            duree_sec: "30"
+            description: >-
+              Gainage fondamental gymnastique. Bas du dos collé au sol, côtes
+              rentrées, rétroversion du bassin.
+            repos_sec: 60
+            rpe_cible: 7
 
           - nom: "Reverse Wrist Curl"
             type: reps
             series: 3
             reps: "15"
-            description: Résilience coudes/poignets (membres longs = levier élevé).
+            description: >-
+              Résilience poignets/coudes. Protection tendineuse face aux contraintes
+              du Handstand et de la Planche.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # THURSDAY — Gym
+      # THURSDAY — Gym (Bas du corps + Explosivité)
       ############################################################
 
       - jour: Jeudi
@@ -2729,8 +3013,8 @@ cycles:
             series: 3
             reps: "4"
             description: >-
-              Ajout audit : pattern squat axial absent avant. Force absolue bas du
-              corps pour masse athlétique 85-90 kg. Torso vertical, coudes hauts.
+              Force bas du corps axiale. Buste vertical, coudes hauts, renforce les
+              quadriceps et le core sans comprimer les lombaires.
             repos_sec: 150
             rpe_cible: 8.5
 
@@ -2739,8 +3023,8 @@ cycles:
             series: 3
             reps: "2"
             description: >-
-              Explosivité VJ (priorité #5). Intent max, arrête si hauteur baisse. Plyo
-              principal de la semaine (jeudi).
+              Explosivité détente verticale (VJ). Intention maximale sur chaque saut.
+              Arrêter si la hauteur diminue.
             repos_sec: 150
             rpe_cible: 6
 
@@ -2748,7 +3032,9 @@ cycles:
             type: reps
             series: 3
             reps: "2"
-            description: Production force rapide. Vitesse barre > charge.
+            description: >-
+              Production de force rapide. Extension triple explosive
+              hanches-genoux-chevilles, vitesse de barre prioritaire.
             repos_sec: 150
             rpe_cible: 8.5
 
@@ -2756,7 +3042,9 @@ cycles:
             type: reps
             series: 3
             reps: "6"
-            description: Force unilatérale, stabilité hanche. Tibia vertical, excentrique contrôlé.
+            description: >-
+              Force unilatérale. Stabilité du genou, contrôle excentrique, élimine les
+              asymétries.
             repos_sec: 120
             rpe_cible: 8
 
@@ -2765,8 +3053,8 @@ cycles:
             series: 2
             reps: "6"
             description: >-
-              Chaîne postérieure — remplace Jefferson curl (audit : flexion lombaire
-              chargée + inconfort dos).
+              Chaîne postérieure (ischios/fessiers). Charnière de hanche propre, dos
+              neutre, étirement contrôlé.
             repos_sec: 120
             rpe_cible: 8
 
@@ -2774,115 +3062,16 @@ cycles:
             type: reps
             series: 3
             reps: "12"
-            description: Anti-rotation tronc.
+            description: Anti-rotation du tronc. Résister à la torsion, stabilité du bassin.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # FRIDAY — Maison (muscle-up)
+      # FRIDAY — Maison (Handstand + L-Sit & Core)
       ############################################################
 
       - jour: Vendredi
-        nom: "Maison — Muscle-Up (maintenance)"
-
-        exercices:
-
-          - nom: "Dead Hang"
-            type: isometrique
-            series: 2
-            duree_sec: "20"
-            description: Échauffement MU. Ouverture épaules et préparation grip.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Scapular Pull-Up"
-            type: reps
-            series: 2
-            reps: "8"
-            description: Échauffement MU. Pattern tirage scapulaire avant transitions.
-            repos_sec: 45
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Face Pull"
-            type: reps
-            series: 2
-            reps: "12"
-            description: Échauffement MU. Coiffe et rotateurs — charge légère, contrôle.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Handstand Chest-to-Wall"
-            type: isometrique
-            series: 3
-            duree_sec: "20-30"
-            description: >-
-              Session handstand 2/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "False Grip Hang"
-            type: isometrique
-            series: 3
-            duree_sec: "15-20"
-            description: >-
-              Endurance false grip — volume minimal (MU = maintenance #8 profil). Sans
-              aller à l'échec.
-            repos_sec: 60
-            rpe_cible: 5
-
-          - nom: "Low Bar Muscle-Up Transition"
-            type: reps
-            series: 2
-            reps: "3"
-            description: Travail technique transition. Coudes près du corps, lent et propre.
-            repos_sec: 90
-            rpe_cible: 6
-
-          - nom: "Negative Muscle-Up"
-            type: reps
-            series: 2
-            reps: "2"
-            description: >-
-              Excentrique contrôlé 5-6 s — volume réduit vs ancien prog (audit :
-              stress coude). Max 2 séries en semaine lourde.
-            repos_sec: 120
-            rpe_cible: 7
-
-          - nom: "Face Pull"
-            type: reps
-            series: 3
-            reps: "15"
-            description: Prehab épaule post-MU.
-            repos_sec: 60
-            rpe_cible: 6
-
-      ############################################################
-      # SATURDAY — Maison (tirage + skills)
-      ############################################################
-
-      - jour: Samedi
-        nom: "Maison — Tirage + Skills"
+        nom: "Maison — Handstand & L-Sit Core"
 
         exercices:
 
@@ -2891,8 +3080,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. Décompression épaules, grip léger — prépare FL et
-              pull-ups.
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Handstand et L-Sit.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -2901,7 +3090,9 @@ cycles:
             type: reps
             series: 2
             reps: "8-10"
-            description: Échauffement tirage. Dépression/rétraction scapulaire, coudes tendus.
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -2910,35 +3101,142 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 3/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
-            repos_sec: 60
+              Travail d'équilibre libre (2/4 micro-sessions HS). Focus sur les
+              micro-ajustements des doigts et la ligne droite.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Wall Handstand Toe Pulls"
             type: reps
             series: 2
             reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
+            description: >-
+              Contrôle de l'équilibre. Face au mur, décoller un pied puis l'autre avec
+              la pression des doigts sans arquer.
             repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "L-Sit to Tuck Press Transition Prep"
+            type: reps
+            series: 3
+            reps: "3-4"
+            description: >-
+              Progression L-Sit et préparation à l'enchaînement L-Sit to Handstand.
+              Dépression scapulaire active, compression abdominale, jambes tendues.
+            repos_sec: 75
+            rpe_cible: 7.5
+
+          - nom: "Wall Handstand Shoulder Taps"
+            type: reps
+            series: 3
+            reps: "6-8"
+            description: >-
+              Mouvement autour du Handstand & stabilité unilatérale. Face au mur,
+              transférer le poids et toucher l'épaule opposée sans désaxer le bassin.
+            repos_sec: 75
+            rpe_cible: 6.5
+
+          - nom: "Dragon Flag (Négatives / Holds)"
+            type: reps
+            series: 3
+            reps: "5"
+            description: >-
+              Force de compression et anti-extension lourde. Corps rigide aligné,
+              descente lente contrôlée 3-4 s sans casser les hanches.
+            repos_sec: 90
+            rpe_cible: 7.5
+
+          - nom: "Hanging Knee-to-Chest Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Compression abdominale et flexion de hanche suspendu à la barre. Montée
+              explosive des genoux vers la poitrine sans balancer.
+            repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Copenhagen Side Plank"
+            type: isometrique
+            series: 2
+            duree_sec: "15-20"
+            description: >-
+              Stabilité pelvienne et adducteurs. Renforcement du bassin pour les
+              maintiens gymniques.
+            repos_sec: 45
+            rpe_cible: 5
+
+      ############################################################
+      # SATURDAY — Maison (Front Lever #2 + Planche #2 + Tirage Skills)
+      ############################################################
+
+      - jour: Samedi
+        nom: "Maison — Front Lever & Planche Skills"
+
+        exercices:
+
+          - nom: "Dead Hang"
+            type: isometrique
+            series: 2
+            duree_sec: "20-30"
+            description: >-
+              Échauffement calisthenics. Décompression épaules, activation du grip
+              pour Front Lever et Planche.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Scapular Pull-Up"
+            type: reps
+            series: 2
+            reps: "8-10"
+            description: >-
+              Échauffement calisthenics. Dépression et rétraction scapulaire, coudes
+              tendus.
+            repos_sec: 45
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Band Pull-Apart"
+            type: reps
+            series: 2
+            reps: "15"
+            description: >-
+              Échauffement calisthenics. Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Handstand Freestanding Practice"
+            type: isometrique
+            series: 3
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (3/4 micro-sessions HS). Répétition des
+              montées (kick-up) propres et recherche du point d'équilibre.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Scapular Handstand Shrugs"
             type: reps
             series: 2
             reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
+            description: >-
+              Endurance scapulaire en élévation. Coudes verrouillés, pousser le sol
+              pour élever et abaisser les omoplates.
             repos_sec: 60
             rpe_cible: 6
 
@@ -2947,50 +3245,73 @@ cycles:
             series: 4
             duree_sec: "15-20"
             description: >-
-              2e exposition FL/semaine (profil : 2-3×). Qualité technique, RPE plus
-              bas qu'en mercredi.
+              2e exposition FL de la semaine. Focus sur la pureté posturale et la
+              tenue isométrique sans compensation lombaire.
             repos_sec: 90
-            rpe_cible: 6
+            rpe_cible: 6.5
 
           - nom: "Front Lever Scapular Pull"
             type: reps
             series: 3
             reps: "8"
-            description: Endurance dépression scapulaire (faiblesse profil).
+            description: >-
+              Endurance dépression scapulaire. Initier la traction bras tendus
+              uniquement avec les grands dorsaux et abaisseurs d'omoplates.
             repos_sec: 75
             rpe_cible: 6
 
-          - nom: "Planche Lean"
+          - nom: "Tuck Planche Hold"
             type: isometrique
             series: 3
-            duree_sec: "15-20"
+            duree_sec: "10-15"
             description: >-
-              Préparation planche long terme (objectif profil). Épaules devant
-              poignets, protraction, jambes tendues. Investissement minimal sans
-              fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Pronated Pull-Up"
-            type: reps
-            series: 2
-            reps: "8"
-            description: >-
-              Volume tirage modéré — C2B et rows redondants retirés (audit : ~50 sets
-              pull/sem). Excentrique contrôlé.
-            repos_sec: 90
+              2e exposition Planche de la semaine. Protraction scapulaire et avancée
+              maximale des épaules.
+            repos_sec: 75
             rpe_cible: 7.5
 
-          - nom: "Bayesian Cable Curl"
+          - nom: "Archer Pull-Up (Progression)"
+            type: reps
+            series: 3
+            reps: "5"
+            description: >-
+              Force unilatérale de tirage calisthenics. Tirer vers un bras pendant que
+              l'autre assiste bras tendu sur la barre.
+            repos_sec: 90
+            rpe_cible: 8
+
+          - nom: "Band Biceps Curl"
             type: reps
             series: 2
-            reps: "10-12"
-            description: Seul curl direct/semaine.
+            reps: "12-15"
+            description: >-
+              Hypertrophie et protection des tendons du coude avec bande élastique.
+              Maintien du pic de contraction 1 s.
+            repos_sec: 60
+            rpe_cible: 7.5
+
+          - nom: "Seated Pike Compression Leg Lift"
+            type: reps
+            series: 3
+            reps: "10"
+            description: >-
+              Force de compression active abdos/psoas. Assis jambes tendues au sol,
+              lever les pieds sans reculer le buste (transfert L-Sit & Press to HS).
             repos_sec: 60
             rpe_cible: 7
 
+          - nom: "Reverse Wrist Curl"
+            type: reps
+            series: 3
+            reps: "15"
+            description: >-
+              Renforcement fléchisseurs/extenseurs poignets avec bande ou léger lest
+              maison.
+            repos_sec: 45
+            rpe_cible: 6
+
       ############################################################
-      # SUNDAY — Récupération active
+      # SUNDAY — Gym (Récupération active + Muscle-Up + Mobilité)
       ############################################################
 
       - jour: Dimanche
@@ -3016,40 +3337,33 @@ cycles:
             rpe_cible: 2
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Strict Muscle-Up (Qualité)"
+            type: reps
+            series: 2
+            reps: "2"
+            description: >-
+              Maintenance Muscle-Up à la salle sur barre haute. Mouvement fluide et
+              propre, transition symétrique sans élan excessif, descente contrôlée.
+            repos_sec: 120
+            rpe_cible: 7
+
+          - nom: "Handstand Balance Flow"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 4/4 de la semaine. Priorité alignement : épaules
-              actives, bassin postérieur, côtes rentrées. Garde 2-3 s en réserve.
-              Fréquence distribuée > une longue séance (apprentissage moteur).
+              Session handstand légère (4/4 de la semaine). Sensation de balance libre
+              sans fatigue ni échec, plaisir du mouvement.
             repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre. Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand. Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            rpe_cible: 5
 
           - nom: "Shoulder Mobility Flow"
             type: isometrique
             series: 1
             duree_sec: "600"
             description: >-
-              Mobilité épaule — extension thoracique, flexion, rotation externe. RPE 2
-              = récupération, jamais effort.
+              Mobilité active des épaules (10 min). Ouverture thoracique, flexion
+              complète, rotation externe. Récupération sans forcer.
             repos_sec: 0
             rpe_cible: 2
 
@@ -3057,7 +3371,9 @@ cycles:
             type: isometrique
             series: 1
             duree_sec: "600"
-            description: Mobilité hanche — RI, adducteurs, fléchisseurs, chevilles.
+            description: >-
+              Mobilité hanches et chevilles (10 min). Rotation interne/externe,
+              fléchisseurs, grand écart facial préparatoire.
             repos_sec: 0
             rpe_cible: 2
 
@@ -3065,7 +3381,9 @@ cycles:
             type: reps
             series: 3
             reps: "10"
-            description: Core léger — déplacé du lundi (repos).
+            description: >-
+              Coordination motrice et activation transverse/obliques. Respiration
+              lente diaphragmatique.
             repos_sec: 45
             rpe_cible: 4
 
@@ -3073,7 +3391,7 @@ cycles:
             type: isometrique
             series: 2
             duree_sec: "15-20"
-            description: Adducteurs / stabilité pelvienne — volume minimal.
+            description: Stabilité pelvienne latérale.
             repos_sec: 45
             rpe_cible: 5
 
@@ -3081,23 +3399,25 @@ cycles:
             type: reps
             series: 3
             reps: "2"
-            description: "S5 : rappel explosivité qualité, volume minimal."
+            description: >-
+              Rappel d'explosivité neuromusculaire en semaine 5. 2 sauts max avec
+              récupération complète.
             repos_sec: 150
             rpe_cible: 5
 
 
-  - nom: "Semaine 6 — Deload"
+  - nom: "Semaine 6 — Deload & Régénération"
 
-    # Deload ~40-50 %. Termine chaque séance en te sentant frais.
+    # Deload ~40-50 %. Récupération nerveuse et tendineuse complète avant le cycle suivant.
 
     seances:
 
       ############################################################
-      # TUESDAY — Gym
+      # TUESDAY — Gym (Force Upper Body)
       ############################################################
 
       - jour: Mardi
-        nom: "Gym — Force Push"
+        nom: "Gym — Force Upper Body"
 
         exercices:
 
@@ -3140,8 +3460,8 @@ cycles:
             reps: "5"
             description: >-
               Lift push principal. (deload) Pause 1 s poitrine, poussée explosive.
-              Progression conservative (193 cm = ROM long). +2,5 kg max si RPE cible
-              respecté. Évite l'ego lifting (profil).
+              Niveau actuel 70kgx5 validé proprement. Progression conservative (+2,5
+              kg max si RPE cible respecté).
             repos_sec: 180
             rpe_cible: 6
 
@@ -3150,9 +3470,20 @@ cycles:
             series: 2
             reps: "6"
             description: >-
-              Volume push réduit (2 séries vs 3 avant) pour limiter fatigue bench.
-              (deload) Pieds surélevés, transfert force horizontale.
+              Volume push sans pontage. (deload) Pieds surélevés, gainage strict,
+              renforce le point de blocage au développé couché.
             repos_sec: 150
+            rpe_cible: 6
+
+          - nom: "Weighted Pull-Up"
+            type: reps
+            series: 3
+            reps: "5"
+            description: >-
+              Lift pull lourd principal (déplacé à la salle). (deload) Suspension
+              complète, prise pronation/semi-pro, tirage explosif sans élan. +15kg de
+              base.
+            repos_sec: 180
             rpe_cible: 6
 
           - nom: "Ring Dip"
@@ -3160,9 +3491,8 @@ cycles:
             series: 2
             reps: "5"
             description: >-
-              Règle profil : dips BW 5 reps propres × 2 semaines avant d'ajouter du
-              lest. Si fatigue ou épaules irritées → remplace par dips BW ou pompes
-              pieds surélevés. (deload) Descente contrôlée, épaules en dépression.
+              Dips aux anneaux ou barres parallèles. (deload) Descente contrôlée,
+              épaules en dépression, protège le sternum et les épaules.
             repos_sec: 120
             rpe_cible: 5
 
@@ -3170,7 +3500,9 @@ cycles:
             type: reps
             series: 2
             reps: "8"
-            description: Transfert handstand / force verticale. (deload)
+            description: >-
+              Force verticale push. (deload) Transfert direct sur la poussée handstand
+              et HSPU. Torse gainé, sans cambrer.
             repos_sec: 120
             rpe_cible: 6
 
@@ -3178,16 +3510,18 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Prehab coiffe — priorité longévité épaule avec volume push + MU. (deload)
+            description: >-
+              Prehab coiffe des rotateurs. (deload) Priorité longévité épaule face au
+              volume de poussée et skills calisthenics.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # WEDNESDAY — Maison (skills + tirage)
+      # WEDNESDAY — Maison (Front Lever + HSPU + Tuck Planche)
       ############################################################
 
       - jour: Mercredi
-        nom: "Maison — Front Lever + Tirage"
+        nom: "Maison — Front Lever + Skills & HSPU"
 
         exercices:
 
@@ -3196,8 +3530,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. (deload) Décompression épaules, grip léger —
-              prépare FL et pull-ups.
+              Échauffement calisthenics. (deload) Décompression épaules, activation du
+              grip pour Front Lever et Handstand.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -3207,8 +3541,8 @@ cycles:
             series: 2
             reps: "8-10"
             description: >-
-              Échauffement tirage. (deload) Dépression/rétraction scapulaire, coudes
-              tendus.
+              Échauffement calisthenics. (deload) Dépression et rétraction scapulaire,
+              coudes tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -3217,48 +3551,50 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. (deload) Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. (deload) Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
+          - nom: "Handstand Freestanding Practice"
+            type: isometrique
+            series: 2
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (1/4 micro-sessions HS). (deload) Chercher
+              l'équilibre 10-15 s, alignement actif des épaules et bassin rétroversé.
+            repos_sec: 75
+            rpe_cible: 6
+
           - nom: "Handstand Chest-to-Wall"
             type: isometrique
-            series: 3
+            series: 2
             duree_sec: "20-30"
             description: >-
-              Session handstand 1/4 de la semaine.  (deload) Priorité alignement :
-              épaules actives, bassin postérieur, côtes rentrées. Garde 2-3 s en
-              réserve. Fréquence distribuée > une longue séance (apprentissage
-              moteur).
+              Alignement et endurance posturale. (deload) Ventre face au mur, pousser
+              fort dans les épaules, côtes rentrées.
             repos_sec: 60
             rpe_cible: 6
 
-          - nom: "Wall Handstand Toe Pulls"
+          - nom: "Elevated Pike Push-Up"
             type: reps
             series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre.  (deload) Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand.  (deload) Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            reps: "6"
+            description: >-
+              Progression Handstand Push-Up (HSPU). (deload) Trajectoire diagonale
+              (tête devant les mains en tripode), coudes serrés à 45°.
+            repos_sec: 90
+            rpe_cible: 5
 
           - nom: "Tuck Front Lever Hold"
             type: isometrique
             series: 3
             duree_sec: "10-12"
             description: >-
-              Skill #1 profil. (deload) Progression : passe au advanced tuck seulement
-              quand tu tiens 5×20 s en tuck strict avec bassin postérieur et coudes
-              tendus. Ton AT actuel (~1-2 s) ne justifie pas le programmer maintenant.
-              Scapulas en dépression, bassin postérieur, coudes tendus.
+              Skill #1 profil. (deload) Dépression et rétraction scapulaire, bassin
+              neutre/rétroversé, bras parfaitement tendus.
             repos_sec: 90
             rpe_cible: 5
 
@@ -3267,52 +3603,64 @@ cycles:
             series: 2
             reps: "4"
             description: >-
-              Renforce pattern FL sans passer prématurément à l'AT. (deload) Contrôlé,
-              sans balancement.
+              Dynamique Front Lever. (deload) Montée explosive, descente contrôlée 3 s
+              sans balancer. Bras verrouillés.
             repos_sec: 90
             rpe_cible: 5
 
           - nom: "Planche Lean"
             type: isometrique
-            series: 3
-            duree_sec: "15-20"
+            series: 2
+            duree_sec: "15"
             description: >-
-              Préparation planche long terme (objectif profil). (deload) Épaules
-              devant poignets, protraction, jambes tendues. Investissement minimal
-              sans fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              Progression Planche (Planche Lean vers Tuck Planche). (deload)
+              Protraction scapulaire maximale, coudes verrouillés, poids projeté vers
+              l'avant.
+            repos_sec: 75
+            rpe_cible: 5
 
-          - nom: "Weighted Pull-Up"
+          - nom: "Pronated Pull-Up"
             type: reps
-            series: 3
-            reps: "5"
+            series: 2
+            reps: "6"
             description: >-
-              Force relative #2 profil. (deload) Suspension complète, pas de kip. +2 à
-              2,5 kg si toutes reps explosives.
-            repos_sec: 180
-            rpe_cible: 6
+              Volume tirage calisthenics au poids du corps. (deload) Amplitude
+              complète menton au-dessus de la barre, tempo 2-0-1.
+            repos_sec: 90
+            rpe_cible: 5
 
-          - nom: "Chest Supported Row"
+          - nom: "TRX Inverted Row"
             type: reps
             series: 2
             reps: "8"
             description: >-
-              Rowing scapulaire pour FL — une seule séance lourde de row/semaine.
-              (deload) Rétraction + dépression.
-            repos_sec: 90
-            rpe_cible: 6
+              Tirage horizontal maison. (deload) Rétraction scapulaire complète,
+              renforce le haut du dos pour le Front Lever.
+            repos_sec: 75
+            rpe_cible: 5
+
+          - nom: "Hollow Body Hold"
+            type: isometrique
+            series: 2
+            duree_sec: "20"
+            description: >-
+              Gainage fondamental gymnastique. (deload) Bas du dos collé au sol, côtes
+              rentrées, rétroversion du bassin.
+            repos_sec: 60
+            rpe_cible: 4
 
           - nom: "Reverse Wrist Curl"
             type: reps
             series: 2
             reps: "15"
-            description: Résilience coudes/poignets (membres longs = levier élevé). (deload)
+            description: >-
+              Résilience poignets/coudes. (deload) Protection tendineuse face aux
+              contraintes du Handstand et de la Planche.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # THURSDAY — Gym
+      # THURSDAY — Gym (Bas du corps + Explosivité)
       ############################################################
 
       - jour: Jeudi
@@ -3358,9 +3706,8 @@ cycles:
             series: 2
             reps: "5"
             description: >-
-              Ajout audit : pattern squat axial absent avant. (deload) Force absolue
-              bas du corps pour masse athlétique 85-90 kg. Torso vertical, coudes
-              hauts.
+              Force bas du corps axiale. (deload) Buste vertical, coudes hauts,
+              renforce les quadriceps et le core sans comprimer les lombaires.
             repos_sec: 150
             rpe_cible: 6
 
@@ -3369,8 +3716,8 @@ cycles:
             series: 3
             reps: "2"
             description: >-
-              Explosivité VJ (priorité #5). (deload) Intent max, arrête si hauteur
-              baisse. Plyo principal de la semaine (jeudi).
+              Explosivité détente verticale (VJ). (deload) Intention maximale sur
+              chaque saut. Arrêter si la hauteur diminue.
             repos_sec: 150
             rpe_cible: 5
 
@@ -3378,7 +3725,9 @@ cycles:
             type: reps
             series: 2
             reps: "2"
-            description: Production force rapide. (deload) Vitesse barre > charge.
+            description: >-
+              Production de force rapide. (deload) Extension triple explosive
+              hanches-genoux-chevilles, vitesse de barre prioritaire.
             repos_sec: 150
             rpe_cible: 6
 
@@ -3387,8 +3736,8 @@ cycles:
             series: 2
             reps: "6"
             description: >-
-              Force unilatérale, stabilité hanche. (deload) Tibia vertical,
-              excentrique contrôlé.
+              Force unilatérale. (deload) Stabilité du genou, contrôle excentrique,
+              élimine les asymétries.
             repos_sec: 120
             rpe_cible: 6
 
@@ -3397,8 +3746,8 @@ cycles:
             series: 2
             reps: "6"
             description: >-
-              Chaîne postérieure — remplace Jefferson curl (audit : flexion lombaire
-              chargée + inconfort dos). (deload)
+              Chaîne postérieure (ischios/fessiers). (deload) Charnière de hanche
+              propre, dos neutre, étirement contrôlé.
             repos_sec: 120
             rpe_cible: 6
 
@@ -3406,118 +3755,18 @@ cycles:
             type: reps
             series: 2
             reps: "12"
-            description: Anti-rotation tronc. (deload)
+            description: >-
+              Anti-rotation du tronc. (deload) Résister à la torsion, stabilité du
+              bassin.
             repos_sec: 45
             rpe_cible: 6
 
       ############################################################
-      # FRIDAY — Maison (muscle-up)
+      # FRIDAY — Maison (Handstand + L-Sit & Core)
       ############################################################
 
       - jour: Vendredi
-        nom: "Maison — Muscle-Up (maintenance)"
-
-        exercices:
-
-          - nom: "Dead Hang"
-            type: isometrique
-            series: 2
-            duree_sec: "20"
-            description: Échauffement MU. (deload) Ouverture épaules et préparation grip.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Scapular Pull-Up"
-            type: reps
-            series: 2
-            reps: "8"
-            description: Échauffement MU. (deload) Pattern tirage scapulaire avant transitions.
-            repos_sec: 45
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Face Pull"
-            type: reps
-            series: 2
-            reps: "12"
-            description: Échauffement MU. (deload) Coiffe et rotateurs — charge légère, contrôle.
-            repos_sec: 30
-            rpe_cible: 3
-            groupe: "Échauffement"
-
-          - nom: "Handstand Chest-to-Wall"
-            type: isometrique
-            series: 3
-            duree_sec: "20-30"
-            description: >-
-              Session handstand 2/4 de la semaine.  (deload) Priorité alignement :
-              épaules actives, bassin postérieur, côtes rentrées. Garde 2-3 s en
-              réserve. Fréquence distribuée > une longue séance (apprentissage
-              moteur).
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre.  (deload) Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand.  (deload) Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "False Grip Hang"
-            type: isometrique
-            series: 2
-            duree_sec: "15-20"
-            description: >-
-              Endurance false grip — volume minimal (MU = maintenance #8 profil).
-              (deload) Sans aller à l'échec.
-            repos_sec: 60
-            rpe_cible: 5
-
-          - nom: "Low Bar Muscle-Up Transition"
-            type: reps
-            series: 2
-            reps: "3"
-            description: >-
-              Travail technique transition. (deload) Coudes près du corps, lent et
-              propre.
-            repos_sec: 90
-            rpe_cible: 5
-
-          - nom: "Negative Muscle-Up"
-            type: reps
-            series: 2
-            reps: "2"
-            description: >-
-              Excentrique contrôlé 5-6 s — volume réduit vs ancien prog (audit :
-              stress coude). (deload) Max 2 séries en semaine lourde.
-            repos_sec: 120
-            rpe_cible: 5
-
-          - nom: "Face Pull"
-            type: reps
-            series: 2
-            reps: "15"
-            description: Prehab épaule post-MU. (deload)
-            repos_sec: 60
-            rpe_cible: 6
-
-      ############################################################
-      # SATURDAY — Maison (tirage + skills)
-      ############################################################
-
-      - jour: Samedi
-        nom: "Maison — Tirage + Skills"
+        nom: "Maison — Handstand & L-Sit Core"
 
         exercices:
 
@@ -3526,8 +3775,8 @@ cycles:
             series: 2
             duree_sec: "20-30"
             description: >-
-              Échauffement tirage. (deload) Décompression épaules, grip léger —
-              prépare FL et pull-ups.
+              Échauffement calisthenics. (deload) Décompression épaules, activation du
+              grip pour Handstand et L-Sit.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
@@ -3537,8 +3786,8 @@ cycles:
             series: 2
             reps: "8-10"
             description: >-
-              Échauffement tirage. (deload) Dépression/rétraction scapulaire, coudes
-              tendus.
+              Échauffement calisthenics. (deload) Dépression et rétraction scapulaire,
+              coudes tendus.
             repos_sec: 45
             rpe_cible: 3
             groupe: "Échauffement"
@@ -3547,36 +3796,144 @@ cycles:
             type: reps
             series: 2
             reps: "15"
-            description: Échauffement tirage. (deload) Posture épaule avant volume de tirage.
+            description: >-
+              Échauffement calisthenics. (deload) Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
             repos_sec: 30
             rpe_cible: 3
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Handstand Freestanding Practice"
             type: isometrique
-            series: 3
-            duree_sec: "20-30"
+            series: 2
+            duree_sec: "10-15"
             description: >-
-              Session handstand 3/4 de la semaine.  (deload) Priorité alignement :
-              épaules actives, bassin postérieur, côtes rentrées. Garde 2-3 s en
-              réserve. Fréquence distribuée > une longue séance (apprentissage
-              moteur).
-            repos_sec: 60
+              Travail d'équilibre libre (2/4 micro-sessions HS). (deload) Focus sur
+              les micro-ajustements des doigts et la ligne droite.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Wall Handstand Toe Pulls"
             type: reps
             series: 2
             reps: "4-6"
-            description: Micro-volume équilibre.  (deload) Un pied à la fois, sans perdre la ligne.
+            description: >-
+              Contrôle de l'équilibre. (deload) Face au mur, décoller un pied puis
+              l'autre avec la pression des doigts sans arquer.
             repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Tuck L-Sit Hold"
+            type: isometrique
+            series: 2
+            duree_sec: "10"
+            description: >-
+              Progression L-Sit et préparation à l'enchaînement L-Sit to Handstand.
+              (deload) Dépression scapulaire active, compression abdominale, jambes
+              tendues.
+            repos_sec: 75
+            rpe_cible: 5
+
+          - nom: "Wall Handstand Shoulder Taps"
+            type: reps
+            series: 2
+            reps: "6-8"
+            description: >-
+              Mouvement autour du Handstand & stabilité unilatérale. (deload) Face au
+              mur, transférer le poids et toucher l'épaule opposée sans désaxer le
+              bassin.
+            repos_sec: 75
+            rpe_cible: 6.5
+
+          - nom: "Dragon Flag (Négatives / Holds)"
+            type: reps
+            series: 2
+            reps: "4"
+            description: >-
+              Force de compression et anti-extension lourde. (deload) Corps rigide
+              aligné, descente lente contrôlée 3-4 s sans casser les hanches.
+            repos_sec: 90
+            rpe_cible: 5
+
+          - nom: "Hanging Knee-to-Chest Lift"
+            type: reps
+            series: 2
+            reps: "10"
+            description: >-
+              Compression abdominale et flexion de hanche suspendu à la barre.
+              (deload) Montée explosive des genoux vers la poitrine sans balancer.
+            repos_sec: 60
+            rpe_cible: 6
+
+          - nom: "Copenhagen Side Plank"
+            type: isometrique
+            series: 2
+            duree_sec: "15-20"
+            description: >-
+              Stabilité pelvienne et adducteurs. (deload) Renforcement du bassin pour
+              les maintiens gymniques.
+            repos_sec: 45
+            rpe_cible: 5
+
+      ############################################################
+      # SATURDAY — Maison (Front Lever #2 + Planche #2 + Tirage Skills)
+      ############################################################
+
+      - jour: Samedi
+        nom: "Maison — Front Lever & Planche Skills"
+
+        exercices:
+
+          - nom: "Dead Hang"
+            type: isometrique
+            series: 2
+            duree_sec: "20-30"
+            description: >-
+              Échauffement calisthenics. (deload) Décompression épaules, activation du
+              grip pour Front Lever et Planche.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Scapular Pull-Up"
+            type: reps
+            series: 2
+            reps: "8-10"
+            description: >-
+              Échauffement calisthenics. (deload) Dépression et rétraction scapulaire,
+              coudes tendus.
+            repos_sec: 45
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Band Pull-Apart"
+            type: reps
+            series: 2
+            reps: "15"
+            description: >-
+              Échauffement calisthenics. (deload) Activation rétracteurs et coiffe des
+              rotateurs avec élastique.
+            repos_sec: 30
+            rpe_cible: 3
+            groupe: "Échauffement"
+
+          - nom: "Handstand Freestanding Practice"
+            type: isometrique
+            series: 2
+            duree_sec: "10-15"
+            description: >-
+              Travail d'équilibre libre (3/4 micro-sessions HS). (deload) Répétition
+              des montées (kick-up) propres et recherche du point d'équilibre.
+            repos_sec: 75
             rpe_cible: 6
 
           - nom: "Scapular Handstand Shrugs"
             type: reps
             series: 2
             reps: "8-10"
-            description: Endurance scapulaire pour handstand.  (deload) Coudes tendus.
+            description: >-
+              Endurance scapulaire en élévation. (deload) Coudes verrouillés, pousser
+              le sol pour élever et abaisser les omoplates.
             repos_sec: 60
             rpe_cible: 6
 
@@ -3585,8 +3942,8 @@ cycles:
             series: 2
             duree_sec: "10-12"
             description: >-
-              2e exposition FL/semaine (profil : 2-3×). (deload) Qualité technique,
-              RPE plus bas qu'en mercredi.
+              2e exposition FL de la semaine. (deload) Focus sur la pureté posturale
+              et la tenue isométrique sans compensation lombaire.
             repos_sec: 90
             rpe_cible: 5
 
@@ -3594,41 +3951,65 @@ cycles:
             type: reps
             series: 2
             reps: "8"
-            description: Endurance dépression scapulaire (faiblesse profil). (deload)
+            description: >-
+              Endurance dépression scapulaire. (deload) Initier la traction bras
+              tendus uniquement avec les grands dorsaux et abaisseurs d'omoplates.
             repos_sec: 75
             rpe_cible: 6
 
           - nom: "Planche Lean"
             type: isometrique
-            series: 3
-            duree_sec: "15-20"
+            series: 2
+            duree_sec: "15"
             description: >-
-              Préparation planche long terme (objectif profil). (deload) Épaules
-              devant poignets, protraction, jambes tendues. Investissement minimal
-              sans fatigue majeure.
-            repos_sec: 60
-            rpe_cible: 6
+              2e exposition Planche de la semaine. (deload) Protraction scapulaire et
+              avancée maximale des épaules.
+            repos_sec: 75
+            rpe_cible: 5
 
           - nom: "Pronated Pull-Up"
             type: reps
             series: 2
-            reps: "8"
+            reps: "6"
             description: >-
-              Volume tirage modéré — C2B et rows redondants retirés (audit : ~50 sets
-              pull/sem). (deload) Excentrique contrôlé.
+              Force unilatérale de tirage calisthenics. (deload) Tirer vers un bras
+              pendant que l'autre assiste bras tendu sur la barre.
             repos_sec: 90
-            rpe_cible: 6
+            rpe_cible: 5
 
-          - nom: "Bayesian Cable Curl"
+          - nom: "Band Biceps Curl"
             type: reps
             series: 2
-            reps: "10-12"
-            description: Seul curl direct/semaine. (deload)
+            reps: "10"
+            description: >-
+              Hypertrophie et protection des tendons du coude avec bande élastique.
+              (deload) Maintien du pic de contraction 1 s.
             repos_sec: 60
-            rpe_cible: 7
+            rpe_cible: 5
+
+          - nom: "Seated Pike Compression Leg Lift"
+            type: reps
+            series: 2
+            reps: "8"
+            description: >-
+              Force de compression active abdos/psoas. (deload) Assis jambes tendues
+              au sol, lever les pieds sans reculer le buste (transfert L-Sit & Press
+              to HS).
+            repos_sec: 60
+            rpe_cible: 4
+
+          - nom: "Reverse Wrist Curl"
+            type: reps
+            series: 2
+            reps: "15"
+            description: >-
+              Renforcement fléchisseurs/extenseurs poignets avec bande ou léger lest
+              maison. (deload)
+            repos_sec: 45
+            rpe_cible: 6
 
       ############################################################
-      # SUNDAY — Récupération active
+      # SUNDAY — Gym (Récupération active + Muscle-Up + Mobilité)
       ############################################################
 
       - jour: Dimanche
@@ -3654,41 +4035,34 @@ cycles:
             rpe_cible: 2
             groupe: "Échauffement"
 
-          - nom: "Handstand Chest-to-Wall"
+          - nom: "Strict Muscle-Up (Qualité)"
+            type: reps
+            series: 2
+            reps: "1"
+            description: >-
+              Maintenance Muscle-Up à la salle sur barre haute. (deload) Mouvement
+              fluide et propre, transition symétrique sans élan excessif, descente
+              contrôlée.
+            repos_sec: 120
+            rpe_cible: 5
+
+          - nom: "Handstand Balance Flow"
             type: isometrique
             series: 3
-            duree_sec: "20-30"
+            duree_sec: "10-15"
             description: >-
-              Session handstand 4/4 de la semaine.  (deload) Priorité alignement :
-              épaules actives, bassin postérieur, côtes rentrées. Garde 2-3 s en
-              réserve. Fréquence distribuée > une longue séance (apprentissage
-              moteur).
+              Session handstand légère (4/4 de la semaine). (deload) Sensation de
+              balance libre sans fatigue ni échec, plaisir du mouvement.
             repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Wall Handstand Toe Pulls"
-            type: reps
-            series: 2
-            reps: "4-6"
-            description: Micro-volume équilibre.  (deload) Un pied à la fois, sans perdre la ligne.
-            repos_sec: 60
-            rpe_cible: 6
-
-          - nom: "Scapular Handstand Shrugs"
-            type: reps
-            series: 2
-            reps: "8-10"
-            description: Endurance scapulaire pour handstand.  (deload) Coudes tendus.
-            repos_sec: 60
-            rpe_cible: 6
+            rpe_cible: 5
 
           - nom: "Shoulder Mobility Flow"
             type: isometrique
             series: 1
             duree_sec: "600"
             description: >-
-              Mobilité épaule — extension thoracique, flexion, rotation externe.
-              (deload) RPE 2 = récupération, jamais effort.
+              Mobilité active des épaules (10 min). (deload) Ouverture thoracique,
+              flexion complète, rotation externe. Récupération sans forcer.
             repos_sec: 0
             rpe_cible: 2
 
@@ -3696,7 +4070,9 @@ cycles:
             type: isometrique
             series: 1
             duree_sec: "600"
-            description: Mobilité hanche — RI, adducteurs, fléchisseurs, chevilles. (deload)
+            description: >-
+              Mobilité hanches et chevilles (10 min). (deload) Rotation
+              interne/externe, fléchisseurs, grand écart facial préparatoire.
             repos_sec: 0
             rpe_cible: 2
 
@@ -3704,7 +4080,9 @@ cycles:
             type: reps
             series: 2
             reps: "10"
-            description: Core léger — déplacé du lundi (repos). (deload)
+            description: >-
+              Coordination motrice et activation transverse/obliques. (deload)
+              Respiration lente diaphragmatique.
             repos_sec: 45
             rpe_cible: 4
 
@@ -3712,7 +4090,7 @@ cycles:
             type: isometrique
             series: 2
             duree_sec: "15-20"
-            description: Adducteurs / stabilité pelvienne — volume minimal. (deload)
+            description: Stabilité pelvienne latérale. (deload)
             repos_sec: 45
             rpe_cible: 5
 

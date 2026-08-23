@@ -20,6 +20,7 @@ import {
     isIsometricExercise,
     isWarmupExercise,
     formatExerciseCible,
+    RECOVERY_ROUTINE,
   } from '$lib/programme';
   import { calcAvgRpe, calcSessionVolume } from '$lib/stats';
   import { suggestWeightForExercise } from '$lib/weights';
@@ -314,6 +315,20 @@ import {
         cycleName: template.cycleName,
       },
       template,
+      'extra',
+    );
+  }
+
+  function startRecoveryFlow() {
+    startSession(
+      {
+        plannedSessionId: null,
+        cycleIndex: 0,
+        sessionIndex: 0,
+        sessionName: RECOVERY_ROUTINE.nom,
+        cycleName: 'Récupération & Mobilité',
+      },
+      RECOVERY_ROUTINE,
       'extra',
     );
   }
@@ -626,6 +641,19 @@ import {
       {/if}
       <button type="button" class="btn-secondary" onclick={() => (showFreePicker = !showFreePicker)}>
         Séance libre
+      </button>
+    </div>
+
+    <div class="card recovery-card">
+      <div class="recovery-header">
+        <span class="badge badge-success">✨ Longévité & Récupération</span>
+        <h3>Routine Régénération (12 min)</h3>
+        <p class="muted">
+          Décompression vertébrale, mobilité épaules & hanches pour accélérer la récupération et débloquer tes skills gymniques.
+        </p>
+      </div>
+      <button type="button" class="btn-recovery" onclick={startRecoveryFlow}>
+        🧘 Lancer la Routine (12 min)
       </button>
     </div>
 
@@ -1217,5 +1245,45 @@ import {
   .cancel-resume {
     color: var(--destructive);
     font-size: 0.88rem;
+  }
+
+  .recovery-card {
+    margin-top: 1rem;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--success) 12%, var(--bg-card)), var(--bg-card));
+    border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .recovery-header h3 {
+    margin: 0.35rem 0 0.2rem 0;
+    font-size: 1.1rem;
+    color: var(--text-heading);
+  }
+
+  .btn-recovery {
+    background: color-mix(in srgb, var(--success) 22%, var(--bg-elevated));
+    color: #4ade80;
+    border: 1.5px solid color-mix(in srgb, var(--success) 60%, transparent);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    padding: 0.85rem 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .btn-recovery:hover {
+    background: var(--success);
+    color: #070706;
+    border-color: var(--success);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.35);
   }
 </style>

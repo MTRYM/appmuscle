@@ -70,14 +70,12 @@
   function getDayStatus(dateISO) {
     const planned = plannedSessions.filter((p) => p.dateISO === dateISO);
     const done = sessions.filter((s) => s.dateISO === dateISO);
-    const extra = done.filter((s) => s.type === 'extra');
     const isVacation = vacations.some((v) => dateISO >= v.startDateISO && dateISO <= v.endDateISO);
 
-    if (planned.some((p) => p.status === 'done')) return 'done';
+    // Si n'importe quelle séance (prévue, hors planning ou routine récup) est faite -> Vert
+    if (planned.some((p) => p.status === 'done') || done.length > 0) return 'done';
     if (planned.some((p) => p.status === 'missed')) return 'missed';
     if (planned.some((p) => p.status === 'pending')) return 'pending';
-    if (extra.length > 0) return 'extra';
-    if (done.length > 0) return 'extra';
     if (isVacation) return 'vacation';
     return 'rest';
   }
@@ -436,7 +434,8 @@
   }
 
   .dot.done {
-    background: var(--deepblue);
+    background: var(--success);
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
   }
   .dot.pending {
     background: var(--beige);
@@ -488,8 +487,10 @@
   }
 
   .day.done {
-    background: color-mix(in srgb, var(--deepblue) 35%, var(--bg-card));
-    border-color: var(--deepblue);
+    background: color-mix(in srgb, var(--success) 28%, var(--bg-card));
+    border-color: var(--success);
+    color: #4ade80;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
   }
 
   .day.missed {
