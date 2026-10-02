@@ -266,7 +266,9 @@
                   {#each session.sets.filter((s) => s.exerciseName === exName) as set}
                     <div class="set-row">
                       <span class="set-label">S{set.setNumber}</span>
-                      <span>{formatSetPerformance(set)} — RPE {set.rpe}</span>
+                      <span>
+                        {formatSetPerformance(set)} — RPE {set.rpe}{#if set.rpeTarget} <span style="font-size: 0.8em; color: var(--text-muted);">(cible {set.rpeTarget})</span>{/if}
+                      </span>
                     </div>
                   {/each}
                 </div>
