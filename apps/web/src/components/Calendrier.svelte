@@ -5,6 +5,9 @@
     db,
     getDayData,
     getVacations,
+    getAllPlannedSessions,
+    getAllWorkoutSessions,
+    ensureMonth2PlannedSessions,
   } from '../lib/db.js';
   import { formatDateFR, formatSetPerformance, todayISO } from '../lib/programme.js';
 
@@ -36,9 +39,10 @@
   });
 
   async function loadData() {
+    await ensureMonth2PlannedSessions();
     [plannedSessions, sessions, vacations] = await Promise.all([
-      db.plannedSessions.toArray(),
-      db.sessions.toArray(),
+      getAllPlannedSessions(),
+      getAllWorkoutSessions(),
       getVacations(),
     ]);
   }

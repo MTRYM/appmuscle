@@ -1,7 +1,7 @@
 <script>
   import { onMount, tick } from 'svelte';
   import { Chart, registerables } from 'chart.js';
-  import { db, getAllSessionsWithSets } from '../lib/db.js';
+  import { db, getAllSessionsWithSets, getAllPlannedSessions } from '../lib/db.js';
   import {
     getGlobalStats,
     getWeightProgression,
@@ -38,7 +38,7 @@
   });
 
   async function loadData() {
-    plannedSessions = await db.plannedSessions.toArray();
+    plannedSessions = await getAllPlannedSessions();
     sessionsWithSets = await getAllSessionsWithSets();
     globalStats = getGlobalStats(plannedSessions, sessionsWithSets);
     records = getPersonalRecords(sessionsWithSets);

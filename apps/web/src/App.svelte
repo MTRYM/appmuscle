@@ -8,9 +8,12 @@
   import LockScreen from './components/LockScreen.svelte';
   import {
     getSettings,
+    updateSettings,
     markMissedSessions,
     replacePlannedSessions,
     syncPlannedWithCompleted,
+    ensureMonth2PlannedSessions,
+    USE_NEW_DB,
     db,
   } from './lib/db.js';
   import {
@@ -37,9 +40,7 @@
     const settings = await getSettings();
     applyTheme(settings.theme ?? 'dark');
 
-    await markMissedSessions(todayISO());
-
-    const count = await db.plannedSessions.count();
+    const count = await (USE_NEW_DB ? db.plannedWorkouts.count() : db.plannedSessions.count());
     if (!settings.programStartDate) {
       showOnboarding = true;
     } else if (count === 0) {
@@ -47,7 +48,12 @@
       const planned = generatePlannedSessions(settings.programStartDate, programme);
       await replacePlannedSessions(planned);
       await syncPlannedWithCompleted();
+    } else {
+      // Auto-ensure Month 2 sessions exist from 2026-10-05 onwards without wiping Month 1
+      await ensureMonth2PlannedSessions();
     }
+
+    await markMissedSessions(todayISO());
 
     ready = true;
   }
@@ -55,8 +61,7 @@
   async function confirmOnboarding() {
     const programme = parseProgramme();
     const planned = generatePlannedSessions(onboardingDate, programme);
-    await db.settings.put({
-      id: 'main',
+    await updateSettings({
       programStartDate: onboardingDate,
       theme: 'dark',
     });

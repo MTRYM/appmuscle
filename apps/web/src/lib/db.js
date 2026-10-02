@@ -1,5 +1,6 @@
 import { db } from '../db/database';
 import { generateId } from '../import/id-mapping';
+import { parseProgramme, generatePlannedSessions } from './programme.js';
 
 export { db };
 
@@ -72,13 +73,16 @@ export async function markMissedSessions(todayISO) {
   if (USE_NEW_DB) {
     const pending = await db.plannedWorkouts.where('status').equals('pending').toArray();
     const toMiss = pending.filter((p) => p.dateISO < todayISO);
-    if (toMiss.length === 0) return;
-
-    await db.transaction('rw', db.plannedWorkouts, async () => {
-      for (const session of toMiss) {
-        await db.plannedWorkouts.update(session.id, { status: 'missed', updatedAt: new Date().toISOString() });
-      }
-    });
+    if (toMiss.length > 0) {
+      await db.transaction('rw', [db.plannedWorkouts, db.plannedSessions], async () => {
+        for (const session of toMiss) {
+          await db.plannedWorkouts.update(session.id, { status: 'missed', updatedAt: new Date().toISOString() });
+          try {
+            await db.plannedSessions.where('dateISO').equals(session.dateISO).modify({ status: 'missed' });
+          } catch (_) {}
+        }
+      });
+    }
     return;
   }
   const pending = await db.plannedSessions
@@ -346,6 +350,68 @@ export async function saveWorkoutSession({
   });
 }
 
+export async function getAllPlannedSessions() {
+  if (USE_NEW_DB) {
+    const list = await db.plannedWorkouts.toArray();
+    if (list && list.length > 0) return list;
+  }
+  return db.plannedSessions.toArray();
+}
+
+export async function getAllWorkoutSessions() {
+  if (USE_NEW_DB) {
+    const list = await db.workoutSessions.toArray();
+    if (list && list.length > 0) return list;
+  }
+  return db.sessions.toArray();
+}
+
+export async function appendPlannedSessions(newSessions) {
+  const now = new Date().toISOString();
+  if (USE_NEW_DB) {
+    const mapped = newSessions.map(s => ({
+      ...s,
+      id: s.id || generateId(),
+      createdAt: now,
+      updatedAt: now,
+    }));
+    await db.transaction('rw', [db.plannedWorkouts, db.plannedSessions], async () => {
+      await db.plannedWorkouts.bulkAdd(mapped);
+      try {
+        await db.plannedSessions.bulkAdd(newSessions);
+      } catch (_) {}
+    });
+    return;
+  }
+  await db.plannedSessions.bulkAdd(newSessions);
+}
+
+export async function ensureMonth2PlannedSessions(force = false) {
+  const allPlanned = await getAllPlannedSessions();
+  const hasMonth2 = allPlanned.some(p => p.dateISO >= '2026-10-01');
+
+  if (!hasMonth2 || force) {
+    const programme = parseProgramme();
+    const planned = generatePlannedSessions('2026-10-05', programme);
+
+    if (force) {
+      if (USE_NEW_DB) {
+        const toDelete = await db.plannedWorkouts.where('dateISO').aboveOrEqual('2026-10-01').toArray();
+        await db.plannedWorkouts.bulkDelete(toDelete.map(d => d.id));
+      }
+      try {
+        const toDeleteLegacy = await db.plannedSessions.where('dateISO').aboveOrEqual('2026-10-01').toArray();
+        await db.plannedSessions.bulkDelete(toDeleteLegacy.map(d => d.id));
+      } catch (_) {}
+    }
+
+    await appendPlannedSessions(planned);
+    await syncPlannedWithCompleted();
+    return planned.length;
+  }
+  return 0;
+}
+
 export async function replacePlannedSessions(sessions) {
   if (USE_NEW_DB) {
     const now = new Date().toISOString();
@@ -355,11 +421,17 @@ export async function replacePlannedSessions(sessions) {
       createdAt: now,
       updatedAt: now,
     }));
-    await db.transaction('rw', db.plannedWorkouts, async () => {
+    await db.transaction('rw', [db.plannedWorkouts, db.plannedSessions], async () => {
       await db.plannedWorkouts.clear();
       if (mapped.length > 0) {
         await db.plannedWorkouts.bulkAdd(mapped);
       }
+      try {
+        await db.plannedSessions.clear();
+        if (sessions.length > 0) {
+          await db.plannedSessions.bulkAdd(sessions);
+        }
+      } catch (_) {}
     });
     return;
   }
@@ -376,10 +448,13 @@ export async function syncPlannedWithCompleted() {
     const completed = await db.workoutSessions.toArray();
     const planned = await db.plannedWorkouts.toArray();
     for (const session of completed) {
-      if (!session.plannedSessionId) continue;
-      const p = planned.find((pl) => pl.id === session.plannedSessionId);
+      if (!session.plannedSessionId && !session.dateISO) continue;
+      const p = planned.find((pl) => pl.id === session.plannedSessionId || pl.dateISO === session.dateISO);
       if (p && p.status !== 'done') {
         await db.plannedWorkouts.update(p.id, { status: 'done', updatedAt: new Date().toISOString() });
+        try {
+          await db.plannedSessions.where('dateISO').equals(p.dateISO).modify({ status: 'done' });
+        } catch (_) {}
       }
     }
     return;
@@ -388,8 +463,8 @@ export async function syncPlannedWithCompleted() {
   const planned = await db.plannedSessions.toArray();
 
   for (const session of completed) {
-    if (!session.plannedSessionId) continue;
-    const p = planned.find((pl) => pl.id === session.plannedSessionId);
+    if (!session.plannedSessionId && !session.dateISO) continue;
+    const p = planned.find((pl) => pl.id === session.plannedSessionId || pl.dateISO === session.dateISO);
     if (p && p.status !== 'done') {
       await db.plannedSessions.update(p.id, { status: 'done' });
     }

@@ -7,6 +7,7 @@
     exportAll,
     importAll,
     markMissedSessions,
+    ensureMonth2PlannedSessions,
     resetAllData,
     RESET_CONFIRMATION_PHRASE,
   } from '../lib/db.js';
@@ -68,6 +69,14 @@
 
     settings = await getSettings();
     message = 'Date de début enregistrée et calendrier regénéré.';
+    onSettingsChanged();
+  }
+
+  async function handleRegenMonth2() {
+    await ensureMonth2PlannedSessions(true);
+    await syncPlannedWithCompleted();
+    await markMissedSessions(todayISO());
+    message = 'Planning Mois 2 généré avec succès dès le lundi 5 octobre 2026.';
     onSettingsChanged();
   }
 
@@ -244,9 +253,14 @@
         <input type="date" bind:value={startDate} />
       </div>
     </label>
-    <button type="button" class="btn-primary save-date-btn" onclick={saveStartDate}>
-      Enregistrer la date
-    </button>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem;">
+      <button type="button" class="btn-primary save-date-btn" onclick={saveStartDate}>
+        Enregistrer la date
+      </button>
+      <button type="button" class="btn-secondary" onclick={handleRegenMonth2}>
+        Générer Mois 2 (05/10/2026)
+      </button>
+    </div>
   </div>
 
   <div class="card">
