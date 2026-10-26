@@ -1,25 +1,14 @@
 <script>
-  import { getSettings, updateSettings, replacePlannedSessions, getPlannedSessions, getAllSessionsWithSets } from '$lib/api';
-  import { applyTheme } from '$lib/theme';
-  import { todayISO, parseProgramme, generatePlannedSessions, formatDateFR } from '$lib/programme';
+  import { getPlannedSessions, getAllSessionsWithSets } from '$lib/api';
+  import { todayISO, formatDateFR } from '$lib/programme';
   import { onMount } from 'svelte';
 
-  const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
-
-  let settings = $state(null);
-  let startDate = $state('');
-  let theme = $state('dark');
   let message = $state('');
   let messageType = $state('info');
-  let importing = $state(false);
   let exporting = $state(false);
-  let selectedFile = $state(null);
   let plan = $state({ next: null, end: null, done: 0, total: 0 });
 
   onMount(async () => {
-    settings = await getSettings();
-    startDate = settings.programStartDate ?? todayISO();
-    theme = settings.theme ?? 'dark';
     await loadPlan();
   });
 
@@ -40,47 +29,7 @@
         total: planned.length,
       };
     } catch {
-      // Les infos du programme sont optionnelles : on n'affiche rien en cas d'erreur.
-    }
-  }
-
-  async function saveStartDate() {
-    if (!startDate || !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
-      notify('Choisis une date valide.', 'error');
-      return;
-    }
-    if (
-      !confirm(
-        'Les séances à venir seront recalculées à partir de cette date. Ton historique (séances faites ou loupées) est conservé. Continuer ?',
-      )
-    ) {
-      return;
-    }
-    try {
-      await updateSettings({ programStartDate: startDate });
-      const programme = parseProgramme();
-      const planned = generatePlannedSessions(startDate, programme);
-      await replacePlannedSessions(planned);
-      settings = await getSettings();
-      await loadPlan();
-      notify('Programme mis à jour.', 'success');
-    } catch (err) {
-      console.error(err);
-      notify('Erreur lors de la génération du programme.', 'error');
-    }
-  }
-
-  async function setTheme(next) {
-    if (next === theme) return;
-    const previous = theme;
-    theme = next;
-    applyTheme(next);
-    try {
-      await updateSettings({ theme: next });
-    } catch {
-      theme = previous;
-      applyTheme(previous);
-      notify('Impossible de changer le thème.', 'error');
+      // Données optionnelles
     }
   }
 
@@ -113,45 +62,6 @@
     }
   }
 
-  function handleFileSelect(e) {
-    const file = e.target.files[0] ?? null;
-    message = '';
-    if (file && file.size > MAX_IMPORT_BYTES) {
-      selectedFile = null;
-      notify('Fichier trop volumineux (10 Mo max).', 'error');
-      return;
-    }
-    selectedFile = file;
-  }
-
-  async function importData() {
-    if (!selectedFile) return;
-    if (!confirm('Importer ce fichier ? Les données déjà présentes ne seront pas écrasées.')) return;
-    importing = true;
-    notify('Importation en cours…');
-    try {
-      const text = await selectedFile.text();
-      const data = JSON.parse(text);
-      if (!data || typeof data !== 'object') throw new Error('Format de fichier invalide');
-
-      const res = await fetch('/api/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error('Le serveur a refusé le fichier');
-
-      selectedFile = null;
-      await loadPlan();
-      notify('Données importées. Actualise la page pour tout voir.', 'success');
-    } catch (err) {
-      console.error(err);
-      notify('Erreur lors de l\'importation : ' + err.message, 'error');
-    } finally {
-      importing = false;
-    }
-  }
-
   async function logout() {
     try {
       await fetch('/api/auth/login', { method: 'DELETE' });
@@ -168,9 +78,9 @@
     <p class="message {messageType}" role="status">{message}</p>
   {/if}
 
-  <section>
-    <h2>Programme</h2>
-    {#if plan.total > 0}
+  {#if plan.total > 0}
+    <section>
+      <h2>Programme en cours</h2>
       <ul class="facts">
         <li>
           <span>Prochaine séance</span>
@@ -182,46 +92,21 @@
         </li>
         {#if plan.end}
           <li>
-            <span>Fin du programme</span>
+            <span>Fin prévue</span>
             <strong>{formatDateFR(plan.end)}</strong>
           </li>
         {/if}
       </ul>
-    {/if}
-    <label>
-      <span class="label">Date de début</span>
-      <input type="date" bind:value={startDate} />
-    </label>
-    <button type="button" class="btn-primary save-date-btn" onclick={saveStartDate}>
-      Appliquer
-    </button>
-  </section>
+    </section>
+  {/if}
 
   <section>
-    <h2>Apparence</h2>
-    <div class="segmented" role="tablist">
-      <button type="button" role="tab" aria-selected={theme === 'dark'} class:on={theme === 'dark'} onclick={() => setTheme('dark')}>Sombre</button>
-      <button type="button" role="tab" aria-selected={theme === 'light'} class:on={theme === 'light'} onclick={() => setTheme('light')}>Clair</button>
-    </div>
-  </section>
-
-  <section>
-    <h2>Données</h2>
+    <h2>Sauvegarde</h2>
+    <p class="sub">Télécharge une copie de secours complète de toutes tes séances et séries.</p>
     <button type="button" class="row" disabled={exporting} onclick={exportData}>
-      <span>{exporting ? 'Export…' : 'Exporter une sauvegarde'}</span>
+      <span>{exporting ? 'Export en cours…' : 'Exporter la sauvegarde'}</span>
       <span class="meta">JSON</span>
     </button>
-
-    <label class="row file-row">
-      <input type="file" accept=".json,application/json" onchange={handleFileSelect} />
-      <span>{selectedFile ? selectedFile.name : 'Importer une sauvegarde'}</span>
-      <span class="meta">JSON</span>
-    </label>
-    {#if selectedFile}
-      <button type="button" class="btn-primary import-btn" disabled={importing} onclick={importData}>
-        {importing ? 'Importation…' : 'Lancer l\'import'}
-      </button>
-    {/if}
   </section>
 
   <section>
@@ -246,20 +131,14 @@
 
   .settings h2 {
     font-size: 1.05rem;
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.5rem;
   }
 
-  .label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
+  .sub {
+    font-size: 0.82rem;
     color: var(--text-muted);
-    margin-bottom: 0.35rem;
-  }
-
-  .save-date-btn,
-  .import-btn {
-    margin-top: 0.75rem;
+    margin: 0 0 0.75rem;
+    line-height: 1.4;
   }
 
   .message {
@@ -280,7 +159,7 @@
 
   .facts {
     list-style: none;
-    margin: 0 0 1rem;
+    margin: 0;
     padding: 0;
   }
 
@@ -305,29 +184,6 @@
     text-transform: capitalize;
   }
 
-  .segmented {
-    display: flex;
-    gap: 0.25rem;
-    padding: 3px;
-    background: var(--bg-elevated);
-    border-radius: 12px;
-  }
-
-  .segmented button {
-    flex: 1;
-    min-height: 40px;
-    padding: 0.35rem;
-    border-radius: 9px;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-  }
-
-  .segmented button.on {
-    background: var(--bg-card);
-    color: var(--text-heading);
-  }
-
   .row {
     width: 100%;
     display: flex;
@@ -348,13 +204,6 @@
     color: var(--text-muted);
     font-weight: 500;
     font-size: 0.8rem;
-  }
-
-  .file-row input {
-    position: absolute;
-    width: 0;
-    height: 0;
-    opacity: 0;
   }
 
   .row.logout {

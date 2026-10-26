@@ -42,7 +42,7 @@
     <div class="logo">
       <span class="logo-icon">🏋️</span>
       <h1>AppMuscu</h1>
-      <p class="tagline">Votre coach personnel</p>
+      <p class="tagline">Entraînement & Progression</p>
     </div>
 
     <form class="login-form" onsubmit={(e) => { e.preventDefault(); handleLogin(); }}>

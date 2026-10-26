@@ -1,6 +1,6 @@
 <script lang="ts">
   import '../app.css';
-  import { Dumbbell, CalendarDays, BarChart3, Bot, Settings } from 'lucide-svelte';
+  import { Dumbbell, CalendarDays, BarChart3, Settings } from 'lucide-svelte';
   import { page } from '$app/stores';
 
   let { children } = $props();
@@ -9,7 +9,6 @@
     { id: '/', label: 'Séance', icon: Dumbbell },
     { id: '/calendrier', label: 'Calendrier', icon: CalendarDays },
     { id: '/stats', label: 'Stats', icon: BarChart3 },
-    { id: '/coach', label: 'Coach IA', icon: Bot },
     { id: '/settings', label: 'Réglages', icon: Settings },
   ];
 

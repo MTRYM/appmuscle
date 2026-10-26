@@ -60,7 +60,6 @@ export function getLastExercisePerformance(sessionsWithSets, exerciseName) {
  * Propose une charge pour la prochaine séance.
  * - Réussite (reps min atteintes sur toutes les séries) → +2,5 kg (ou +5 jambes)
  * - Échec (au moins une série sous l'objectif) → reprise au même poids, pas d'augmentation
- * Prend en compte les overrides validés par le coach IA.
  */
 export async function suggestWeightForExercise(exerciseName, cibleTarget, exerciseType, sessionsWithSets) {
   if (exerciseType === 'isometrique') return null;
@@ -75,34 +74,6 @@ export async function suggestWeightForExercise(exerciseName, cibleTarget, exerci
   const successful = isExerciseSuccessful(last.sets, repsForCheck);
   const increment = getIncrementForExercise(exerciseName);
 
-  // Check if there is a pending program change for this exercise (Not implemented in API yet)
-  const changes = [];
-
-  if (changes.length > 0) {
-    // Get the most recent change
-    changes.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    const latestChange = changes[0];
-
-    if (latestChange.overrideValue === 'weight_increase') {
-      const suggested = roundWeight(maxWeight + increment);
-      return {
-        weight: suggested,
-        previousWeight: maxWeight,
-        increment,
-        type: 'increase',
-        message: `Coach : Augmentation à ${suggested} kg validée.`,
-      };
-    } else if (latestChange.overrideValue === 'deload') {
-      const suggested = roundWeight(Math.max(0, maxWeight * 0.9));
-      return {
-        weight: suggested,
-        previousWeight: maxWeight,
-        increment: suggested - maxWeight,
-        type: 'deload',
-        message: `Coach : Décharge à ${suggested} kg validée.`,
-      };
-    }
-  }
 
   if (successful) {
     const suggested = roundWeight(maxWeight + increment);
