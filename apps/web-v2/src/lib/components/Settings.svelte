@@ -6,6 +6,7 @@
   let message = $state('');
   let messageType = $state('info');
   let exporting = $state(false);
+  let loading = $state(true);
   let plan = $state({ next: null, end: null, done: 0, total: 0 });
 
   onMount(async () => {
@@ -18,6 +19,7 @@
   }
 
   async function loadPlan() {
+    loading = true;
     try {
       const planned = await getPlannedSessions();
       const today = todayISO();
@@ -30,6 +32,8 @@
       };
     } catch {
       // Données optionnelles
+    } finally {
+      loading = false;
     }
   }
 
@@ -78,43 +82,50 @@
     <p class="message {messageType}" role="status">{message}</p>
   {/if}
 
-  {#if plan.total > 0}
-    <section>
-      <h2>Programme en cours</h2>
-      <ul class="facts">
-        <li>
-          <span>Prochaine séance</span>
-          <strong>{plan.next ? `${plan.next.sessionName} · ${formatDateFR(plan.next.dateISO)}` : 'Aucune'}</strong>
-        </li>
-        <li>
-          <span>Réalisées</span>
-          <strong>{plan.done} / {plan.total}</strong>
-        </li>
-        {#if plan.end}
+  {#if loading}
+    <div class="loading-screen">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Chargement des réglages…</p>
+    </div>
+  {:else}
+    {#if plan.total > 0}
+      <section>
+        <h2>Programme en cours</h2>
+        <ul class="facts">
           <li>
-            <span>Fin prévue</span>
-            <strong>{formatDateFR(plan.end)}</strong>
+            <span>Prochaine séance</span>
+            <strong>{plan.next ? `${plan.next.sessionName} · ${formatDateFR(plan.next.dateISO)}` : 'Aucune'}</strong>
           </li>
-        {/if}
-      </ul>
+          <li>
+            <span>Réalisées</span>
+            <strong>{plan.done} / {plan.total}</strong>
+          </li>
+          {#if plan.end}
+            <li>
+              <span>Fin prévue</span>
+              <strong>{formatDateFR(plan.end)}</strong>
+            </li>
+          {/if}
+        </ul>
+      </section>
+    {/if}
+
+    <section>
+      <h2>Sauvegarde</h2>
+      <p class="sub">Télécharge une copie de secours complète de toutes tes séances et séries.</p>
+      <button type="button" class="row" disabled={exporting} onclick={exportData}>
+        <span>{exporting ? 'Export en cours…' : 'Exporter la sauvegarde'}</span>
+        <span class="meta">JSON</span>
+      </button>
+    </section>
+
+    <section>
+      <h2>Session</h2>
+      <button type="button" class="row logout" onclick={logout}>
+        <span>Se déconnecter</span>
+      </button>
     </section>
   {/if}
-
-  <section>
-    <h2>Sauvegarde</h2>
-    <p class="sub">Télécharge une copie de secours complète de toutes tes séances et séries.</p>
-    <button type="button" class="row" disabled={exporting} onclick={exportData}>
-      <span>{exporting ? 'Export en cours…' : 'Exporter la sauvegarde'}</span>
-      <span class="meta">JSON</span>
-    </button>
-  </section>
-
-  <section>
-    <h2>Session</h2>
-    <button type="button" class="row logout" onclick={logout}>
-      <span>Se déconnecter</span>
-    </button>
-  </section>
 </div>
 
 <style>

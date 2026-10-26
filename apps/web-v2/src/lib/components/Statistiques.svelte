@@ -23,6 +23,7 @@
   let selectedExercise = $state('');
   let selectedCategory = $state('');
   let metric = $state('weight');
+  let loading = $state(true);
   let exerciseCanvas = $state(null);
   let volumeCanvas = $state(null);
   let exerciseChart = null;
@@ -36,18 +37,29 @@
   });
 
   async function loadData() {
-    plannedSessions = await getPlannedSessions();
-    sessionsWithSets = await getAllSessionsWithSets();
-    globalStats = getGlobalStats(plannedSessions, sessionsWithSets);
-    records = getPersonalRecords(sessionsWithSets);
-    exercises = getUniqueExercises(sessionsWithSets);
-    if ((!selectedExercise || !exercises.includes(selectedExercise)) && exercises.length) {
-      selectedExercise = exercises[0];
+    loading = true;
+    try {
+      const [planned, sWithSets] = await Promise.all([
+        getPlannedSessions(),
+        getAllSessionsWithSets(),
+      ]);
+      plannedSessions = planned;
+      sessionsWithSets = sWithSets;
+      globalStats = getGlobalStats(plannedSessions, sessionsWithSets);
+      records = getPersonalRecords(sessionsWithSets);
+      exercises = getUniqueExercises(sessionsWithSets);
+      if ((!selectedExercise || !exercises.includes(selectedExercise)) && exercises.length) {
+        selectedExercise = exercises[0];
+      }
+      if (selectedExercise) selectedCategory = getExerciseCategory(selectedExercise);
+      await tick();
+      renderVolumeChart();
+      renderExerciseChart();
+    } catch (e) {
+      console.warn('Erreur chargement statistiques:', e);
+    } finally {
+      loading = false;
     }
-    if (selectedExercise) selectedCategory = getExerciseCategory(selectedExercise);
-    await tick();
-    renderVolumeChart();
-    renderExerciseChart();
   }
 
   $effect(() => {
@@ -142,7 +154,12 @@
 <div class="stats">
   <h1>Statistiques</h1>
 
-  {#if sessionsWithSets.length === 0}
+  {#if loading}
+    <div class="loading-screen">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Chargement de tes statistiques…</p>
+    </div>
+  {:else if sessionsWithSets.length === 0}
     <div class="empty-state">
       <p>Aucune séance enregistrée. Complétez une séance pour voir vos stats.</p>
     </div>

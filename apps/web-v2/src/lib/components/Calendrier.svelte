@@ -24,6 +24,8 @@
   let vacationMessage = $state('');
   let vacationSaving = $state(false);
 
+  let loading = $state(true);
+
   const WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
   const MONTHS = [
     'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -38,11 +40,18 @@
   });
 
   async function loadData() {
-    [plannedSessions, sessions, vacations] = await Promise.all([
-      getPlannedSessions(),
-      getAllSessionsWithSets(),
-      getVacations(),
-    ]);
+    loading = true;
+    try {
+      [plannedSessions, sessions, vacations] = await Promise.all([
+        getPlannedSessions(),
+        getAllSessionsWithSets(),
+        getVacations(),
+      ]);
+    } catch (e) {
+      console.warn('Erreur chargement calendrier:', e);
+    } finally {
+      loading = false;
+    }
   }
 
   function prevMonth() {
@@ -196,94 +205,101 @@
     <button type="button" class="nav-btn" onclick={nextMonth} aria-label="Mois suivant">›</button>
   </div>
 
-  <div class="cal-sub">
-    <p class="recap">
-      {#if monthRecap.total > 0 || monthRecap.extra > 0}
-        {monthRecap.done}/{monthRecap.total} séances
-        {#if monthRecap.extra > 0}· +{monthRecap.extra} hors planning{/if}
-      {:else}
-        Aucune séance ce mois-ci
+  {#if loading}
+    <div class="loading-screen">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Chargement du planning…</p>
+    </div>
+  {:else}
+    <div class="cal-sub">
+      <p class="recap">
+        {#if monthRecap.total > 0 || monthRecap.extra > 0}
+          {monthRecap.done}/{monthRecap.total} séances
+          {#if monthRecap.extra > 0}· +{monthRecap.extra} hors planning{/if}
+        {:else}
+          Aucune séance ce mois-ci
+        {/if}
+      </p>
+      {#if !isCurrentMonth}
+        <button type="button" class="btn-ghost today-btn" onclick={goToday}>Aujourd'hui</button>
       {/if}
-    </p>
-    {#if !isCurrentMonth}
-      <button type="button" class="btn-ghost today-btn" onclick={goToday}>Aujourd'hui</button>
-    {/if}
-  </div>
-
-  <div class="legend">
-    <span class="dot done"></span> Faite
-    <span class="dot pending"></span> Prévue
-    <span class="dot missed"></span> Loupée
-    <span class="dot extra"></span> Hors planning
-    <span class="dot vacation"></span> Vacances
-    <span class="dot rest"></span> Repos
-  </div>
-
-  <div class="weekdays">
-    {#each WEEKDAYS as wd}
-      <span>{wd}</span>
-    {/each}
-  </div>
-
-  <div class="grid">
-    {#each calendarDays as dateISO}
-      {#if dateISO}
-        {@const status = getDayStatus(dateISO)}
-        {@const dayNum = parseInt(dateISO.slice(8, 10), 10)}
-        <button
-          type="button"
-          class="day {status}"
-          class:selected={selectedDate === dateISO}
-          class:today={dateISO === today}
-          aria-label={formatDateFR(dateISO)}
-          aria-current={dateISO === today ? 'date' : undefined}
-          onclick={() => selectDay(dateISO)}
-        >
-          {dayNum}
-        </button>
-      {:else}
-        <div class="day empty"></div>
-      {/if}
-    {/each}
-  </div>
-
-  <details class="vacation-card">
-    <summary>Mode vacances</summary>
-    <p>
-      Ajoutez une période sans entraînement : les séances non réalisées seront repoussées, sans toucher aux séances déjà faites.
-    </p>
-
-    <div class="vacation-fields">
-      <label>
-        <span>Départ</span>
-        <input type="date" bind:value={vacationStart} />
-      </label>
-      <label>
-        <span>Retour</span>
-        <input type="date" bind:value={vacationEnd} />
-      </label>
     </div>
 
-    <button type="button" class="btn-primary" disabled={vacationSaving} onclick={saveVacation}>
-      {vacationSaving ? 'Ajout…' : 'Ajouter les vacances'}
-    </button>
+    <div class="legend">
+      <span class="dot done"></span> Faite
+      <span class="dot pending"></span> Prévue
+      <span class="dot missed"></span> Loupée
+      <span class="dot extra"></span> Hors planning
+      <span class="dot vacation"></span> Vacances
+      <span class="dot rest"></span> Repos
+    </div>
 
-    {#if vacationMessage}
-      <p class="vacation-message">{vacationMessage}</p>
-    {/if}
+    <div class="weekdays">
+      {#each WEEKDAYS as wd}
+        <span>{wd}</span>
+      {/each}
+    </div>
 
-    {#if vacations.length > 0}
-      <div class="vacation-list">
-        <strong>Vacances enregistrées</strong>
-        {#each vacations as vacation}
-          <span>
-            {formatDateFR(vacation.startDateISO)} → {formatDateFR(vacation.endDateISO)}
-            ({vacation.days} j)
-          </span>
-        {/each}
+    <div class="grid">
+      {#each calendarDays as dateISO}
+        {#if dateISO}
+          {@const status = getDayStatus(dateISO)}
+          {@const dayNum = parseInt(dateISO.slice(8, 10), 10)}
+          <button
+            type="button"
+            class="day {status}"
+            class:selected={selectedDate === dateISO}
+            class:today={dateISO === today}
+            aria-label={formatDateFR(dateISO)}
+            aria-current={dateISO === today ? 'date' : undefined}
+            onclick={() => selectDay(dateISO)}
+          >
+            {dayNum}
+          </button>
+        {:else}
+          <div class="day empty"></div>
+        {/if}
+      {/each}
+    </div>
+
+    <details class="vacation-card">
+      <summary>Mode vacances</summary>
+      <p>
+        Ajoutez une période sans entraînement : les séances non réalisées seront repoussées, sans toucher aux séances déjà faites.
+      </p>
+
+      <div class="vacation-fields">
+        <label>
+          <span>Départ</span>
+          <input type="date" bind:value={vacationStart} />
+        </label>
+        <label>
+          <span>Retour</span>
+          <input type="date" bind:value={vacationEnd} />
+        </label>
       </div>
-    {/if}
-  </details>
+
+      <button type="button" class="btn-primary" disabled={vacationSaving} onclick={saveVacation}>
+        {vacationSaving ? 'Ajout…' : 'Ajouter les vacances'}
+      </button>
+
+      {#if vacationMessage}
+        <p class="vacation-message">{vacationMessage}</p>
+      {/if}
+
+      {#if vacations.length > 0}
+        <div class="vacation-list">
+          <strong>Vacances enregistrées</strong>
+          {#each vacations as vacation}
+            <span>
+              {formatDateFR(vacation.startDateISO)} → {formatDateFR(vacation.endDateISO)}
+              ({vacation.days} j)
+            </span>
+          {/each}
+        </div>
+      {/if}
+    </details>
+  {/if}
 
   {#if selectedDate && dayDetail}
     <div class="modal-overlay" onclick={closeDetail} role="presentation">

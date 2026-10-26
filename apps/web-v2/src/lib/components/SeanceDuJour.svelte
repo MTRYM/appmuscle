@@ -32,6 +32,7 @@ import {
   const programme = parseProgramme();
 
   let phase = $state('idle');
+  let loading = $state(true);
   let todaySession = $state(null);
   let missedSessions = $state([]);
   let showCatchup = $state(false);
@@ -80,15 +81,21 @@ import {
   });
 
   async function refreshIdle() {
-    todaySession = await getTodayPlannedSession(todayISO());
-    missedSessions = await getMissedSessions();
-    freeTemplates = getAllSessionTemplates(programme);
-    // Check for in-progress sessions
+    loading = true;
     try {
-      inProgressSession = await getInProgressSession();
+      const [today, missed, inProg] = await Promise.all([
+        getTodayPlannedSession(todayISO()),
+        getMissedSessions(),
+        getInProgressSession().catch(() => null),
+      ]);
+      todaySession = today;
+      missedSessions = missed;
+      inProgressSession = inProg;
+      freeTemplates = getAllSessionTemplates(programme);
     } catch (e) {
-      console.warn('Could not check in-progress sessions:', e);
-      inProgressSession = null;
+      console.warn('Erreur chargement séances:', e);
+    } finally {
+      loading = false;
     }
   }
 
@@ -672,99 +679,106 @@ import {
 
 <div class="seance">
   {#if phase === 'idle'}
-    {#if inProgressSession}
-      <header class="home-head">
-        <p class="home-date accent-text">En cours</p>
-        <h1>{inProgressSession.plannedSession?.sessionName || 'Séance'}</h1>
-        <p class="muted">
-          {inProgressSession.sets?.length || 0} série(s) · commencée le {formatDateFR(inProgressSession.dateISO)}
-        </p>
-      </header>
-
-      <button type="button" class="btn-primary start-btn" onclick={() => resumeSession(inProgressSession)}>
-        Reprendre la séance
-      </button>
-      <button type="button" class="btn-ghost cancel-resume" onclick={discardInProgress}>
-        Abandonner
-      </button>
-    {:else if todaySession}
-      {@const split = getSessionExercisesSplit(todaySession.cycleIndex, todaySession.sessionIndex)}
-      <header class="home-head">
-        <p class="home-date accent-text">{formatDateFR(todayISO())}</p>
-        <h1>{todaySession.sessionName}</h1>
-        <p class="muted">{todaySession.cycleName}</p>
-      </header>
-
-      <button type="button" class="btn-primary start-btn" onclick={startToday}>
-        Démarrer la séance
-      </button>
-
-      <section class="plan" aria-label="Programme du jour">
-        {#if split.warmups.length > 0}
-          <p class="plan-warmup">
-            Échauffement · {split.warmups.map((w) => w.nom).join(', ')}
-          </p>
-        {/if}
-        <ul class="plan-list">
-          {#each split.main as ex}
-            <li>
-              <span class="plan-name">{ex.nom}</span>
-              <span class="plan-meta">{ex.series}×{formatExerciseCible(ex)}</span>
-            </li>
-          {/each}
-        </ul>
-      </section>
+    {#if loading}
+      <div class="loading-screen">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Chargement de ta séance…</p>
+      </div>
     {:else}
-      <header class="home-head">
-        <p class="home-date accent-text">{formatDateFR(todayISO())}</p>
-        <h1>Pas de séance prévue</h1>
-        <p class="muted">
-          {#if missedSessions.length > 0}
-            Rattrapez une séance manquée ou lancez une séance libre.
-          {:else}
-            Jour de repos, ou séance déjà effectuée.
-          {/if}
-        </p>
-      </header>
-    {/if}
+      {#if inProgressSession}
+        <header class="home-head">
+          <p class="home-date accent-text">En cours</p>
+          <h1>{inProgressSession.plannedSession?.sessionName || 'Séance'}</h1>
+          <p class="muted">
+            {inProgressSession.sets?.length || 0} série(s) · commencée le {formatDateFR(inProgressSession.dateISO)}
+          </p>
+        </header>
 
-    <nav class="quick-links" aria-label="Autres options">
-      {#if missedSessions.length > 0}
-        <button type="button" class="quick-row" onclick={() => (showCatchup = !showCatchup)}>
-          <span>Rattraper une séance</span>
-          <span class="quick-meta">{missedSessions.length}</span>
+        <button type="button" class="btn-primary start-btn" onclick={() => resumeSession(inProgressSession)}>
+          Reprendre la séance
         </button>
-        {#if showCatchup}
+        <button type="button" class="btn-ghost cancel-resume" onclick={discardInProgress}>
+          Abandonner
+        </button>
+      {:else if todaySession}
+        {@const split = getSessionExercisesSplit(todaySession.cycleIndex, todaySession.sessionIndex)}
+        <header class="home-head">
+          <p class="home-date accent-text">{formatDateFR(todayISO())}</p>
+          <h1>{todaySession.sessionName}</h1>
+          <p class="muted">{todaySession.cycleName}</p>
+        </header>
+
+        <button type="button" class="btn-primary start-btn" onclick={startToday}>
+          Démarrer la séance
+        </button>
+
+        <section class="plan" aria-label="Programme du jour">
+          {#if split.warmups.length > 0}
+            <p class="plan-warmup">
+              Échauffement · {split.warmups.map((w) => w.nom).join(', ')}
+            </p>
+          {/if}
+          <ul class="plan-list">
+            {#each split.main as ex}
+              <li>
+                <span class="plan-name">{ex.nom}</span>
+                <span class="plan-meta">{ex.series}×{formatExerciseCible(ex)}</span>
+              </li>
+            {/each}
+          </ul>
+        </section>
+      {:else}
+        <header class="home-head">
+          <p class="home-date accent-text">{formatDateFR(todayISO())}</p>
+          <h1>Pas de séance prévue</h1>
+          <p class="muted">
+            {#if missedSessions.length > 0}
+              Rattrapez une séance manquée ou lancez une séance libre.
+            {:else}
+              Jour de repos, ou séance déjà effectuée.
+            {/if}
+          </p>
+        </header>
+      {/if}
+
+      <nav class="quick-links" aria-label="Autres options">
+        {#if missedSessions.length > 0}
+          <button type="button" class="quick-row" onclick={() => (showCatchup = !showCatchup)}>
+            <span>Rattraper une séance</span>
+            <span class="quick-meta">{missedSessions.length}</span>
+          </button>
+          {#if showCatchup}
+            <div class="picker">
+              {#each missedSessions as m}
+                <button type="button" class="pick-item" onclick={() => startCatchup(m)}>
+                  <strong>{m.sessionName}</strong>
+                  <span>{formatDateFR(m.dateISO)} — {m.cycleName}</span>
+                </button>
+              {/each}
+            </div>
+          {/if}
+        {/if}
+
+        <button type="button" class="quick-row" onclick={() => (showFreePicker = !showFreePicker)}>
+          <span>Séance libre</span>
+        </button>
+        {#if showFreePicker}
           <div class="picker">
-            {#each missedSessions as m}
-              <button type="button" class="pick-item" onclick={() => startCatchup(m)}>
-                <strong>{m.sessionName}</strong>
-                <span>{formatDateFR(m.dateISO)} — {m.cycleName}</span>
+            {#each freeTemplates as t}
+              <button type="button" class="pick-item" onclick={() => startFree(t)}>
+                <strong>{t.label}</strong>
+                <span>{t.exercices.length} exercices</span>
               </button>
             {/each}
           </div>
         {/if}
-      {/if}
 
-      <button type="button" class="quick-row" onclick={() => (showFreePicker = !showFreePicker)}>
-        <span>Séance libre</span>
-      </button>
-      {#if showFreePicker}
-        <div class="picker">
-          {#each freeTemplates as t}
-            <button type="button" class="pick-item" onclick={() => startFree(t)}>
-              <strong>{t.label}</strong>
-              <span>{t.exercices.length} exercices</span>
-            </button>
-          {/each}
-        </div>
-      {/if}
-
-      <button type="button" class="quick-row" onclick={startRecoveryFlow}>
-        <span>Routine récupération</span>
-        <span class="quick-meta">12 min</span>
-      </button>
-    </nav>
+        <button type="button" class="quick-row" onclick={startRecoveryFlow}>
+          <span>Routine récupération</span>
+          <span class="quick-meta">12 min</span>
+        </button>
+      </nav>
+    {/if}
   {:else if phase === 'active'}
     <div class="workout-top">
       <div class="workout-header">
