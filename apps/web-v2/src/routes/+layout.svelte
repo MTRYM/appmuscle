@@ -70,11 +70,11 @@
     padding-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
     padding-left: max(0.85rem, calc(env(safe-area-inset-left, 0px) + 0.5rem));
     padding-right: max(0.85rem, calc(env(safe-area-inset-right, 0px) + 0.5rem));
-    padding-bottom: 76px;
+    padding-bottom: 54px;
     box-sizing: border-box;
   }
 
-  /* === Mobile Bottom Tab Bar === */
+  /* === Mobile Bottom Tab Bar (100% iPhone 13 Optimized) === */
   .mobile-nav {
     position: fixed;
     bottom: 0;
@@ -85,8 +85,8 @@
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-top: 1px solid rgba(247, 245, 242, 0.08);
-    padding-top: 6px;
-    padding-bottom: 24px;
+    padding-top: 4px;
+    padding-bottom: 2px;
     display: flex;
     justify-content: center;
   }
