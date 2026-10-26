@@ -26,7 +26,7 @@
       {@render children()}
     </main>
 
-    <!-- Mobile Bottom Navigation Bar (100% iPhone 13 & Safari Optimized) -->
+    <!-- Mobile Bottom Navigation Bar (Apple HIG Native Standard) -->
     <nav class="mobile-nav" aria-label="Navigation principale">
       <div class="mobile-nav-inner">
         {#each tabs as tab}
@@ -38,8 +38,8 @@
             class:active
             aria-current={active ? 'page' : undefined}
           >
-            <div class="nav-tab-icon-wrap" class:active>
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+            <div class="nav-tab-icon-wrap">
+              <Icon size={22} strokeWidth={active ? 2.25 : 1.75} />
             </div>
             <span class="nav-tab-label">{tab.label}</span>
           </a>
@@ -70,23 +70,25 @@
     padding-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
     padding-left: max(0.85rem, calc(env(safe-area-inset-left, 0px) + 0.5rem));
     padding-right: max(0.85rem, calc(env(safe-area-inset-right, 0px) + 0.5rem));
-    padding-bottom: calc(76px + env(safe-area-inset-bottom, 16px));
+    padding-bottom: 88px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 20px));
     box-sizing: border-box;
   }
 
-  /* === Mobile Bottom Tab Bar (iOS Glassmorphism) === */
+  /* === Mobile Bottom Tab Bar (Apple iOS Native Standard) === */
   .mobile-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(11, 10, 9, 0.88);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-top: 1px solid rgba(247, 245, 242, 0.09);
-    padding-bottom: max(8px, env(safe-area-inset-bottom, 12px));
-    padding-top: 6px;
+    background: rgba(7, 7, 6, 0.92);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border-top: 1px solid rgba(247, 245, 242, 0.08);
+    padding-top: 8px;
+    padding-bottom: 24px;
+    padding-bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 10px));
     display: flex;
     justify-content: center;
   }
@@ -105,14 +107,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     text-decoration: none;
-    color: var(--text-muted);
-    padding: 4px 8px;
-    border-radius: 12px;
-    min-width: 56px;
-    min-height: 48px;
-    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    color: rgba(247, 245, 242, 0.45);
+    padding: 3px 10px;
+    border-radius: 10px;
+    min-width: 58px;
+    transition: color 0.15s ease, transform 0.12s ease;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
@@ -126,31 +127,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 28px;
-    border-radius: 999px;
-    transition: all 0.2s ease;
+    width: 28px;
+    height: 24px;
+    transition: color 0.15s ease;
   }
 
   .nav-tab.active {
     color: var(--pink);
   }
 
-  .nav-tab-icon-wrap.active {
-    background: color-mix(in srgb, var(--pink) 16%, transparent);
-    color: var(--pink);
-  }
-
   .nav-tab-label {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Montserrat', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 500;
     line-height: 1;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
+    color: inherit;
   }
 
   .nav-tab.active .nav-tab-label {
-    font-weight: 700;
+    font-weight: 600;
     color: var(--pink);
   }
 </style>
