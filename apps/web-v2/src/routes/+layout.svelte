@@ -67,7 +67,10 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0.75rem 0.85rem calc(76px + env(safe-area-inset-bottom, 16px));
+    padding-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+    padding-left: max(0.85rem, calc(env(safe-area-inset-left, 0px) + 0.5rem));
+    padding-right: max(0.85rem, calc(env(safe-area-inset-right, 0px) + 0.5rem));
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 16px));
     box-sizing: border-box;
   }
 

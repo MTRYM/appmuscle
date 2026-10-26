@@ -1187,7 +1187,7 @@ import {
 <style>
   /* ─── Accueil : hiérarchie unique, 1 action principale ─── */
   .home-head {
-    padding: 1.25rem 0.15rem 1rem;
+    padding: 0.75rem 0.15rem 1rem;
   }
 
   .home-head .home-date {
