@@ -672,123 +672,99 @@ import {
 
 <div class="seance">
   {#if phase === 'idle'}
-    <h1>Séance du jour</h1>
-    <p class="date accent-text">{formatDateFR(todayISO())}</p>
-
     {#if inProgressSession}
-      <div class="card resume-card">
-        <span class="badge badge-warning">Séance en cours</span>
-        <h2>{inProgressSession.plannedSession?.sessionName || 'Séance'}</h2>
+      <header class="home-head">
+        <p class="home-date accent-text">En cours</p>
+        <h1>{inProgressSession.plannedSession?.sessionName || 'Séance'}</h1>
         <p class="muted">
-          {inProgressSession.sets?.length || 0} série(s) enregistrée(s) — commencée le {formatDateFR(inProgressSession.dateISO)}
+          {inProgressSession.sets?.length || 0} série(s) · commencée le {formatDateFR(inProgressSession.dateISO)}
         </p>
-        <div class="resume-actions">
-          <button type="button" class="btn-primary" onclick={() => resumeSession(inProgressSession)}>
-            Reprendre la séance
-          </button>
-          <button type="button" class="btn-ghost cancel-resume" onclick={discardInProgress}>
-            Abandonner
-          </button>
-        </div>
-      </div>
-    {/if}
+      </header>
 
-    {#if todaySession}
+      <button type="button" class="btn-primary start-btn" onclick={() => resumeSession(inProgressSession)}>
+        Reprendre la séance
+      </button>
+      <button type="button" class="btn-ghost cancel-resume" onclick={discardInProgress}>
+        Abandonner
+      </button>
+    {:else if todaySession}
       {@const split = getSessionExercisesSplit(todaySession.cycleIndex, todaySession.sessionIndex)}
-      <div class="card preview">
-        <span class="badge badge-success">Prévue aujourd'hui</span>
-        <h2>{todaySession.sessionName}</h2>
+      <header class="home-head">
+        <p class="home-date accent-text">{formatDateFR(todayISO())}</p>
+        <h1>{todaySession.sessionName}</h1>
         <p class="muted">{todaySession.cycleName}</p>
-        <ul class="exercise-list">
-          {#if split.warmups.length > 0}
-            <li class="section-label">Échauffement</li>
-            {#each split.warmups as ex}
-              <li class="warmup">
-                <span>{ex.nom}</span>
-                <span class="ex-meta">{ex.series}×{formatExerciseCible(ex)} · RPE {ex.rpe_cible}</span>
-                {#if ex.description}
-                  <span class="ex-desc">{ex.description}</span>
-                {/if}
-              </li>
-            {/each}
-          {/if}
-          {#if split.main.length > 0}
-            <li class="section-label">Séance principale</li>
-            {#each split.main as ex}
-              <li>
-                <span>{ex.nom}</span>
-                <span class="ex-meta">{ex.series}×{formatExerciseCible(ex)} · RPE {ex.rpe_cible}</span>
-                {#if ex.description}
-                  <span class="ex-desc">{ex.description}</span>
-                {/if}
-              </li>
-            {/each}
-          {/if}
-        </ul>
-      </div>
+      </header>
 
       <button type="button" class="btn-primary start-btn" onclick={startToday}>
-        Démarrer la séance du jour
+        Démarrer la séance
       </button>
+
+      <section class="plan" aria-label="Programme du jour">
+        {#if split.warmups.length > 0}
+          <p class="plan-warmup">
+            Échauffement · {split.warmups.map((w) => w.nom).join(', ')}
+          </p>
+        {/if}
+        <ul class="plan-list">
+          {#each split.main as ex}
+            <li>
+              <span class="plan-name">{ex.nom}</span>
+              <span class="plan-meta">{ex.series}×{formatExerciseCible(ex)}</span>
+            </li>
+          {/each}
+        </ul>
+      </section>
     {:else}
-      <div class="card">
-        <p class="empty-msg">
+      <header class="home-head">
+        <p class="home-date accent-text">{formatDateFR(todayISO())}</p>
+        <h1>Pas de séance prévue</h1>
+        <p class="muted">
           {#if missedSessions.length > 0}
-            Pas de séance prévue aujourd'hui. Rattrapez une séance manquée ou faites une séance libre.
+            Rattrapez une séance manquée ou lancez une séance libre.
           {:else}
-            Jour de repos ou séance déjà effectuée. Lancez une séance libre si besoin.
+            Jour de repos, ou séance déjà effectuée.
           {/if}
         </p>
-      </div>
+      </header>
     {/if}
 
-    <div class="secondary-actions">
+    <nav class="quick-links" aria-label="Autres options">
       {#if missedSessions.length > 0}
-        <button type="button" class="btn-secondary" onclick={() => (showCatchup = !showCatchup)}>
-          Rattraper une séance manquée ({missedSessions.length})
+        <button type="button" class="quick-row" onclick={() => (showCatchup = !showCatchup)}>
+          <span>Rattraper une séance</span>
+          <span class="quick-meta">{missedSessions.length}</span>
         </button>
+        {#if showCatchup}
+          <div class="picker">
+            {#each missedSessions as m}
+              <button type="button" class="pick-item" onclick={() => startCatchup(m)}>
+                <strong>{m.sessionName}</strong>
+                <span>{formatDateFR(m.dateISO)} — {m.cycleName}</span>
+              </button>
+            {/each}
+          </div>
+        {/if}
       {/if}
-      <button type="button" class="btn-secondary" onclick={() => (showFreePicker = !showFreePicker)}>
-        Séance libre
+
+      <button type="button" class="quick-row" onclick={() => (showFreePicker = !showFreePicker)}>
+        <span>Séance libre</span>
       </button>
-    </div>
+      {#if showFreePicker}
+        <div class="picker">
+          {#each freeTemplates as t}
+            <button type="button" class="pick-item" onclick={() => startFree(t)}>
+              <strong>{t.label}</strong>
+              <span>{t.exercices.length} exercices</span>
+            </button>
+          {/each}
+        </div>
+      {/if}
 
-    <div class="card recovery-card">
-      <div class="recovery-header">
-        <span class="badge badge-success">✨ Longévité & Récupération</span>
-        <h3>Routine Régénération (12 min)</h3>
-        <p class="muted">
-          Décompression vertébrale, mobilité épaules & hanches pour accélérer la récupération et débloquer tes skills gymniques.
-        </p>
-      </div>
-      <button type="button" class="btn-recovery" onclick={startRecoveryFlow}>
-        🧘 Lancer la Routine (12 min)
+      <button type="button" class="quick-row" onclick={startRecoveryFlow}>
+        <span>Routine récupération</span>
+        <span class="quick-meta">12 min</span>
       </button>
-    </div>
-
-    {#if showCatchup}
-      <div class="card picker">
-        <h3>Séances manquées</h3>
-        {#each missedSessions as m}
-          <button type="button" class="pick-item" onclick={() => startCatchup(m)}>
-            <strong>{m.sessionName}</strong>
-            <span>{formatDateFR(m.dateISO)} — {m.cycleName}</span>
-          </button>
-        {/each}
-      </div>
-    {/if}
-
-    {#if showFreePicker}
-      <div class="card picker">
-        <h3>Choisir un modèle</h3>
-        {#each freeTemplates as t}
-          <button type="button" class="pick-item" onclick={() => startFree(t)}>
-            <strong>{t.label}</strong>
-            <span>{t.exercices.length} exercices</span>
-          </button>
-        {/each}
-      </div>
-    {/if}
+    </nav>
   {:else if phase === 'active'}
     <div class="workout-top">
       <div class="workout-header">
@@ -1195,6 +1171,99 @@ import {
 </div>
 
 <style>
+  /* ─── Accueil : hiérarchie unique, 1 action principale ─── */
+  .home-head {
+    padding: 1.25rem 0.15rem 1rem;
+  }
+
+  .home-head .home-date {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    text-transform: capitalize;
+  }
+
+  .home-head h1 {
+    font-size: 2rem;
+    line-height: 1.1;
+    margin: 0 0 0.4rem;
+  }
+
+  .home-head .muted {
+    margin: 0;
+  }
+
+  .start-btn {
+    width: 100%;
+    margin: 0.25rem 0 0;
+  }
+
+  .plan {
+    margin-top: 1.5rem;
+  }
+
+  .plan-warmup {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .plan-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .plan-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .plan-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .plan-meta {
+    flex-shrink: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .quick-links {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quick-row {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 52px;
+    padding: 0.75rem 0.15rem;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .quick-meta {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+  }
+
+  .cancel-resume {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
   .seance {
     width: 100%;
   }

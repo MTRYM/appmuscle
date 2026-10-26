@@ -8,9 +8,7 @@
     getRpeProgression,
     getVolumeByPeriod,
     getPersonalRecords,
-    getSessionTypeFrequency,
     getUniqueExercises,
-    calcAdherence,
   } from '$lib/stats';
   Chart.register(...registerables);
 
@@ -20,14 +18,13 @@
   let sessionsWithSets = $state([]);
   let globalStats = $state(null);
   let records = $state([]);
-  let frequency = $state([]);
   let exercises = $state([]);
   let selectedExercise = $state('');
-  let weightCanvas = $state(null);
-  let rpeCanvas = $state(null);
+  let metric = $state('weight');
+  let showAllRecords = $state(false);
+  let exerciseCanvas = $state(null);
   let volumeCanvas = $state(null);
-  let weightChart = null;
-  let rpeChart = null;
+  let exerciseChart = null;
   let volumeChart = null;
 
   onMount(loadData);
@@ -42,19 +39,20 @@
     sessionsWithSets = await getAllSessionsWithSets();
     globalStats = getGlobalStats(plannedSessions, sessionsWithSets);
     records = getPersonalRecords(sessionsWithSets);
-    frequency = getSessionTypeFrequency(sessionsWithSets, plannedSessions);
     exercises = getUniqueExercises(sessionsWithSets);
     if (!selectedExercise && exercises.length) {
       selectedExercise = exercises[0];
     }
     await tick();
-    renderCharts();
-    renderExerciseCharts();
+    renderVolumeChart();
+    renderExerciseChart();
   }
 
   $effect(() => {
+    selectedExercise;
+    metric;
     if (selectedExercise && sessionsWithSets.length) {
-      renderExerciseCharts();
+      renderExerciseChart();
     }
   });
 
@@ -62,12 +60,10 @@
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
   }
 
-  function renderCharts() {
+  function renderVolumeChart() {
     if (!volumeCanvas) return;
-
     const volumeData = getVolumeByPeriod(sessionsWithSets, 'week').slice(-12);
     const pink = cssVar('--pink', '#e6a6b2');
-    const deepblue = cssVar('--deepblue', '#06375a');
 
     if (volumeChart) volumeChart.destroy();
     volumeChart = new Chart(volumeCanvas, {
@@ -83,186 +79,122 @@
           },
         ],
       },
-      options: chartOptions('Volume hebdomadaire (kg)'),
+      options: chartOptions(),
     });
   }
 
-  function renderExerciseCharts() {
-    if (!weightCanvas || !rpeCanvas || !selectedExercise) return;
-
-    const weightData = getWeightProgression(sessionsWithSets, selectedExercise);
-    const rpeData = getRpeProgression(sessionsWithSets, selectedExercise);
+  function renderExerciseChart() {
+    if (!exerciseCanvas || !selectedExercise) return;
     const pink = cssVar('--pink', '#e6a6b2');
-    const deepblue = cssVar('--deepblue', '#06375a');
+    const isWeight = metric === 'weight';
+    const data = isWeight
+      ? getWeightProgression(sessionsWithSets, selectedExercise).map((d) => ({ x: d.dateISO, y: d.weight }))
+      : getRpeProgression(sessionsWithSets, selectedExercise).map((d) => ({ x: d.dateISO, y: d.rpe }));
 
-    if (weightChart) weightChart.destroy();
-    weightChart = new Chart(weightCanvas, {
+    if (exerciseChart) exerciseChart.destroy();
+    exerciseChart = new Chart(exerciseCanvas, {
       type: 'line',
       data: {
-        labels: weightData.map((d) => d.dateISO.slice(5)),
+        labels: data.map((d) => d.x.slice(5)),
         datasets: [
           {
-            label: 'Charge max (kg)',
-            data: weightData.map((d) => d.weight),
-            borderColor: deepblue,
-            backgroundColor: `${deepblue}22`,
-            fill: true,
-            tension: 0.3,
-          },
-        ],
-      },
-      options: chartOptions('Progression charge'),
-    });
-
-    if (rpeChart) rpeChart.destroy();
-    rpeChart = new Chart(rpeCanvas, {
-      type: 'line',
-      data: {
-        labels: rpeData.map((d) => d.dateISO.slice(5)),
-        datasets: [
-          {
-            label: 'RPE moyen',
-            data: rpeData.map((d) => d.rpe),
+            label: isWeight ? 'Charge max (kg)' : 'RPE moyen',
+            data: data.map((d) => d.y),
             borderColor: pink,
-            backgroundColor: `${pink}33`,
+            backgroundColor: `${pink}22`,
             fill: true,
             tension: 0.3,
+            pointRadius: 3,
           },
         ],
       },
-      options: chartOptions('Évolution RPE'),
+      options: chartOptions(),
     });
   }
 
-  function chartOptions(title) {
+  function chartOptions() {
     const textColor = cssVar('--muted-foreground', 'rgba(247, 245, 242, 0.56)');
-    const titleFont = "'Montserrat', sans-serif";
     return {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: {
-        title: {
-          display: true,
-          text: title,
-          color: textColor,
-          font: { family: titleFont, size: 13, weight: '600' },
-        },
-        legend: { labels: { color: textColor, font: { family: "'Open Sans', sans-serif" } } },
-      },
+      plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: textColor }, grid: { color: 'rgba(128,128,128,0.15)' } },
+        x: { ticks: { color: textColor }, grid: { display: false } },
         y: { ticks: { color: textColor }, grid: { color: 'rgba(128,128,128,0.15)' } },
       },
     };
   }
 
-  const years = $derived([...new Set(plannedSessions.map((p) => p.dateISO.slice(0, 4)))].sort());
+  const visibleRecords = $derived(showAllRecords ? records : records.slice(0, 5));
 </script>
 
 <div class="stats">
-  <h1>Statistiques & Recommandations</h1>
-
-  {#if globalStats}
-    <div class="kpi-grid">
-      <div class="card">
-        <p class="card-title">Assiduité globale</p>
-        <p class="card-value">{globalStats.adherence.rate}%</p>
-        <p class="sub">{globalStats.adherence.done}/{globalStats.adherence.total} séances</p>
-      </div>
-      <div class="card">
-        <p class="card-title">Ce mois</p>
-        <p class="card-value">{globalStats.monthAdherence.rate}%</p>
-        <p class="sub">{globalStats.monthAdherence.done}/{globalStats.monthAdherence.total}</p>
-      </div>
-      <div class="card">
-        <p class="card-title">Cette année</p>
-        <p class="card-value">{globalStats.yearAdherence.rate}%</p>
-        <p class="sub">{globalStats.yearAdherence.done}/{globalStats.yearAdherence.total}</p>
-      </div>
-      <div class="card">
-        <p class="card-title">Volume semaine</p>
-        <p class="card-value">{globalStats.thisWeekVolume}</p>
-        <p class="sub">kg total</p>
-      </div>
-    </div>
-  {/if}
+  <h1>Statistiques</h1>
 
   {#if sessionsWithSets.length === 0}
     <div class="empty-state">
       <p>Aucune séance enregistrée. Complétez une séance pour voir vos stats.</p>
     </div>
   {:else}
-    <div class="card chart-card">
-      <canvas bind:this={volumeCanvas}></canvas>
-    </div>
+    {#if globalStats}
+      <section class="summary" aria-label="Résumé">
+        <div>
+          <p class="summary-value">{globalStats.monthAdherence.rate}%</p>
+          <p class="summary-label">Assiduité du mois</p>
+          <p class="sub">{globalStats.monthAdherence.done}/{globalStats.monthAdherence.total} séances</p>
+        </div>
+        <div>
+          <p class="summary-value">{globalStats.thisWeekVolume}</p>
+          <p class="summary-label">Volume semaine</p>
+          <p class="sub">kg</p>
+        </div>
+        <div>
+          <p class="summary-value">{globalStats.adherence.rate}%</p>
+          <p class="summary-label">Assiduité globale</p>
+          <p class="sub">{globalStats.adherence.done}/{globalStats.adherence.total} séances</p>
+        </div>
+      </section>
+    {/if}
+
+    <section>
+      <h2>Volume</h2>
+      <p class="sub section-sub">Par semaine, 12 dernières semaines (kg)</p>
+      <div class="chart-wrap"><canvas bind:this={volumeCanvas}></canvas></div>
+    </section>
 
     {#if exercises.length > 0}
-      <div class="card">
-        <label>
-          <span class="card-title">Exercice</span>
-          <select bind:value={selectedExercise}>
-            {#each exercises as ex}
-              <option value={ex}>{ex}</option>
-            {/each}
-          </select>
-        </label>
-      </div>
-
-      <div class="card chart-card">
-        <canvas bind:this={weightCanvas}></canvas>
-      </div>
-
-      <div class="card chart-card">
-        <canvas bind:this={rpeCanvas}></canvas>
-      </div>
+      <section>
+        <h2>Progression</h2>
+        <select bind:value={selectedExercise} aria-label="Exercice">
+          {#each exercises as ex}
+            <option value={ex}>{ex}</option>
+          {/each}
+        </select>
+        <div class="segmented" role="tablist">
+          <button type="button" role="tab" aria-selected={metric === 'weight'} class:on={metric === 'weight'} onclick={() => (metric = 'weight')}>Charge</button>
+          <button type="button" role="tab" aria-selected={metric === 'rpe'} class:on={metric === 'rpe'} onclick={() => (metric = 'rpe')}>RPE</button>
+        </div>
+        <div class="chart-wrap"><canvas bind:this={exerciseCanvas}></canvas></div>
+      </section>
     {/if}
 
     {#if records.length > 0}
-      <h2>Records personnels</h2>
-      <div class="records">
-        {#each records as rec}
-          <div class="card record-card">
-            <h3>{rec.exerciseName}</h3>
-            <div class="rec-grid">
-              <div>
-                <span class="card-title">Charge max</span>
-                <strong>{rec.maxWeight} kg</strong>
-              </div>
-              <div>
-                <span class="card-title">1RM estimé</span>
-                <strong>{rec.max1RM} kg</strong>
-              </div>
-              <div>
-                <span class="card-title">Volume max/série</span>
-                <strong>{rec.maxVolume} kg</strong>
-              </div>
-            </div>
-          </div>
-        {/each}
-      </div>
-    {/if}
-
-    {#if frequency.length > 0}
-      <h2>Fréquence par type</h2>
-      <div class="card">
-        {#each frequency as f}
-          <div class="freq-row">
-            <span>{f.name}</span>
-            <strong>{f.count} séances</strong>
-          </div>
-        {/each}
-      </div>
-    {/if}
-
-    {#if years.length > 0}
-      <h2>Assiduité par année</h2>
-      {#each years as year}
-        {@const adh = calcAdherence(plannedSessions, { year: parseInt(year, 10) })}
-        <div class="card freq-row">
-          <span>{year}</span>
-          <strong>{adh.rate}% ({adh.done}/{adh.total})</strong>
-        </div>
-      {/each}
+      <section>
+        <h2>Records</h2>
+        <ul class="records">
+          {#each visibleRecords as rec}
+            <li>
+              <span class="rec-name">{rec.exerciseName}</span>
+              <span class="rec-val">{rec.maxWeight} kg <span class="sub">· 1RM {rec.max1RM}</span></span>
+            </li>
+          {/each}
+        </ul>
+        {#if records.length > 5}
+          <button type="button" class="btn-ghost more" onclick={() => (showAllRecords = !showAllRecords)}>
+            {showAllRecords ? 'Réduire' : `Voir tout (${records.length})`}
+          </button>
+        {/if}
+      </section>
     {/if}
   {/if}
 </div>
@@ -270,6 +202,18 @@
 <style>
   .stats {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .stats h1 {
+    margin: 0.75rem 0 0;
+  }
+
+  .stats h2 {
+    font-size: 1.05rem;
+    margin: 0 0 0.75rem;
   }
 
   .sub {
@@ -278,73 +222,96 @@
     margin: 0;
   }
 
-  .chart-card {
-    height: 260px;
-    position: relative;
+  .section-sub {
+    margin: -0.5rem 0 0.75rem;
   }
 
-  .chart-card canvas {
-    max-height: 220px;
-  }
-
-  .records {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .record-card h3 {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .recommendations {
-    margin-bottom: 1.5rem;
-  }
-
-  .rec-card {
-    padding: 1rem;
-    background: var(--bg-elevated);
-    margin-bottom: 0.5rem;
-  }
-
-  .ai-coach-msg {
-    margin-bottom: 1rem;
-  }
-
-  .rec-reason {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
-
-  .rec-grid {
+  .summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
-    text-align: center;
-  }
-
-  .rec-grid strong {
-    display: block;
-    font-size: 1.1rem;
-    color: var(--text-heading);
-  }
-
-  .freq-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
   }
 
-  .freq-row:last-child {
-    border-bottom: none;
+  .summary p {
+    margin: 0;
   }
 
-  label span.card-title {
-    display: block;
-    margin-bottom: 0.5rem;
+  .summary-value {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-heading);
+  }
+
+  .summary-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin: 0.2rem 0 0.15rem !important;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 210px;
+    margin-top: 0.75rem;
+  }
+
+  .segmented {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.75rem;
+    padding: 3px;
+    background: var(--bg-elevated);
+    border-radius: 12px;
+  }
+
+  .segmented button {
+    flex: 1;
+    min-height: 36px;
+    padding: 0.35rem;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .segmented button.on {
+    background: var(--bg-card);
+    color: var(--text-heading);
+  }
+
+  .records {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .records li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rec-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  .rec-val {
+    flex-shrink: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .more {
+    width: 100%;
+    margin-top: 0.25rem;
   }
 </style>
