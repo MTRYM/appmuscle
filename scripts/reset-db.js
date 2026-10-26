@@ -6,7 +6,7 @@ import path from "path";
 import * as yaml from "js-yaml";
 import crypto from "crypto";
 
-const DATABASE_URL = 'postgres://d3339c053a51d317cab3801f4f0326c7a4320fbaf0c7bf88604d211a0f2a686e:sk_Bepyg18Y4P-vrX8qYSHpz@db.prisma.io:5432/postgres?sslmode=require';
+const DATABASE_URL = process.env.DATABASE_URL;
 
 const pool = new pg.Pool({ connectionString: DATABASE_URL });
 const adapter = new PrismaPg(pool);
