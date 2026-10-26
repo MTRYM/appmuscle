@@ -113,7 +113,7 @@ html {
   overflow-x: hidden;
   height: 100%;
   -webkit-text-size-adjust: 100%;
-  background: var(--ink);
+  background: #0b0a09;
 }
 
 body {

@@ -81,7 +81,7 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(11, 10, 9, 0.90);
+    background: rgba(11, 10, 9, 0.95);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-top: 1px solid rgba(247, 245, 242, 0.08);
@@ -89,6 +89,20 @@
     padding-bottom: 2px;
     display: flex;
     justify-content: center;
+  }
+
+  /* Seamlessly fill any gap below the menu with the exact same color */
+  .mobile-nav::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: rgba(11, 10, 9, 0.95);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    pointer-events: none;
   }
 
   .mobile-nav-inner {
