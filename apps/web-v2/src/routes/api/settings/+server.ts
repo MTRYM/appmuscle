@@ -23,7 +23,20 @@ export const GET: RequestHandler = async () => {
 };
 
 export const POST: RequestHandler = async ({ request }) => {
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return json({ error: "Requête invalide" }, { status: 400 });
+  }
+  if (body.theme !== undefined && !["dark", "light"].includes(body.theme)) {
+    return json({ error: "Thème invalide" }, { status: 400 });
+  }
+  if (
+    body.programStartDate !== undefined &&
+    body.programStartDate !== null &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(body.programStartDate)
+  ) {
+    return json({ error: "Date invalide" }, { status: 400 });
+  }
   const now = new Date().toISOString();
 
   const settings = await prisma.appSettings.upsert({

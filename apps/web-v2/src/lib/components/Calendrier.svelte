@@ -121,6 +121,11 @@
     if (vacationSaving) return;
     vacationMessage = '';
 
+    if (!vacationStart || !vacationEnd || vacationEnd < vacationStart) {
+      vacationMessage = 'La date de retour doit être après le départ.';
+      return;
+    }
+
     if (!confirm('Ajouter ces vacances va décaler toutes les séances non réalisées à partir du départ. Continuer ?')) {
       return;
     }
@@ -140,6 +145,29 @@
   }
 
   let calendarDays = $derived(getCalendarDays());
+
+  const today = todayISO();
+
+  let monthRecap = $derived.by(() => {
+    const prefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
+    const planned = plannedSessions.filter((p) => p.dateISO.startsWith(prefix));
+    const done = planned.filter((p) => p.status === 'done').length;
+    const extra = sessions.filter(
+      (s) => s.dateISO.startsWith(prefix) && s.type !== 'planned' && s.status === 'completed',
+    ).length;
+    return { done, total: planned.length, extra };
+  });
+
+  let isCurrentMonth = $derived(
+    viewYear === new Date().getFullYear() && viewMonth === new Date().getMonth(),
+  );
+
+  function goToday() {
+    const now = new Date();
+    viewYear = now.getFullYear();
+    viewMonth = now.getMonth();
+    selectDay(todayISO());
+  }
 
   let deletingSessionId = $state(null);
 
@@ -168,6 +196,20 @@
     <button type="button" class="nav-btn" onclick={nextMonth} aria-label="Mois suivant">›</button>
   </div>
 
+  <div class="cal-sub">
+    <p class="recap">
+      {#if monthRecap.total > 0 || monthRecap.extra > 0}
+        {monthRecap.done}/{monthRecap.total} séances
+        {#if monthRecap.extra > 0}· +{monthRecap.extra} hors planning{/if}
+      {:else}
+        Aucune séance ce mois-ci
+      {/if}
+    </p>
+    {#if !isCurrentMonth}
+      <button type="button" class="btn-ghost today-btn" onclick={goToday}>Aujourd'hui</button>
+    {/if}
+  </div>
+
   <div class="legend">
     <span class="dot done"></span> Faite
     <span class="dot pending"></span> Prévue
@@ -192,6 +234,9 @@
           type="button"
           class="day {status}"
           class:selected={selectedDate === dateISO}
+          class:today={dateISO === today}
+          aria-label={formatDateFR(dateISO)}
+          aria-current={dateISO === today ? 'date' : undefined}
           onclick={() => selectDay(dateISO)}
         >
           {dayNum}
@@ -202,13 +247,11 @@
     {/each}
   </div>
 
-  <div class="card vacation-card">
-    <div>
-      <h3>Mode vacances</h3>
-      <p>
-        Ajoutez une période sans entraînement : les séances non réalisées seront repoussées, sans toucher aux séances déjà faites.
-      </p>
-    </div>
+  <details class="vacation-card">
+    <summary>Mode vacances</summary>
+    <p>
+      Ajoutez une période sans entraînement : les séances non réalisées seront repoussées, sans toucher aux séances déjà faites.
+    </p>
 
     <div class="vacation-fields">
       <label>
@@ -240,7 +283,7 @@
         {/each}
       </div>
     {/if}
-  </div>
+  </details>
 
   {#if selectedDate && dayDetail}
     <div class="modal-overlay" onclick={closeDetail} role="presentation">
@@ -381,12 +424,57 @@
     margin-bottom: 1rem;
   }
 
-  .vacation-card {
-    margin-top: 1.25rem;
+  .cal-sub {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    margin: -0.5rem 0 0.75rem;
   }
 
-  .vacation-card h3 {
-    margin-bottom: 0.35rem;
+  .recap {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .today-btn {
+    min-height: 36px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .day.today {
+    border-color: var(--pink);
+    color: var(--pink);
+  }
+
+  .vacation-card {
+    margin-top: 1.5rem;
+  }
+
+  .vacation-card summary {
+    display: flex;
+    align-items: center;
+    min-height: 52px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .vacation-card summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .vacation-card[open] summary {
+    color: var(--accent);
+  }
+
+  .vacation-card > p {
+    margin-top: 0.75rem;
   }
 
   .vacation-card p {

@@ -99,14 +99,23 @@ export async function getPlannedSessions() {
   return res.json();
 }
 
-export async function getVacations() { 
-  // Should call /api/vacations, but for now let's just return empty array if not implemented
-  return []; 
+export async function getVacations() {
+  const res = await fetch('/api/vacations');
+  if (!res.ok) return [];
+  return res.json();
 }
 
-export async function addVacationAndShiftPlan(s: any, e: any, d: any) {
-  // Not implemented yet on backend
-  throw new Error("Mode vacances non implémenté côté serveur");
+export async function addVacationAndShiftPlan(startDateISO: string, endDateISO: string) {
+  const res = await fetch('/api/vacations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ startDateISO, endDateISO })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `Erreur (${res.status})`);
+  }
+  return data;
 }
 
 export async function getDayData(dateISO: string) {

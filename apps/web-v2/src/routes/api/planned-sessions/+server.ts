@@ -74,10 +74,15 @@ export const PATCH: RequestHandler = async ({ url, request }) => {
   const id = url.searchParams.get("id");
   if (!id) return json({ error: "id requis" }, { status: 400 });
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  const allowed = ["pending", "done", "missed"];
+  if (!body || !allowed.includes(body.status)) {
+    return json({ error: "status invalide" }, { status: 400 });
+  }
+
   const session = await prisma.plannedSession.update({
     where: { id },
-    data: { ...body, updatedAt: new Date().toISOString() },
+    data: { status: body.status, updatedAt: new Date().toISOString() },
   });
 
   return json(session);

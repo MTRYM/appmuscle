@@ -10,6 +10,7 @@
     getPersonalRecords,
     getUniqueExercises,
   } from '$lib/stats';
+  import { getExerciseCategory, groupByCategory } from '$lib/exerciseCategories';
   Chart.register(...registerables);
 
   let { refreshKey = 0 } = $props();
@@ -20,8 +21,8 @@
   let records = $state([]);
   let exercises = $state([]);
   let selectedExercise = $state('');
+  let selectedCategory = $state('');
   let metric = $state('weight');
-  let showAllRecords = $state(false);
   let exerciseCanvas = $state(null);
   let volumeCanvas = $state(null);
   let exerciseChart = null;
@@ -40,9 +41,10 @@
     globalStats = getGlobalStats(plannedSessions, sessionsWithSets);
     records = getPersonalRecords(sessionsWithSets);
     exercises = getUniqueExercises(sessionsWithSets);
-    if (!selectedExercise && exercises.length) {
+    if ((!selectedExercise || !exercises.includes(selectedExercise)) && exercises.length) {
       selectedExercise = exercises[0];
     }
+    if (selectedExercise) selectedCategory = getExerciseCategory(selectedExercise);
     await tick();
     renderVolumeChart();
     renderExerciseChart();
@@ -125,7 +127,16 @@
     };
   }
 
-  const visibleRecords = $derived(showAllRecords ? records : records.slice(0, 5));
+  const exerciseGroups = $derived(groupByCategory(exercises));
+  const exercisesInCategory = $derived(
+    exerciseGroups.find((g) => g.category === selectedCategory)?.items ?? [],
+  );
+  const recordGroups = $derived(groupByCategory(records, (r) => r.exerciseName));
+
+  function onCategoryChange() {
+    const first = exercisesInCategory[0];
+    if (first) selectedExercise = first;
+  }
 </script>
 
 <div class="stats">
@@ -165,11 +176,18 @@
     {#if exercises.length > 0}
       <section>
         <h2>Progression</h2>
-        <select bind:value={selectedExercise} aria-label="Exercice">
-          {#each exercises as ex}
-            <option value={ex}>{ex}</option>
-          {/each}
-        </select>
+        <div class="pickers">
+          <select bind:value={selectedCategory} onchange={onCategoryChange} aria-label="Catégorie">
+            {#each exerciseGroups as g}
+              <option value={g.category}>{g.category} ({g.items.length})</option>
+            {/each}
+          </select>
+          <select bind:value={selectedExercise} aria-label="Exercice">
+            {#each exercisesInCategory as ex}
+              <option value={ex}>{ex}</option>
+            {/each}
+          </select>
+        </div>
         <div class="segmented" role="tablist">
           <button type="button" role="tab" aria-selected={metric === 'weight'} class:on={metric === 'weight'} onclick={() => (metric = 'weight')}>Charge</button>
           <button type="button" role="tab" aria-selected={metric === 'rpe'} class:on={metric === 'rpe'} onclick={() => (metric = 'rpe')}>RPE</button>
@@ -181,19 +199,22 @@
     {#if records.length > 0}
       <section>
         <h2>Records</h2>
-        <ul class="records">
-          {#each visibleRecords as rec}
-            <li>
-              <span class="rec-name">{rec.exerciseName}</span>
-              <span class="rec-val">{rec.maxWeight} kg <span class="sub">· 1RM {rec.max1RM}</span></span>
-            </li>
-          {/each}
-        </ul>
-        {#if records.length > 5}
-          <button type="button" class="btn-ghost more" onclick={() => (showAllRecords = !showAllRecords)}>
-            {showAllRecords ? 'Réduire' : `Voir tout (${records.length})`}
-          </button>
-        {/if}
+        {#each recordGroups as group}
+          <details class="rec-group">
+            <summary>
+              <span>{group.category}</span>
+              <span class="sub">{group.items.length}</span>
+            </summary>
+            <ul class="records">
+              {#each group.items as rec}
+                <li>
+                  <span class="rec-name">{rec.exerciseName}</span>
+                  <span class="rec-val">{rec.maxWeight} kg <span class="sub">· 1RM {rec.max1RM}</span></span>
+                </li>
+              {/each}
+            </ul>
+          </details>
+        {/each}
       </section>
     {/if}
   {/if}
@@ -310,8 +331,31 @@
     font-size: 0.9rem;
   }
 
-  .more {
-    width: 100%;
-    margin-top: 0.25rem;
+  .pickers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .rec-group summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 52px;
+    padding: 0 0.15rem;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .rec-group summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .rec-group[open] summary {
+    color: var(--accent);
   }
 </style>
