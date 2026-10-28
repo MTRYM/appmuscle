@@ -12,6 +12,31 @@
 
   Chart.register(...registerables);
 
+  // Valeurs initiales du fichier AthleteProfil
+  const DEFAULT_PROFILE = {
+    age: 16,
+    heightCm: 193,
+    targetWeightKg: 88,
+    targetWeightRange: '85–90 kg',
+    wingspanCm: 195,
+    legLengthCm: 95,
+    armLengthCm: 52,
+    armLengthWithShoulderCm: 64,
+  };
+
+  const DEFAULT_MEASUREMENTS = [
+    { id: 'init-cou', dateISO: todayISO(), type: 'cou', value: 37 },
+    { id: 'init-poitrine', dateISO: todayISO(), type: 'poitrine', value: 96 },
+    { id: 'init-taille', dateISO: todayISO(), type: 'taille', value: 79 },
+    { id: 'init-bras', dateISO: todayISO(), type: 'bras', value: 37 },
+    { id: 'init-bras-repos', dateISO: todayISO(), type: 'bras_repos', value: 32 },
+    { id: 'init-cuisses', dateISO: todayISO(), type: 'cuisses', value: 59 },
+  ];
+
+  const DEFAULT_CHECKINS = [
+    { id: 'init-weight', dateISO: todayISO(), weight: 83, notes: 'Profil initial' },
+  ];
+
   const BODY_ZONES = [
     {
       id: 'cou',
@@ -48,26 +73,25 @@
     },
     {
       id: 'bras',
-      label: 'Bras',
-      fullName: 'Tour de bras (biceps)',
+      label: 'Bras (contr.)',
+      fullName: 'Tour de bras contracté',
       unit: 'cm',
       side: 'right',
       cx: 178,
-      cy: 122,
+      cy: 120,
       rx: 10,
       ry: 7,
-      mirrorX: 82,
     },
     {
-      id: 'taille',
-      label: 'Taille',
-      fullName: 'Tour de taille',
+      id: 'bras_repos',
+      label: 'Bras (repos)',
+      fullName: 'Tour de bras au repos',
       unit: 'cm',
       side: 'left',
-      cx: 130,
-      cy: 152,
-      rx: 24,
-      ry: 7,
+      cx: 82,
+      cy: 120,
+      rx: 9,
+      ry: 6.5,
     },
     {
       id: 'avant_bras',
@@ -80,6 +104,17 @@
       rx: 8,
       ry: 6,
       mirrorX: 71,
+    },
+    {
+      id: 'taille',
+      label: 'Taille',
+      fullName: 'Tour de taille',
+      unit: 'cm',
+      side: 'left',
+      cx: 130,
+      cy: 152,
+      rx: 24,
+      ry: 7,
     },
     {
       id: 'hanches',
@@ -123,18 +158,21 @@
   let statusMsg = $state('');
   let statusType = $state('info');
 
-  let profile = $state({ heightCm: null, targetWeightKg: null });
-  let checkIns = $state([]);
-  let measurements = $state([]);
+  let profile = $state({ ...DEFAULT_PROFILE });
+  let checkIns = $state([...DEFAULT_CHECKINS]);
+  let measurements = $state([...DEFAULT_MEASUREMENTS]);
 
   // Active selection: 'poids' | 'profil' | zone.id
   let selectedTarget = $state('poids');
 
   // Form inputs
-  let inputValue = $state('');
+  let inputValue = $state('83');
   let inputDate = $state(todayISO());
-  let heightInput = $state('');
-  let targetWeightInput = $state('');
+  let heightInput = $state('193');
+  let targetWeightInput = $state('88');
+  let wingspanInput = $state('195');
+  let legLengthInput = $state('95');
+  let armLengthInput = $state('52');
 
   let chartCanvas = $state(null);
   let evolutionChart = null;
@@ -155,16 +193,20 @@
     loading = true;
     try {
       const data = await getBodyData();
-      profile = data.profile || { heightCm: null, targetWeightKg: null };
-      checkIns = data.checkIns || [];
-      measurements = data.measurements || [];
-      heightInput = profile.heightCm ? String(profile.heightCm) : '';
-      targetWeightInput = profile.targetWeightKg ? String(profile.targetWeightKg) : '';
+      profile = { ...DEFAULT_PROFILE, ...(data.profile || {}) };
+      checkIns = data.checkIns?.length ? data.checkIns : [...DEFAULT_CHECKINS];
+      measurements = data.measurements?.length ? data.measurements : [...DEFAULT_MEASUREMENTS];
+      heightInput = profile.heightCm ? String(profile.heightCm) : '193';
+      targetWeightInput = profile.targetWeightKg ? String(profile.targetWeightKg) : '88';
+      wingspanInput = profile.wingspanCm ? String(profile.wingspanCm) : '195';
+      legLengthInput = profile.legLengthCm ? String(profile.legLengthCm) : '95';
+      armLengthInput = profile.armLengthCm ? String(profile.armLengthCm) : '52';
       syncInputForSelection(selectedTarget);
       await tick();
       renderChart();
     } catch (err) {
       console.warn('Erreur chargement données corps:', err);
+      syncInputForSelection(selectedTarget);
     } finally {
       loading = false;
     }
@@ -172,7 +214,7 @@
 
   // Derived latest weight & delta
   let latestWeightObj = $derived(
-    checkIns.length > 0 ? checkIns[checkIns.length - 1] : null,
+    checkIns.length > 0 ? checkIns[checkIns.length - 1] : { weight: 83, dateISO: todayISO() },
   );
   let previousWeightObj = $derived(
     checkIns.length > 1 ? checkIns[checkIns.length - 2] : null,
@@ -237,6 +279,9 @@
     } else if (target === 'profil') {
       heightInput = profile.heightCm ? String(profile.heightCm) : '';
       targetWeightInput = profile.targetWeightKg ? String(profile.targetWeightKg) : '';
+      wingspanInput = profile.wingspanCm ? String(profile.wingspanCm) : '';
+      legLengthInput = profile.legLengthCm ? String(profile.legLengthCm) : '';
+      armLengthInput = profile.armLengthCm ? String(profile.armLengthCm) : '';
     } else {
       const latest = getLatestZoneValue(target);
       inputValue = latest != null ? String(latest) : '';
@@ -283,11 +328,20 @@
 
     const h = heightInput ? parseFloat(String(heightInput).replace(',', '.')) : null;
     const tw = targetWeightInput ? parseFloat(String(targetWeightInput).replace(',', '.')) : null;
+    const wSpan = wingspanInput ? parseFloat(String(wingspanInput).replace(',', '.')) : null;
+    const legL = legLengthInput ? parseFloat(String(legLengthInput).replace(',', '.')) : null;
+    const armL = armLengthInput ? parseFloat(String(armLengthInput).replace(',', '.')) : null;
 
     saving = true;
     try {
-      await saveBodyProfile({ heightCm: h, targetWeightKg: tw });
-      notify('Profil corporel mis à jour.');
+      await saveBodyProfile({
+        heightCm: h,
+        targetWeightKg: tw,
+        wingspanCm: wSpan,
+        legLengthCm: legL,
+        armLengthCm: armL,
+      });
+      notify('Profil morphologique mis à jour.');
       await loadAll();
     } catch (err) {
       notify(err?.message || 'Erreur lors de la sauvegarde.', 'error');
@@ -398,6 +452,8 @@
         <p class="sub">
           {#if weightDelta !== null}
             {weightDelta > 0 ? `+${weightDelta}` : weightDelta} kg vs préc.
+          {:else if profile.targetWeightRange}
+            Obj. {profile.targetWeightRange}
           {:else if profile.targetWeightKg}
             Cible {profile.targetWeightKg} kg
           {:else}
@@ -417,7 +473,7 @@
         </p>
         <p class="summary-label">Taille (cm)</p>
         <p class="sub">
-          {profile.targetWeightKg ? `Obj. ${profile.targetWeightKg} kg` : 'Modifier profil'}
+          {profile.wingspanCm ? `Envergure ${profile.wingspanCm} cm` : 'Modifier profil'}
         </p>
       </button>
 
@@ -429,10 +485,10 @@
         <p class="summary-value">{bmi ?? '—'}</p>
         <p class="summary-label">IMC</p>
         <p class="sub">
-          {#if bmi}
-            Ratio poids/taille
+          {#if profile.legLengthCm && profile.armLengthCm}
+            Jambes {profile.legLengthCm} · Bras {profile.armLengthCm}
           {:else}
-            Poids + taille requis
+            Ratio poids/taille
           {/if}
         </p>
       </button>
@@ -588,8 +644,8 @@
     <section class="editor-panel">
       {#if selectedTarget === 'profil'}
         <div class="editor-head">
-          <h2>Profil morphologique</h2>
-          <p class="sub">Renseignez votre taille et votre poids cible pour calculer votre IMC.</p>
+          <h2>Profil morphologique (Athlete Profile)</h2>
+          <p class="sub">Données anthropométriques et objectifs issus de votre profil athlète.</p>
         </div>
 
         <form class="profile-form" onsubmit={handleSaveProfile}>
@@ -602,20 +658,56 @@
                 step="0.5"
                 min="100"
                 max="250"
-                placeholder="178"
+                placeholder="193"
                 bind:value={heightInput}
               />
             </label>
             <label class="field-box">
-              <span>Poids cible (kg · option)</span>
+              <span>Poids cible (kg · 85–90)</span>
               <input
                 type="number"
                 inputmode="decimal"
-                step="0.1"
+                step="0.5"
                 min="30"
                 max="250"
-                placeholder="75"
+                placeholder="88"
                 bind:value={targetWeightInput}
+              />
+            </label>
+            <label class="field-box">
+              <span>Envergure (cm)</span>
+              <input
+                type="number"
+                inputmode="decimal"
+                step="0.5"
+                min="100"
+                max="270"
+                placeholder="195"
+                bind:value={wingspanInput}
+              />
+            </label>
+            <label class="field-box">
+              <span>Longueur jambes (cm)</span>
+              <input
+                type="number"
+                inputmode="decimal"
+                step="0.5"
+                min="40"
+                max="150"
+                placeholder="95"
+                bind:value={legLengthInput}
+              />
+            </label>
+            <label class="field-box">
+              <span>Longueur bras (cm · hors épaule)</span>
+              <input
+                type="number"
+                inputmode="decimal"
+                step="0.5"
+                min="25"
+                max="110"
+                placeholder="52"
+                bind:value={armLengthInput}
               />
             </label>
           </div>
@@ -654,7 +746,7 @@
                 step="0.1"
                 min="10"
                 max="300"
-                placeholder={selectedTarget === 'poids' ? '75.0' : '38.5'}
+                placeholder={selectedTarget === 'poids' ? '83.0' : '37.0'}
                 bind:value={inputValue}
                 required
               />
@@ -702,13 +794,13 @@
       {/if}
     </section>
 
-    <!-- Complete Measurements Recap Table -->
+    <!-- Complete Measurements & Anthropometrics Recap Table -->
     <section class="recap-section">
-      <h2>Toutes les mensurations</h2>
+      <h2>Toutes les mensurations & Anthropométrie</h2>
       <ul class="recap-list">
         <li>
           <button type="button" class="recap-row" onclick={() => selectTarget('poids')}>
-            <span class="recap-name">Poids de corps</span>
+            <span class="recap-name">Poids de corps (Obj. {profile.targetWeightRange || `${profile.targetWeightKg} kg`})</span>
             <span class="recap-val">
               {#if latestWeightObj}
                 <strong>{latestWeightObj.weight} kg</strong>
@@ -718,6 +810,26 @@
               {:else}
                 <small class="muted-dash">Non renseigné</small>
               {/if}
+            </span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="recap-row" onclick={() => selectTarget('profil')}>
+            <span class="recap-name">Taille · Envergure</span>
+            <span class="recap-val">
+              <strong>{profile.heightCm ?? 193} cm</strong>
+              {#if profile.wingspanCm}
+                <small class="recap-delta">Env. {profile.wingspanCm} cm</small>
+              {/if}
+            </span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="recap-row" onclick={() => selectTarget('profil')}>
+            <span class="recap-name">Segments (Jambes · Bras)</span>
+            <span class="recap-val">
+              <strong>{profile.legLengthCm ?? 95} cm · {profile.armLengthCm ?? 52} cm</strong>
+              <small class="recap-delta">64 cm av. épaule</small>
             </span>
           </button>
         </li>
@@ -853,20 +965,20 @@
   .zone-col {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.5rem;
   }
 
   .zone-pill {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 0.45rem 0.6rem;
+    padding: 0.42rem 0.55rem;
     border-radius: 10px;
     background: var(--bg);
     border: 1px solid var(--border);
     cursor: pointer;
     text-align: left;
-    min-height: 46px;
+    min-height: 44px;
     transition: border-color 0.15s, background 0.15s;
   }
 
@@ -885,7 +997,7 @@
   }
 
   .zone-pill-name {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     color: var(--text-muted);
     line-height: 1.1;

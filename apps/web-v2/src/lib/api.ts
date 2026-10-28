@@ -181,7 +181,13 @@ export async function getBodyData() {
   return res.json();
 }
 
-export async function saveBodyProfile(data: { heightCm?: number | null; targetWeightKg?: number | null }) {
+export async function saveBodyProfile(data: {
+  heightCm?: number | null;
+  targetWeightKg?: number | null;
+  wingspanCm?: number | null;
+  legLengthCm?: number | null;
+  armLengthCm?: number | null;
+}) {
   const res = await fetch('/api/body', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

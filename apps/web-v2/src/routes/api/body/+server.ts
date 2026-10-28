@@ -7,6 +7,7 @@ const ALLOWED_MEASUREMENT_TYPES = [
   "epaules",
   "poitrine",
   "bras",
+  "bras_repos",
   "avant_bras",
   "taille",
   "hanches",
@@ -14,25 +15,116 @@ const ALLOWED_MEASUREMENT_TYPES = [
   "mollets",
 ];
 
-// GET /api/body — get athlete profile (height, targetWeight), weight check-ins, and body measurements
+// Valeurs initiales issues du fichier AthleteProfil
+const INITIAL_ATHLETE_PROFILE = {
+  age: 16,
+  heightCm: 193,
+  targetWeightKg: 88,
+  targetWeightRange: "85–90 kg",
+  wingspanCm: 195,
+  legLengthCm: 95,
+  armLengthCm: 52,
+  armLengthWithShoulderCm: 64,
+};
+
+const INITIAL_WEIGHT_KG = 83;
+
+const INITIAL_MEASUREMENTS: Array<{ type: string; value: number }> = [
+  { type: "cou", value: 37 },
+  { type: "poitrine", value: 96 },
+  { type: "taille", value: 79 },
+  { type: "bras", value: 37 },
+  { type: "bras_repos", value: 32 },
+  { type: "cuisses", value: 59 },
+];
+
+// GET /api/body — get athlete profile, weight check-ins, and body measurements (auto-seeds from AthleteProfil if empty)
 export const GET: RequestHandler = async () => {
   try {
-    const [profileRow, checkIns, measurements] = await Promise.all([
+    let [profileRow, checkIns, measurements] = await Promise.all([
       prisma.athleteProfile.findUnique({ where: { id: "main" } }).catch(() => null),
       prisma.checkIn.findMany({ orderBy: { dateISO: "asc" } }),
       prisma.measurement.findMany({ orderBy: { dateISO: "asc" } }),
     ]);
 
-    let profile = { heightCm: null as number | null, targetWeightKg: null as number | null };
+    const now = new Date().toISOString();
+    const seedDateISO = now.slice(0, 10);
+
+    // 1. Auto-seed AthleteProfile if not yet initialized
+    if (!profileRow) {
+      try {
+        profileRow = await prisma.athleteProfile.upsert({
+          where: { id: "main" },
+          create: {
+            id: "main",
+            data: JSON.stringify(INITIAL_ATHLETE_PROFILE),
+            createdAt: now,
+            updatedAt: now,
+          },
+          update: {},
+        });
+      } catch (e) {
+        console.warn("Auto-seed athleteProfile warning:", e);
+      }
+    }
+
+    // 2. Auto-seed initial Weight CheckIn (83 kg) if none exists
+    if (checkIns.length === 0) {
+      try {
+        const createdWeight = await prisma.checkIn.create({
+          data: {
+            dateISO: seedDateISO,
+            weight: INITIAL_WEIGHT_KG,
+            notes: "Profil athlète initial",
+            createdAt: now,
+            updatedAt: now,
+          },
+        });
+        checkIns = [createdWeight];
+      } catch (e) {
+        console.warn("Auto-seed checkIn warning:", e);
+      }
+    }
+
+    // 3. Auto-seed initial Measurements from AthleteProfil if none exist
+    if (measurements.length === 0) {
+      try {
+        const createdList = [];
+        for (const item of INITIAL_MEASUREMENTS) {
+          const created = await prisma.measurement.create({
+            data: {
+              dateISO: seedDateISO,
+              type: item.type,
+              value: item.value,
+              createdAt: now,
+              updatedAt: now,
+            },
+          });
+          createdList.push(created);
+        }
+        measurements = createdList;
+      } catch (e) {
+        console.warn("Auto-seed measurements warning:", e);
+      }
+    }
+
+    let profile = { ...INITIAL_ATHLETE_PROFILE };
     if (profileRow?.data) {
       try {
         const parsed = JSON.parse(profileRow.data);
         profile = {
-          heightCm: parsed.heightCm ?? null,
-          targetWeightKg: parsed.targetWeightKg ?? null,
+          ...INITIAL_ATHLETE_PROFILE,
+          ...parsed,
+          heightCm: parsed.heightCm ?? INITIAL_ATHLETE_PROFILE.heightCm,
+          targetWeightKg: parsed.targetWeightKg ?? INITIAL_ATHLETE_PROFILE.targetWeightKg,
+          wingspanCm: parsed.wingspanCm ?? INITIAL_ATHLETE_PROFILE.wingspanCm,
+          legLengthCm: parsed.legLengthCm ?? INITIAL_ATHLETE_PROFILE.legLengthCm,
+          armLengthCm: parsed.armLengthCm ?? INITIAL_ATHLETE_PROFILE.armLengthCm,
+          armLengthWithShoulderCm:
+            parsed.armLengthWithShoulderCm ?? INITIAL_ATHLETE_PROFILE.armLengthWithShoulderCm,
         };
       } catch {
-        // Ignore malformed JSON
+        // Fallback to INITIAL_ATHLETE_PROFILE
       }
     }
 
@@ -47,7 +139,7 @@ export const GET: RequestHandler = async () => {
   }
 };
 
-// POST /api/body — save profile (height), weight check-in, or body measurement
+// POST /api/body — save profile (height, wingspan, etc.), weight check-in, or body measurement
 export const POST: RequestHandler = async ({ request }) => {
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") {
@@ -58,18 +150,18 @@ export const POST: RequestHandler = async ({ request }) => {
   const todayISO = now.slice(0, 10);
 
   try {
-    // 1. Update profile (Taille / Objectif poids)
+    // 1. Update profile (Taille / Objectif poids / Envergure / Segments)
     if (body.kind === "profile") {
       const existing = await prisma.athleteProfile
         .findUnique({ where: { id: "main" } })
         .catch(() => null);
 
-      let currentData: Record<string, any> = {};
+      let currentData: Record<string, any> = { ...INITIAL_ATHLETE_PROFILE };
       if (existing?.data) {
         try {
-          currentData = JSON.parse(existing.data);
+          currentData = { ...INITIAL_ATHLETE_PROFILE, ...JSON.parse(existing.data) };
         } catch {
-          currentData = {};
+          currentData = { ...INITIAL_ATHLETE_PROFILE };
         }
       }
 
@@ -90,6 +182,30 @@ export const POST: RequestHandler = async ({ request }) => {
           return json({ error: "Poids cible invalide" }, { status: 400 });
         }
         currentData.targetWeightKg = tw;
+      }
+
+      if (body.wingspanCm !== undefined) {
+        const w =
+          body.wingspanCm === null || body.wingspanCm === "" ? null : Number(body.wingspanCm);
+        if (w !== null && !Number.isNaN(w) && w >= 50 && w <= 280) {
+          currentData.wingspanCm = w;
+        }
+      }
+
+      if (body.legLengthCm !== undefined) {
+        const l =
+          body.legLengthCm === null || body.legLengthCm === "" ? null : Number(body.legLengthCm);
+        if (l !== null && !Number.isNaN(l) && l >= 30 && l <= 160) {
+          currentData.legLengthCm = l;
+        }
+      }
+
+      if (body.armLengthCm !== undefined) {
+        const a =
+          body.armLengthCm === null || body.armLengthCm === "" ? null : Number(body.armLengthCm);
+        if (a !== null && !Number.isNaN(a) && a >= 20 && a <= 120) {
+          currentData.armLengthCm = a;
+        }
       }
 
       const serialized = JSON.stringify(currentData);
