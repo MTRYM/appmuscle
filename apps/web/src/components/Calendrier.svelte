@@ -409,7 +409,7 @@
   }
 
   .dot.done {
-    background: #1e5a3a;
+    background: #259659;
   }
   .dot.pending {
     background: #c4a482;
@@ -466,7 +466,7 @@
   }
 
   .day.done {
-    background: #1e5a3a;
+    background: #238656;
     color: #f7f5f2;
     font-weight: 700;
   }
@@ -478,8 +478,8 @@
   }
 
   .day.pending {
-    background: #423223;
-    color: #fcefe3;
+    background: #c4a482;
+    color: #17150f;
     font-weight: 700;
   }
 
