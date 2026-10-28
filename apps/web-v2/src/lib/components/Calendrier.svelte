@@ -728,4 +728,13 @@
     cursor: not-allowed;
     transform: none;
   }
+
+  .detail .btn-secondary {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+  }
 </style>

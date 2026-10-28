@@ -1393,6 +1393,7 @@ import {
   .done-screen {
     text-align: center;
     padding-top: 1rem;
+    padding-bottom: 2rem;
   }
 
   .done-icon {
@@ -1964,7 +1965,7 @@ import {
     max-width: 480px;
     max-height: 85dvh;
     overflow-y: auto;
-    padding: 0.5rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+    padding: 0.75rem 1.25rem calc(56px + 1.25rem + env(safe-area-inset-bottom, 0px));
     background: var(--bg-card);
     border-radius: 20px 20px 0 0;
     animation: sheet-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2019,7 +2020,11 @@ import {
 
   .sheet-close {
     width: 100%;
-    margin-top: 0.75rem;
+    min-height: 48px;
+    margin-top: 0.85rem;
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    font-weight: 600;
     justify-content: center;
     background: var(--bg-elevated);
     color: var(--text);
@@ -2028,7 +2033,9 @@ import {
   .sheet-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    min-height: 48px;
   }
 
   .sheet-text {
