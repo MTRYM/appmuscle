@@ -26,6 +26,9 @@ import {
   import { suggestWeightForExercise } from '$lib/weights';
   import { Check } from 'lucide-svelte';
   import ExerciseGif from './ExerciseGif.svelte';
+  import { getExerciseGif } from '$lib/exerciseGifs.js';
+
+  const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
 
   let { onSessionSaved = () => {} } = $props();
 
@@ -54,6 +57,7 @@ import {
   let setFlash = $state(false);
   let editingSet = $state(null);
   let showAllCompletedSets = $state(false);
+  let showMenu = $state(false);
 
   let showRest = $state(false);
   let restKey = $state(0);
@@ -368,6 +372,36 @@ import {
   );
 
   let isIso = $derived(isIsometricExercise(currentExercise));
+  let hasGuide = $derived(
+    !!currentExercise && (!!getExerciseGif(currentExercise.nom) || !!currentExercise.description),
+  );
+  let nextUp = $derived.by(() => {
+    if (!showRest || !currentExercise) return null;
+    if (pendingAfterRest === 'nextExercise') {
+      const nx = exercices[exerciseIndex + 1];
+      return nx ? nx.nom : null;
+    }
+    return `Série ${setIndex + 2} · ${currentExercise.nom}`;
+  });
+
+  function menuAction(fn) {
+    showMenu = false;
+    fn();
+  }
+
+  function formatClock(secs) {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const sec = String(secs % 60).padStart(2, '0');
+    return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+  }
+
+  function formatSetPerf(set) {
+    if (set.exerciseType === 'isometrique') {
+      return `${set.weight > 0 ? `${set.weight} kg · ` : ''}${set.repsActual} s`;
+    }
+    return `${set.weight} kg × ${set.repsActual}`;
+  }
 
   function validateSetInput() {
     const r = parseInt(repsActual, 10);
@@ -780,92 +814,75 @@ import {
       </nav>
     {/if}
   {:else if phase === 'active'}
-    <div class="workout-top">
-      <div class="workout-header">
-        <button type="button" class="btn-ghost cancel-btn" onclick={cancelSession}>Annuler</button>
-        <span class="session-tag">{sessionMeta.sessionName}</span>
-      </div>
-
-      <div class="session-progress">
-        <div class="progress-meta">
-          <span>{completedSets.length}/{totalSetsPlanned} séries</span>
-          <span>{formatDuration(sessionElapsed)}</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" style="width: {progressPct}%"></div>
-        </div>
-      </div>
-    </div>
-
     {#if currentExercise}
-      <div class="exercise-card" class:flash={setFlash}>
-        <p class="progress-label">
-          {#if isWarmupExercise(currentExercise)}
-            <span class="warmup-tag">Échauffement</span>
-          {/if}
-          Exercice {exerciseIndex + 1}/{exercices.length} · Série {setIndex + 1}/{totalSetsForExercise}
-        </p>
-        <h1 class="exercise-name">{currentExercise.nom}</h1>
-
-        <ExerciseGif name={currentExercise.nom} />
-
-        {#if currentExercise.description}
-          <p class="exercise-desc">{currentExercise.description}</p>
-        {/if}
-
-        <div class="targets">
-          <span class="target-chip">{formatExerciseCible(currentExercise)}</span>
-          <span class="target-chip rpe">RPE {currentExercise.rpe_cible}</span>
-          <span class="target-chip">{currentExercise.repos_sec}s repos</span>
-          {#if isIso}
-            <span class="target-chip iso">Isométrique</span>
-          {/if}
-        </div>
+      <div class="workout" class:flash={setFlash}>
+        <header class="w-top">
+          <span class="w-session">{sessionMeta.sessionName}</span>
+          <span class="w-clock">{formatClock(sessionElapsed)}</span>
+          <button
+            type="button"
+            class="w-more"
+            aria-label="Options de la séance"
+            onclick={() => (showMenu = true)}
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <circle cx="5" cy="12" r="1.8" />
+              <circle cx="12" cy="12" r="1.8" />
+              <circle cx="19" cy="12" r="1.8" />
+            </svg>
+          </button>
+        </header>
+        <div class="w-progress" aria-hidden="true"><span style="width: {progressPct}%"></span></div>
 
         {#if !showRest}
-          {#if isIso}
-            {#key `${exerciseIndex}-${setIndex}-${holdTimerKey}`}
-              <HoldTimer
-                targetSeconds={parseInt(currentExercise.cibleParsed?.mid ?? currentExercise.cible ?? '20', 10) || 20}
-                exerciseName={currentExercise.nom}
-                onTimeRecorded={(secs) => {
-                  repsActual = String(secs);
-                }}
-              />
-            {/key}
-          {/if}
+          <section class="w-exercise">
+            <p class="w-step">
+              {#if isWarmupExercise(currentExercise)}Échauffement · {/if}Exercice {exerciseIndex + 1}/{exercices.length}
+            </p>
+            <h1 class="w-name">{currentExercise.nom}</h1>
+            <p class="w-target">
+              {formatExerciseCible(currentExercise)} · RPE {currentExercise.rpe_cible} · {currentExercise.repos_sec} s de repos
+            </p>
 
-          {#if weightHint && setIndex === 0 && !isIso}
-            <div
-              class="weight-hint"
-              class:hint-increase={weightHint.type === 'increase'}
-              class:hint-repeat={weightHint.type === 'repeat'}
-            >
-              {weightHint.message}
+            {#if hasGuide}
+              <details class="w-guide">
+                <summary>Voir l'exécution</summary>
+                <ExerciseGif name={currentExercise.nom} compact />
+                {#if currentExercise.description}
+                  <p class="w-desc">{currentExercise.description}</p>
+                {/if}
+              </details>
+            {/if}
+          </section>
+
+          <section class="w-log">
+            <div class="w-set-head">
+              <span class="w-set-label">Série {setIndex + 1}<span class="w-set-total">/{totalSetsForExercise}</span></span>
+              <span class="w-dots" aria-hidden="true">
+                {#each Array(totalSetsForExercise) as _, i}
+                  <i class:done={i < setIndex} class:current={i === setIndex}></i>
+                {/each}
+              </span>
             </div>
-          {/if}
 
-          <div class="input-stack" class:iso-stack={isIso}>
-            {#if !isIso}
-              <label class="input-block">
-                <span>Charge (kg)</span>
-                <input
-                  type="number"
-                  inputmode="decimal"
-                  step="0.5"
-                  min="0"
-                  bind:value={weight}
-                  placeholder="0"
-                />
-              </label>
-            {/if}
-            <label class="input-block" class:full-width={isIso}>
-              <span>{isIso ? 'Secondes tenues' : 'Reps effectuées'}</span>
-              <input type="number" inputmode="numeric" min="1" bind:value={repsActual} />
-            </label>
             {#if isIso}
-              <label class="input-block optional-weight">
-                <span>Lestage (kg) — optionnel</span>
+              {#key `${exerciseIndex}-${setIndex}-${holdTimerKey}`}
+                <HoldTimer
+                  targetSeconds={parseInt(currentExercise.cibleParsed?.mid ?? currentExercise.cible ?? '20', 10) || 20}
+                  exerciseName={currentExercise.nom}
+                  onTimeRecorded={(secs) => {
+                    repsActual = String(secs);
+                  }}
+                />
+              {/key}
+            {/if}
+
+            {#if weightHint && setIndex === 0 && !isIso}
+              <p class="w-hint" class:up={weightHint.type === 'increase'}>{weightHint.message}</p>
+            {/if}
+
+            <div class="w-inputs">
+              <label class="w-field">
                 <input
                   type="number"
                   inputmode="decimal"
@@ -874,266 +891,234 @@ import {
                   bind:value={weight}
                   placeholder="0"
                 />
+                <span>{isIso ? 'kg de lest · option' : 'kg'}</span>
               </label>
-            {/if}
-
-            <div class="input-block rpe-block">
-              <div class="rpe-label-row">
-                <span>RPE Ressenti</span>
-                <span class="rpe-target-hint">Cible : RPE {currentExercise.rpe_cible}</span>
-              </div>
-              <div class="rpe-input-wrapper">
+              <label class="w-field">
                 <input
                   type="number"
-                  inputmode="decimal"
-                  step="0.5"
+                  inputmode="numeric"
                   min="1"
-                  max="10"
-                  bind:value={rpeActual}
-                  placeholder={String(currentExercise.rpe_cible)}
+                  bind:value={repsActual}
+                  placeholder="0"
                 />
+                <span>{isIso ? 'secondes' : 'reps'}</span>
+              </label>
+            </div>
+
+            <div class="w-rpe">
+              <div class="w-rpe-head">
+                <span>Effort ressenti</span>
+                <span>cible RPE {currentExercise.rpe_cible}</span>
               </div>
-              <div class="rpe-quick-chips">
-                {#each [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10] as val}
+              <div class="w-rpe-scale" role="radiogroup" aria-label="RPE ressenti">
+                {#each RPE_VALUES as val}
                   <button
                     type="button"
-                    class="rpe-chip"
+                    role="radio"
+                    aria-checked={parseFloat(rpeActual) === val}
+                    aria-label="RPE {val}"
+                    class:half={val % 1 !== 0}
                     class:active={parseFloat(rpeActual) === val}
-                    class:is-target={currentExercise.rpe_cible === val}
+                    class:target={currentExercise.rpe_cible === val}
                     onclick={() => (rpeActual = String(val))}
                   >
-                    {val}
-                    {#if currentExercise.rpe_cible === val}
-                      <span class="chip-star">★</span>
-                    {/if}
+                    {val % 1 !== 0 ? '½' : val}
                   </button>
                 {/each}
               </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            class="btn-primary validate-btn"
-            disabled={!validateSetInput()}
-            onclick={confirmSet}
-          >
-            Valider la série {setIndex + 1}
-          </button>
+            <button
+              type="button"
+              class="btn-primary w-validate"
+              disabled={!validateSetInput()}
+              onclick={confirmSet}
+            >
+              Valider la série
+            </button>
+          </section>
 
           {#if currentExerciseSets.length > 0}
-            <div class="completed-sets-box">
-              <div class="completed-sets-head">
-                <span class="head-title">Séries validées ({currentExerciseSets.length}/{totalSetsForExercise})</span>
-                <button
-                  type="button"
-                  class="btn-undo-link"
-                  onclick={undoLastSet}
-                  title="Annuler la dernière série et la recharger dans les champs"
-                >
-                  ↩ Corriger la dernière série
-                </button>
-              </div>
-              <div class="completed-sets-list">
+            <section class="w-done">
+              <p class="w-done-title">Séries faites <span>Toucher pour corriger</span></p>
+              <ul class="w-sets">
                 {#each currentExerciseSets as s}
-                  {@const isHigher = (s.rpe ?? s.rpeTarget) > s.rpeTarget}
-                  {@const isLower = (s.rpe ?? s.rpeTarget) < s.rpeTarget}
-                  <div class="set-row-item">
-                    <div class="set-badge-col">
-                      <span class="set-num-tag">S{s.setNumber}</span>
-                    </div>
-                    <div class="set-perf-col">
-                      {#if s.exerciseType === 'isometrique'}
-                        <span class="perf-val">{s.weight > 0 ? `${s.weight} kg · ` : ''}{s.repsActual} s</span>
-                      {:else}
-                        <span class="perf-val">{s.weight} kg × {s.repsActual}</span>
-                      {/if}
-                    </div>
-                    <div class="set-rpe-col">
-                      <span
-                        class="rpe-compare-chip"
-                        class:rpe-match={!isHigher && !isLower}
-                        class:rpe-higher={isHigher}
-                        class:rpe-lower={isLower}
-                      >
-                        RPE {s.rpe ?? s.rpeTarget}
-                        <span class="rpe-target-sub">/ cible {s.rpeTarget}</span>
-                      </span>
-                    </div>
-                    <div class="set-actions-col">
-                      <button
-                        type="button"
-                        class="btn-edit-icon"
-                        onclick={() => startEditSet(s)}
-                        title="Modifier cette série"
-                      >
-                        ✏️
-                      </button>
-                    </div>
-                  </div>
+                  {@const r = s.rpe ?? s.rpeTarget}
+                  <li>
+                    <button
+                      type="button"
+                      class="w-set-row"
+                      onclick={() => startEditSet(s)}
+                      aria-label="Corriger la série {s.setNumber}"
+                    >
+                      <span class="w-set-n">{s.setNumber}</span>
+                      <span class="w-set-perf">{formatSetPerf(s)}</span>
+                      <span class="w-set-rpe" class:higher={r > s.rpeTarget} class:lower={r < s.rpeTarget}>RPE {r}</span>
+                    </button>
+                  </li>
                 {/each}
-              </div>
-            </div>
-          {/if}
-
-          <div class="skip-row">
-            {#if completedSets.length > 0 && currentExerciseSets.length === 0}
-              <button type="button" class="btn-ghost undo-link" onclick={undoLastSet}>
-                ↩ Revenir à l'exercice précédent
-              </button>
-            {/if}
-            {#if !isLastSet}
-              <button type="button" class="btn-ghost" onclick={skipToNextSet}>Passer la série →</button>
-            {/if}
-            {#if !isLastExercise}
-              <button type="button" class="btn-ghost" onclick={skipToNextExercise}>Passer l'exercice →</button>
-            {/if}
-            {#if completedSets.length > 0}
-              <button
-                type="button"
-                class="btn-ghost view-all-link"
-                onclick={() => (showAllCompletedSets = !showAllCompletedSets)}
-              >
-                {showAllCompletedSets ? 'Masquer toutes les séries' : `Toutes les séries de la séance (${completedSets.length})`}
-              </button>
-            {/if}
-            <button type="button" class="btn-ghost finish-link" onclick={finishSession}>Terminer la séance</button>
-          </div>
-
-          {#if showAllCompletedSets && completedSets.length > 0}
-            <div class="all-sets-drawer">
-              <p class="all-sets-title">Historique de la séance en cours</p>
-              <div class="completed-sets-list">
-                {#each completedSets as s}
-                  {@const isHigher = (s.rpe ?? s.rpeTarget) > s.rpeTarget}
-                  {@const isLower = (s.rpe ?? s.rpeTarget) < s.rpeTarget}
-                  <div class="set-row-item">
-                    <div class="set-badge-col">
-                      <span class="set-num-tag">{s.exerciseName.slice(0, 14)}.. S{s.setNumber}</span>
-                    </div>
-                    <div class="set-perf-col">
-                      {#if s.exerciseType === 'isometrique'}
-                        <span class="perf-val">{s.weight > 0 ? `${s.weight} kg · ` : ''}{s.repsActual} s</span>
-                      {:else}
-                        <span class="perf-val">{s.weight} kg × {s.repsActual}</span>
-                      {/if}
-                    </div>
-                    <div class="set-rpe-col">
-                      <span
-                        class="rpe-compare-chip"
-                        class:rpe-match={!isHigher && !isLower}
-                        class:rpe-higher={isHigher}
-                        class:rpe-lower={isLower}
-                      >
-                        RPE {s.rpe ?? s.rpeTarget}
-                        <span class="rpe-target-sub">/ {s.rpeTarget}</span>
-                      </span>
-                    </div>
-                    <div class="set-actions-col">
-                      <button
-                        type="button"
-                        class="btn-edit-icon"
-                        onclick={() => startEditSet(s)}
-                        title="Modifier cette série"
-                      >
-                        ✏️
-                      </button>
-                    </div>
-                  </div>
-                {/each}
-              </div>
-            </div>
+              </ul>
+            </section>
           {/if}
         {:else}
-          {#key restKey}
-            <Chrono
-              duration={restDuration}
-              onComplete={onRestComplete}
-              onSkip={onRestSkip}
-            />
-          {/key}
-          <div class="rest-undo-wrapper">
-            <button type="button" class="btn-ghost rest-undo-btn" onclick={undoLastSet}>
-              ↩ Erreur ? Corriger la série précédente
-              {#if completedSets.length > 0}
-                ({completedSets[completedSets.length - 1]?.weight} kg × {completedSets[completedSets.length - 1]?.repsActual})
-              {/if}
-            </button>
-          </div>
+          <section class="w-rest">
+            {#key restKey}
+              <Chrono
+                duration={restDuration}
+                onComplete={onRestComplete}
+                onSkip={onRestSkip}
+              />
+            {/key}
+
+            {#if nextUp}
+              <div class="w-next">
+                <span class="w-next-label">À suivre</span>
+                <span class="w-next-name">{nextUp}</span>
+              </div>
+            {/if}
+
+            <button type="button" class="w-link" onclick={undoLastSet}>Corriger la série précédente</button>
+          </section>
         {/if}
       </div>
     {/if}
 
+    {#if showMenu}
+      <div
+        class="sheet-backdrop"
+        role="presentation"
+        onclick={() => (showMenu = false)}
+        onkeydown={(e) => e.key === 'Escape' && (showMenu = false)}
+      >
+        <div
+          class="sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Options de la séance"
+          tabindex="-1"
+          onclick={(e) => e.stopPropagation()}
+          onkeydown={(e) => e.stopPropagation()}
+        >
+          {#if !showRest && !isLastSet}
+            <button type="button" class="sheet-item" onclick={() => menuAction(skipToNextSet)}>Passer la série</button>
+          {/if}
+          {#if !showRest && !isLastExercise}
+            <button type="button" class="sheet-item" onclick={() => menuAction(skipToNextExercise)}>Passer l'exercice</button>
+          {/if}
+          {#if completedSets.length > 0}
+            <button type="button" class="sheet-item" onclick={() => menuAction(undoLastSet)}>Annuler la dernière série</button>
+            <button type="button" class="sheet-item" onclick={() => menuAction(() => (showAllCompletedSets = true))}>
+              Historique de la séance <span class="sheet-meta">{completedSets.length}</span>
+            </button>
+          {/if}
+          <button type="button" class="sheet-item" onclick={() => menuAction(finishSession)}>Terminer la séance</button>
+          <button type="button" class="sheet-item danger" onclick={() => menuAction(cancelSession)}>Abandonner la séance</button>
+          <button type="button" class="sheet-close" onclick={() => (showMenu = false)}>Fermer</button>
+        </div>
+      </div>
+    {/if}
+
+    {#if showAllCompletedSets && completedSets.length > 0}
+      <div
+        class="sheet-backdrop"
+        role="presentation"
+        onclick={() => (showAllCompletedSets = false)}
+        onkeydown={(e) => e.key === 'Escape' && (showAllCompletedSets = false)}
+      >
+        <div
+          class="sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Historique de la séance"
+          tabindex="-1"
+          onclick={(e) => e.stopPropagation()}
+          onkeydown={(e) => e.stopPropagation()}
+        >
+          <p class="sheet-title">Historique de la séance</p>
+          <ul class="w-sets">
+            {#each completedSets as s}
+              {@const r = s.rpe ?? s.rpeTarget}
+              <li>
+                <button
+                  type="button"
+                  class="w-set-row"
+                  onclick={() => startEditSet(s)}
+                  aria-label="Corriger {s.exerciseName} série {s.setNumber}"
+                >
+                  <span class="w-set-n">{s.setNumber}</span>
+                  <span class="w-set-perf">
+                    <small>{s.exerciseName}</small>
+                    {formatSetPerf(s)}
+                  </span>
+                  <span class="w-set-rpe" class:higher={r > s.rpeTarget} class:lower={r < s.rpeTarget}>RPE {r}</span>
+                </button>
+              </li>
+            {/each}
+          </ul>
+          <button type="button" class="sheet-close" onclick={() => (showAllCompletedSets = false)}>Fermer</button>
+        </div>
+      </div>
+    {/if}
+
     {#if editingSet}
-      <div class="modal-backdrop" onclick={cancelEditSet} onkeydown={(e) => e.key === 'Escape' && cancelEditSet()} role="presentation">
-        <div class="modal-card" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
-          <div class="modal-header">
-            <h3>Corriger la Série {editingSet.setNumber}</h3>
-            <p class="modal-subtitle">{editingSet.exerciseName}</p>
-          </div>
+      <div
+        class="sheet-backdrop top"
+        role="presentation"
+        onclick={cancelEditSet}
+        onkeydown={(e) => e.key === 'Escape' && cancelEditSet()}
+      >
+        <div
+          class="sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Corriger la série"
+          tabindex="-1"
+          onclick={(e) => e.stopPropagation()}
+          onkeydown={(e) => e.stopPropagation()}
+        >
+          <p class="sheet-title">Série {editingSet.setNumber}</p>
+          <p class="sheet-sub">{editingSet.exerciseName}</p>
 
-          <div class="modal-fields">
-            {#if editingSet.exerciseType !== 'isometrique'}
-              <label class="modal-field">
-                <span>Charge (kg)</span>
-                <input
-                  type="number"
-                  inputmode="decimal"
-                  step="0.5"
-                  min="0"
-                  bind:value={editingSet.weight}
-                />
-              </label>
-            {:else}
-              <label class="modal-field">
-                <span>Lestage (kg)</span>
-                <input
-                  type="number"
-                  inputmode="decimal"
-                  step="0.5"
-                  min="0"
-                  bind:value={editingSet.weight}
-                />
-              </label>
-            {/if}
-
-            <label class="modal-field">
-              <span>{editingSet.exerciseType === 'isometrique' ? 'Durée (secondes)' : 'Répétitions'}</span>
-              <input
-                type="number"
-                inputmode="numeric"
-                min="1"
-                bind:value={editingSet.repsActual}
-              />
+          <div class="w-inputs">
+            <label class="w-field">
+              <input type="number" inputmode="decimal" step="0.5" min="0" bind:value={editingSet.weight} />
+              <span>{editingSet.exerciseType === 'isometrique' ? 'kg de lest' : 'kg'}</span>
             </label>
-
-            <label class="modal-field">
-              <span>RPE Réalisé (cible {editingSet.rpeTarget})</span>
-              <input
-                type="number"
-                inputmode="decimal"
-                step="0.5"
-                min="1"
-                max="10"
-                bind:value={editingSet.rpe}
-              />
+            <label class="w-field">
+              <input type="number" inputmode="numeric" min="1" bind:value={editingSet.repsActual} />
+              <span>{editingSet.exerciseType === 'isometrique' ? 'secondes' : 'reps'}</span>
             </label>
           </div>
 
-          <div class="modal-actions">
-            <button type="button" class="btn-primary" onclick={saveEditedSet}>
-              Enregistrer la correction
+          <div class="w-rpe">
+            <div class="w-rpe-head">
+              <span>Effort ressenti</span>
+              <span>cible RPE {editingSet.rpeTarget}</span>
+            </div>
+            <div class="w-rpe-scale" role="radiogroup" aria-label="RPE réalisé">
+              {#each RPE_VALUES as val}
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={parseFloat(editingSet.rpe) === val}
+                  aria-label="RPE {val}"
+                  class:half={val % 1 !== 0}
+                  class:active={parseFloat(editingSet.rpe) === val}
+                  class:target={editingSet.rpeTarget === val}
+                  onclick={() => (editingSet.rpe = String(val))}
+                >
+                  {val % 1 !== 0 ? '½' : val}
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary w-validate" onclick={saveEditedSet}>Enregistrer</button>
+          <div class="sheet-row">
+            <button type="button" class="sheet-text danger" onclick={() => deleteSpecificSet(editingSet.globalIndex)}>
+              Supprimer
             </button>
-            <button
-              type="button"
-              class="btn-danger-ghost"
-              onclick={() => deleteSpecificSet(editingSet.globalIndex)}
-            >
-              Supprimer cette série
-            </button>
-            <button type="button" class="btn-ghost" onclick={cancelEditSet}>
-              Annuler
-            </button>
+            <button type="button" class="sheet-text" onclick={cancelEditSet}>Annuler</button>
           </div>
         </div>
       </div>
@@ -1338,50 +1323,6 @@ import {
     opacity: 0.92;
   }
 
-  .warmup-tag {
-    display: inline-block;
-    margin-right: 0.35rem;
-    padding: 0.1rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: color-mix(in srgb, var(--warning) 25%, var(--bg-card));
-    color: var(--warning);
-  }
-
-  .exercise-desc {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 0.95rem;
-    line-height: 1.45;
-    color: var(--text-muted);
-    margin: 0 0 1rem;
-    padding: 0.75rem 0.85rem;
-    background: color-mix(in srgb, var(--beige) 12%, var(--bg-card));
-    border-left: 3px solid var(--pink);
-    border-radius: 0 calc(var(--radius) * 2) calc(var(--radius) * 2) 0;
-  }
-
-  .target-chip.iso {
-    background: color-mix(in srgb, var(--deepblue) 18%, var(--bg-elevated));
-    border-color: color-mix(in srgb, var(--deepblue) 35%, transparent);
-    color: color-mix(in srgb, var(--deepblue) 80%, var(--offwhite));
-  }
-
-  .input-stack.iso-stack {
-    gap: 0.85rem;
-  }
-
-  .input-block.full-width {
-    grid-column: 1 / -1;
-  }
-
-  .optional-weight input {
-    font-size: 1.25rem;
-  }
-
   .start-btn {
     font-size: 1.2rem;
     min-height: 72px;
@@ -1421,180 +1362,6 @@ import {
     font-size: 0.85rem;
     color: var(--text-muted);
     font-weight: 400;
-  }
-
-  .workout-top {
-    margin-bottom: 1rem;
-  }
-
-  .workout-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-  }
-
-  .cancel-btn {
-    padding: 0;
-    min-height: auto;
-  }
-
-  .session-tag {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .session-progress {
-    margin-bottom: 0.25rem;
-  }
-
-  .progress-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 0.35rem;
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .progress-track {
-    height: 6px;
-    background: var(--border);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--pink);
-    border-radius: 999px;
-    transition: width 0.35s ease;
-  }
-
-  .exercise-card {
-    background: var(--bg-card);
-    border-radius: calc(var(--radius) * 4);
-    padding: 1.35rem;
-    border: 1px solid var(--border);
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-
-  .exercise-card.flash {
-    border-color: var(--pink);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--pink) 40%, transparent);
-  }
-
-  .progress-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-bottom: 0.35rem;
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .exercise-name {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1.85rem;
-    margin-bottom: 0.75rem;
-    line-height: 1.15;
-  }
-
-  .targets {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .target-chip {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 0.35rem 0.65rem;
-    border-radius: 999px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-  }
-
-  .target-chip.rpe {
-    background: color-mix(in srgb, var(--pink) 20%, var(--bg-elevated));
-    border-color: color-mix(in srgb, var(--pink) 40%, transparent);
-    color: var(--pink);
-  }
-
-  .input-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    margin-bottom: 1rem;
-  }
-
-  .input-block {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  .input-block span {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .input-block input {
-    font-size: 1.75rem;
-    font-weight: 700;
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
-  }
-
-  .validate-btn {
-    min-height: 68px;
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .weight-hint {
-    font-size: 0.82rem;
-    line-height: 1.35;
-    padding: 0.65rem 0.85rem;
-    border-radius: calc(var(--radius) * 2);
-    margin-bottom: 0.85rem;
-    border: 1px solid var(--border);
-  }
-
-  .weight-hint.hint-increase {
-    background: color-mix(in srgb, var(--deepblue) 18%, var(--bg-card));
-    border-color: color-mix(in srgb, var(--deepblue) 35%, transparent);
-    color: var(--text);
-  }
-
-  .weight-hint.hint-repeat {
-    background: color-mix(in srgb, var(--beige) 22%, var(--bg-card));
-    border-color: color-mix(in srgb, var(--beige) 45%, transparent);
-    color: var(--text-muted);
-  }
-
-  .skip-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    margin-top: 0.5rem;
-  }
-
-  .finish-link {
-    color: var(--danger);
   }
 
   .debrief-intro {
@@ -1710,357 +1477,522 @@ import {
     box-shadow: 0 0 15px rgba(34, 197, 94, 0.35);
   }
 
-  /* ─── RPE Input & Chips ─────────────────────────────────────── */
-  .rpe-block {
-    margin-top: 0.25rem;
+  /* ─── Séance active : une seule colonne, typographie, aucune carte ─── */
+  .workout {
+    padding-top: 0.25rem;
   }
 
-  .rpe-label-row {
+  .w-top {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.35rem;
+    gap: 0.75rem;
+    min-height: 44px;
   }
 
-  .rpe-target-hint {
+  .w-session,
+  .w-clock {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .w-session {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .w-clock {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .w-more {
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+    margin-right: -0.6rem;
+    justify-content: center;
+    background: transparent;
+    color: var(--text);
+    border-radius: 50%;
+  }
+
+  .w-more svg {
+    fill: currentColor;
+  }
+
+  .w-progress {
+    height: 2px;
+    margin: 0.35rem 0 1.75rem;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .w-progress span {
+    display: block;
+    height: 100%;
+    background: var(--pink);
+    transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .w-step {
+    margin: 0 0 0.4rem;
+    font-family: 'Montserrat', sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
-    font-family: 'Montserrat', sans-serif;
-    color: var(--accent);
-    letter-spacing: 0.04em;
-    background: color-mix(in srgb, var(--accent) 15%, var(--bg-elevated));
-    padding: 0.2rem 0.55rem;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  }
-
-  .rpe-input-wrapper input {
-    font-size: 1.6rem;
-    font-weight: 800;
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
-    color: var(--accent);
-  }
-
-  .rpe-quick-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-top: 0.5rem;
-    justify-content: center;
-  }
-
-  .rpe-chip {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    min-height: 38px;
-    min-width: 44px;
-    padding: 0.35rem 0.55rem;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.15rem;
-  }
-
-  .rpe-chip:hover {
-    border-color: var(--accent);
-    transform: translateY(-1px);
-  }
-
-  .rpe-chip.is-target {
-    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
-    color: var(--accent);
-  }
-
-  .rpe-chip.active {
-    background: var(--accent);
-    color: var(--accent-foreground, #070706);
-    border-color: var(--accent);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 40%, transparent);
-    font-weight: 800;
-    transform: scale(1.05);
-  }
-
-  .chip-star {
-    font-size: 0.65rem;
-    color: currentColor;
-    margin-left: 1px;
-  }
-
-  /* ─── Completed Sets List & Comparison ───────────────────────── */
-  .completed-sets-box {
-    margin-top: 1.25rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .completed-sets-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .head-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
   }
 
-  .btn-undo-link {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #fb923c;
-    background: color-mix(in srgb, #fb923c 14%, transparent);
-    border: 1px solid color-mix(in srgb, #fb923c 35%, transparent);
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
+  .w-name {
+    font-size: 1.9rem;
+    line-height: 1.1;
+    margin: 0 0 0.5rem;
+  }
+
+  .w-target {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .w-guide {
+    margin-top: 0.5rem;
+  }
+
+  .w-guide summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    list-style: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--beige);
     cursor: pointer;
-    transition: all 0.2s;
   }
 
-  .btn-undo-link:hover {
-    background: color-mix(in srgb, #fb923c 25%, transparent);
+  .w-guide summary::-webkit-details-marker {
+    display: none;
   }
 
-  .completed-sets-list {
+  .w-guide summary::after {
+    content: '+';
+    margin-left: 0.4rem;
+    font-weight: 400;
+  }
+
+  .w-guide[open] summary::after {
+    content: '−';
+  }
+
+  .w-desc {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .w-log {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .w-set-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .w-set-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .w-set-total {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .w-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .w-dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+
+  .w-dots i.done {
+    background: var(--text-muted);
+  }
+
+  .w-dots i.current {
+    background: var(--pink);
+  }
+
+  .w-hint {
+    margin: 0 0 1.25rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+  }
+
+  .w-hint.up {
+    color: var(--beige);
+  }
+
+  .w-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .w-field {
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
-  }
-
-  .set-row-item {
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.55rem 0.75rem;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    transition: background 0.15s ease;
+    gap: 0.3rem;
   }
 
-  .set-num-tag {
+  .w-field input {
+    min-height: 64px;
+    padding: 0.25rem 0;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-size: 2.75rem !important;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--text-heading);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
+    -moz-appearance: textfield;
+    transition: border-color 0.2s;
+  }
+
+  .w-field input:focus {
+    border-bottom-color: var(--pink);
+    box-shadow: none;
+  }
+
+  .w-field input::-webkit-outer-spin-button,
+  .w-field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .w-field span {
+    font-size: 0.78rem;
     color: var(--text-muted);
-    background: color-mix(in srgb, var(--border) 40%, transparent);
-    padding: 0.15rem 0.45rem;
-    border-radius: 6px;
   }
 
-  .perf-val {
-    font-family: 'Montserrat', sans-serif;
+  .w-rpe {
+    margin-top: 1.5rem;
+  }
+
+  .w-rpe-head {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .w-rpe-scale {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 2px;
+  }
+
+  .w-rpe-scale button {
+    position: relative;
+    min-height: 44px;
+    padding: 0;
+    justify-content: center;
+    background: transparent;
+    color: var(--text);
     font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 10px;
+  }
+
+  .w-rpe-scale button.half {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .w-rpe-scale button.target::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: 50%;
+    background: var(--beige);
+  }
+
+  .w-rpe-scale button.active {
+    background: var(--pink);
+    color: #070706;
+  }
+
+  .w-rpe-scale button.active::after {
+    background: #070706;
+  }
+
+  .w-validate {
+    margin-top: 1.75rem;
+    min-height: 56px;
+    font-size: 1.02rem;
+  }
+
+  .workout.flash .w-progress span {
+    box-shadow: 0 0 10px var(--pink);
+  }
+
+  .w-done {
+    margin-top: 2rem;
+  }
+
+  .w-done-title {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .w-done-title span {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--faint);
+  }
+
+  .w-sets {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 0;
+  }
+
+  .w-set-row {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 52px;
+    padding: 0.5rem 0;
+    text-align: left;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .w-set-row:active {
+    transform: none;
+    opacity: 0.6;
+  }
+
+  .w-set-n {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .w-set-perf {
+    display: flex;
+    flex-direction: column;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .w-set-perf small {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .w-set-rpe {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .w-set-rpe.higher {
+    color: var(--warning);
+  }
+
+  .w-set-rpe.lower {
+    color: color-mix(in srgb, var(--deepblue) 35%, var(--offwhite));
+  }
+
+  /* ─── Repos ─── */
+  .w-rest {
+    text-align: center;
+  }
+
+  .w-next {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 1.5rem;
+  }
+
+  .w-next-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .w-next-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .w-link {
+    margin: 1.5rem auto 0;
+    min-height: 44px;
+    padding: 0.5rem;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  /* ─── Feuilles (options, historique, correction) ─── */
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    animation: sheet-fade 0.2s ease;
+  }
+
+  .sheet-backdrop.top {
+    z-index: 1001;
+  }
+
+  .sheet {
+    width: 100%;
+    max-width: 480px;
+    max-height: 85dvh;
+    overflow-y: auto;
+    padding: 0.5rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+    background: var(--bg-card);
+    border-radius: 20px 20px 0 0;
+    animation: sheet-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sheet::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 5px;
+    margin: 0.25rem auto 0.75rem;
+    border-radius: 3px;
+    background: var(--border);
+  }
+
+  .sheet-title {
+    margin: 0 0 0.15rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--text-heading);
   }
 
-  .rpe-compare-chip {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 0.2rem 0.55rem;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-  }
-
-  .rpe-target-sub {
-    font-size: 0.65rem;
-    opacity: 0.8;
-  }
-
-  .rpe-compare-chip.rpe-match {
-    background: color-mix(in srgb, #22c55e 18%, var(--bg-card));
-    color: #4ade80;
-    border: 1px solid color-mix(in srgb, #22c55e 40%, transparent);
-  }
-
-  .rpe-compare-chip.rpe-higher {
-    background: color-mix(in srgb, #f97316 20%, var(--bg-card));
-    color: #fb923c;
-    border: 1px solid color-mix(in srgb, #f97316 45%, transparent);
-  }
-
-  .rpe-compare-chip.rpe-lower {
-    background: color-mix(in srgb, #38bdf8 18%, var(--bg-card));
-    color: #38bdf8;
-    border: 1px solid color-mix(in srgb, #38bdf8 40%, transparent);
-  }
-
-  .btn-edit-icon {
-    background: transparent;
-    border: none;
-    font-size: 0.95rem;
-    padding: 0.25rem 0.35rem;
-    cursor: pointer;
-    border-radius: 6px;
-    opacity: 0.8;
-    transition: opacity 0.15s, transform 0.15s;
-  }
-
-  .btn-edit-icon:hover {
-    opacity: 1;
-    transform: scale(1.15);
-  }
-
-  /* ─── Rest Screen Undo ───────────────────────────────────────── */
-  .rest-undo-wrapper {
-    margin-top: 1.25rem;
-    display: flex;
-    justify-content: center;
-  }
-
-  .rest-undo-btn {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #fb923c;
-    background: color-mix(in srgb, #fb923c 14%, var(--bg-elevated));
-    border: 1px solid color-mix(in srgb, #fb923c 35%, transparent);
-    padding: 0.75rem 1.25rem;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .rest-undo-btn:hover {
-    background: color-mix(in srgb, #fb923c 25%, var(--bg-elevated));
-    transform: translateY(-1px);
-  }
-
-  /* ─── All Sets Drawer ────────────────────────────────────────── */
-  .all-sets-drawer {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: var(--bg-elevated);
-    border-radius: calc(var(--radius) * 2);
-    border: 1px solid var(--border);
-  }
-
-  .all-sets-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
-    color: var(--accent);
-  }
-
-  .undo-link {
-    color: #fb923c;
-    font-weight: 700;
-  }
-
-  .view-all-link {
-    color: var(--accent);
-    font-size: 0.85rem;
-  }
-
-  /* ─── Modal Dialog ───────────────────────────────────────────── */
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(6px);
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  .modal-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) * 3);
-    padding: 1.5rem;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-  }
-
-  .modal-header h3 {
-    margin: 0 0 0.25rem;
-    font-size: 1.25rem;
-    font-family: 'Montserrat', sans-serif;
-  }
-
-  .modal-subtitle {
+  .sheet-sub {
     margin: 0 0 1.25rem;
     font-size: 0.85rem;
     color: var(--text-muted);
   }
 
-  .modal-fields {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    margin-bottom: 1.25rem;
+  .sheet-item {
+    width: 100%;
+    min-height: 54px;
+    padding: 0 0.15rem;
+    justify-content: space-between;
+    background: transparent;
+    color: var(--text);
+    font-weight: 600;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
   }
 
-  .modal-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+  .sheet-item.danger {
+    color: var(--destructive);
+    border-bottom: none;
   }
 
-  .modal-field span {
-    font-size: 0.78rem;
-    font-weight: 700;
+  .sheet-meta {
+    font-weight: 500;
     color: var(--text-muted);
-    font-family: 'Montserrat', sans-serif;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 
-  .modal-field input {
-    font-size: 1.4rem;
-    font-weight: 700;
-    text-align: center;
-    font-family: 'Montserrat', sans-serif;
+  .sheet-close {
+    width: 100%;
+    margin-top: 0.75rem;
+    justify-content: center;
+    background: var(--bg-elevated);
+    color: var(--text);
   }
 
-  .modal-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
+  .sheet-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 0.25rem;
   }
 
-  .btn-danger-ghost {
-    background: color-mix(in srgb, #ef4444 14%, transparent);
-    color: #f87171;
-    border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
-    padding: 0.65rem 1rem;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s;
-    min-height: 48px;
+  .sheet-text {
+    justify-content: center;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
   }
 
-  .btn-danger-ghost:hover {
-    background: color-mix(in srgb, #ef4444 25%, transparent);
+  .sheet-text.danger {
+    color: var(--destructive);
+  }
+
+  @keyframes sheet-rise {
+    from {
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes sheet-fade {
+    from {
+      opacity: 0;
+    }
   }
 </style>

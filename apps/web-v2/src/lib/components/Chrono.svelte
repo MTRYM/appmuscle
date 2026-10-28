@@ -169,20 +169,12 @@
 
 <style>
   .chrono {
-    background: var(--bg-elevated);
-    border-radius: calc(var(--radius) * 4);
-    padding: 1.5rem 1.25rem;
     text-align: center;
-    margin: 1rem 0;
-    border: 2px solid var(--border);
+    padding: 0.5rem 0 0;
   }
 
-  .chrono.finished {
-    border-color: var(--deepblue);
-  }
-
-  .chrono.urgent {
-    border-color: var(--pink);
+  .chrono.urgent .chrono-time {
+    color: var(--pink);
     animation: pulse 1s infinite;
   }
 
@@ -207,9 +199,9 @@
 
   .ring-wrap {
     position: relative;
-    width: 160px;
-    height: 160px;
-    margin: 0 auto 1.25rem;
+    width: 220px;
+    height: 220px;
+    margin: 0 auto 1.75rem;
   }
 
   .ring {
@@ -221,13 +213,13 @@
   .ring-bg {
     fill: none;
     stroke: var(--border);
-    stroke-width: 6;
+    stroke-width: 3;
   }
 
   .ring-fill {
     fill: none;
     stroke: var(--pink);
-    stroke-width: 6;
+    stroke-width: 3;
     stroke-linecap: round;
     stroke-dasharray: 326.73;
     transition: stroke-dashoffset 0.25s linear;
@@ -240,8 +232,8 @@
     align-items: center;
     justify-content: center;
     font-family: 'Montserrat', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 900;
+    font-size: 3.25rem;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--text-heading);
     margin: 0;
@@ -259,26 +251,30 @@
     gap: 0.5rem;
   }
 
+  .add-row {
+    justify-content: center;
+  }
+
   .btn-add {
-    flex: 1;
-    min-height: 48px;
-    background: var(--secondary);
-    color: var(--text);
+    min-height: 44px;
+    padding: 0.5rem 1.25rem;
+    background: transparent;
+    color: var(--text-muted);
     border: 1px solid var(--border);
+    border-radius: 999px;
     font-size: 0.85rem;
+    font-weight: 600;
   }
 
   .chrono-next {
-    min-height: 64px;
-    font-size: 1.05rem;
+    min-height: 56px;
+    font-size: 1.02rem;
   }
 
   .done-msg {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    color: var(--pink);
-    font-weight: 500;
-    font-size: 1.15rem;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 1rem;
     margin: 0;
   }
 </style>
