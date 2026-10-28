@@ -174,7 +174,7 @@
   }
 
   .chrono.urgent .chrono-time {
-    color: var(--pink);
+    color: var(--beige);
     animation: pulse 1s infinite;
   }
 
@@ -226,7 +226,7 @@
   }
 
   .chrono.urgent .ring-fill {
-    stroke: var(--pink);
+    stroke: var(--beige);
   }
 
   .chrono-time {

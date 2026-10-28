@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { Play, Pause, Square, RotateCcw, Plus, Minus, Volume2, VolumeX, Check, Flame } from 'lucide-svelte';
+  import { Play, Pause, Square, RotateCcw } from 'lucide-svelte';
 
   let {
     targetSeconds = 20,
@@ -13,17 +13,16 @@
   }>();
 
   // State
-  let mode = $state<'countdown' | 'stopwatch'>('countdown');
-  let prepCountdown = $state(true); // 3-second preparation countdown (3...2...1...GO)
-  let soundEnabled = $state(true);
-
+  let prepCountdown = $state(true); // 3-second preparation countdown
   let state = $state<'idle' | 'prepping' | 'running' | 'paused' | 'finished'>('idle');
   let prepRemaining = $state(3);
-  let elapsedSinceStart = $state(0);
   let timerTarget = $state(20);
   let currentSeconds = $state(20);
+  let elapsedSec = $state(0);
+  let recordedSeconds = $state(20);
 
-  let intervalId: ReturnType<typeof setInterval> | null = null;
+  let activeInterval: ReturnType<typeof setInterval> | null = null;
+  let prepInterval: ReturnType<typeof setInterval> | null = null;
   let startTime = 0;
   let accumulatedTime = 0;
 
@@ -32,22 +31,22 @@
     if (state === 'idle') {
       const initial = targetSeconds > 0 ? targetSeconds : 20;
       timerTarget = initial;
-      currentSeconds = mode === 'countdown' ? initial : 0;
+      currentSeconds = initial;
+      elapsedSec = 0;
     }
   });
 
-  // Sound generator with Web Audio API
-  function playTone(freq: number, durationSec: number, type: OscillatorType = 'sine') {
-    if (!soundEnabled) return;
+  // Clean Web Audio beeper
+  function playTone(freq: number, durationSec: number) {
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = type;
+      osc.type = 'sine';
       osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationSec);
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -74,13 +73,13 @@
   }
 
   function playGoTone() {
-    playTone(980, 0.45, 'triangle');
+    playTone(980, 0.35);
     vibrate([100, 50, 150]);
   }
 
   function playFinishTone() {
     playTone(880, 0.25);
-    setTimeout(() => playTone(1175, 0.5), 200);
+    setTimeout(() => playTone(1100, 0.4), 180);
     vibrate([200, 100, 200, 100, 400]);
   }
 
@@ -92,13 +91,13 @@
       prepRemaining = 3;
       playPrepTone();
 
-      intervalId = setInterval(() => {
+      prepInterval = setInterval(() => {
         prepRemaining -= 1;
         if (prepRemaining > 0) {
           playPrepTone();
         } else {
-          clearInterval(intervalId!);
-          intervalId = null;
+          if (prepInterval) clearInterval(prepInterval);
+          prepInterval = null;
           playGoTone();
           runActiveTimer();
         }
@@ -108,34 +107,39 @@
     }
   }
 
+  function cancelPrep() {
+    if (prepInterval) clearInterval(prepInterval);
+    prepInterval = null;
+    state = 'idle';
+    prepRemaining = 3;
+  }
+
   function runActiveTimer() {
     state = 'running';
     startTime = Date.now();
 
-    intervalId = setInterval(() => {
+    if (activeInterval) clearInterval(activeInterval);
+    activeInterval = setInterval(() => {
       const now = Date.now();
-      const currentDelta = (now - startTime) / 1000;
-      const totalElapsed = accumulatedTime + currentDelta;
-      elapsedSinceStart = Math.floor(totalElapsed);
+      const delta = (now - startTime) / 1000;
+      const totalElapsed = accumulatedTime + delta;
+      elapsedSec = Math.floor(totalElapsed);
 
-      if (mode === 'countdown') {
-        const remaining = Math.max(0, timerTarget - totalElapsed);
-        currentSeconds = Math.ceil(remaining);
+      const remaining = Math.max(0, timerTarget - totalElapsed);
+      currentSeconds = Math.ceil(remaining);
 
-        if (remaining <= 0) {
-          finishTimer(timerTarget);
-        }
-      } else {
-        currentSeconds = Math.floor(totalElapsed);
+      if (remaining <= 0) {
+        finishTimer(timerTarget);
       }
     }, 100);
   }
 
   function pause() {
     if (state !== 'running') return;
-    if (intervalId) clearInterval(intervalId);
-    intervalId = null;
+    if (activeInterval) clearInterval(activeInterval);
+    activeInterval = null;
     accumulatedTime += (Date.now() - startTime) / 1000;
+    elapsedSec = Math.floor(accumulatedTime);
     state = 'paused';
   }
 
@@ -144,29 +148,39 @@
     runActiveTimer();
   }
 
-  function finishTimer(recordedSec: number) {
-    if (intervalId) clearInterval(intervalId);
-    intervalId = null;
-    state = 'finished';
-    const finalSec = Math.max(1, Math.round(recordedSec));
-    playFinishTone();
-    onTimeRecorded(finalSec);
-  }
-
   function stopAndSave() {
-    const finalSec = mode === 'countdown'
-      ? Math.max(1, Math.round(timerTarget - currentSeconds))
-      : Math.max(1, Math.round(currentSeconds));
+    if (activeInterval) clearInterval(activeInterval);
+    activeInterval = null;
+    const currentDelta = startTime ? (Date.now() - startTime) / 1000 : 0;
+    const totalElapsed = accumulatedTime + currentDelta;
+    const finalSec = Math.max(1, Math.round(totalElapsed));
     finishTimer(finalSec);
   }
 
+  function finishTimer(sec: number) {
+    if (activeInterval) clearInterval(activeInterval);
+    activeInterval = null;
+    if (prepInterval) clearInterval(prepInterval);
+    prepInterval = null;
+
+    state = 'finished';
+    recordedSeconds = Math.max(1, Math.round(sec));
+    currentSeconds = 0;
+    playFinishTone();
+    onTimeRecorded(recordedSeconds);
+  }
+
   function reset() {
-    if (intervalId) clearInterval(intervalId);
-    intervalId = null;
+    if (activeInterval) clearInterval(activeInterval);
+    activeInterval = null;
+    if (prepInterval) clearInterval(prepInterval);
+    prepInterval = null;
+
     state = 'idle';
     accumulatedTime = 0;
-    elapsedSinceStart = 0;
-    currentSeconds = mode === 'countdown' ? timerTarget : 0;
+    startTime = 0;
+    elapsedSec = 0;
+    currentSeconds = timerTarget;
     prepRemaining = 3;
   }
 
@@ -176,25 +190,21 @@
     currentSeconds = timerTarget;
   }
 
-  function switchMode(newMode: 'countdown' | 'stopwatch') {
-    if (state !== 'idle') reset();
-    mode = newMode;
-    currentSeconds = newMode === 'countdown' ? timerTarget : 0;
-  }
-
   onDestroy(() => {
-    if (intervalId) clearInterval(intervalId);
+    if (activeInterval) clearInterval(activeInterval);
+    if (prepInterval) clearInterval(prepInterval);
   });
 
-  // Calculate progress percentage for circular ring
+  // Calculate circular progress percentage (matching Chrono.svelte)
   let progressPct = $derived.by(() => {
-    if (mode === 'countdown') {
-      if (timerTarget <= 0) return 0;
-      return Math.min(100, Math.max(0, ((timerTarget - currentSeconds) / timerTarget) * 100));
-    } else {
-      if (timerTarget <= 0) return 0;
-      return Math.min(100, (currentSeconds / timerTarget) * 100);
+    if (state === 'prepping') {
+      return ((3 - prepRemaining) / 3) * 100;
     }
+    if (state === 'finished') {
+      return 100;
+    }
+    if (timerTarget <= 0) return 0;
+    return Math.min(100, Math.max(0, ((timerTarget - currentSeconds) / timerTarget) * 100));
   });
 
   function formatDisplayTime(sec: number): string {
@@ -207,148 +217,134 @@
   }
 </script>
 
-<div class="hold-timer-card" class:running={state === 'running'} class:prepping={state === 'prepping'} class:finished={state === 'finished'}>
-  <div class="timer-top-bar">
-    <div class="mode-tabs">
-      <button
-        type="button"
-        class="tab-btn"
-        class:active={mode === 'countdown'}
-        onclick={() => switchMode('countdown')}
-        disabled={state !== 'idle'}
-      >
-        Décompte ({timerTarget}s)
-      </button>
-      <button
-        type="button"
-        class="tab-btn"
-        class:active={mode === 'stopwatch'}
-        onclick={() => switchMode('stopwatch')}
-        disabled={state !== 'idle'}
-      >
-        Chrono libre
-      </button>
-    </div>
+<div class="hold-timer" class:finished={state === 'finished'}>
+  <p class="timer-label">
+    {#if state === 'prepping'}
+      Préparation
+    {:else if state === 'running'}
+      Maintien en cours
+    {:else if state === 'paused'}
+      En pause
+    {:else if state === 'finished'}
+      Maintien terminé
+    {:else}
+      Chrono maintien
+    {/if}
+  </p>
 
-    <div class="top-toggles">
-      <button
-        type="button"
-        class="icon-toggle"
-        class:active={prepCountdown}
-        onclick={() => prepCountdown = !prepCountdown}
-        disabled={state !== 'idle'}
-        title="Délai de préparation de 3 secondes pour se mettre en place"
-      >
-        <span>3s prépa</span>
-      </button>
+  <div class="ring-wrap">
+    <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="ring-bg" cx="60" cy="60" r="52" />
+      <circle
+        class="ring-fill"
+        class:is-prepping={state === 'prepping'}
+        class:is-finished={state === 'finished'}
+        cx="60"
+        cy="60"
+        r="52"
+        style="stroke-dashoffset: {326.73 * (1 - progressPct / 100)}"
+      />
+    </svg>
 
-      <button
-        type="button"
-        class="icon-toggle"
-        class:active={soundEnabled}
-        onclick={() => soundEnabled = !soundEnabled}
-        title={soundEnabled ? 'Son activé' : 'Son coupé'}
-      >
-        {#if soundEnabled}
-          <Volume2 size={16} />
+    <div class="timer-center">
+      {#if state === 'prepping'}
+        <span class="prep-count">{prepRemaining}</span>
+        <span class="timer-sub prep-sub">Préparez-vous</span>
+      {:else}
+        <span class="timer-time">{formatDisplayTime(currentSeconds)}</span>
+        {#if state === 'finished'}
+          <span class="timer-sub success-sub">{recordedSeconds}s validées</span>
         {:else}
-          <VolumeX size={16} />
+          <span class="timer-sub">Cible : {timerTarget}s</span>
         {/if}
-      </button>
+      {/if}
     </div>
   </div>
 
-  <!-- Center Circular Display -->
-  <div class="timer-display-wrap">
-    <div class="circular-ring-container">
-      <svg class="ring-svg" viewBox="0 0 160 160">
-        <circle class="ring-bg" cx="80" cy="80" r="70" />
-        <circle
-          class="ring-progress"
-          class:is-finished={state === 'finished'}
-          cx="80"
-          cy="80"
-          r="70"
-          style="stroke-dashoffset: {440 - (440 * progressPct) / 100}"
-        />
-      </svg>
-
-      <div class="timer-inner-content">
-        {#if state === 'prepping'}
-          <div class="prep-indicator">
-            <span class="prep-label">PRÉPAREZ-VOUS</span>
-            <span class="prep-count">{prepRemaining}</span>
-          </div>
-        {:else}
-          <div class="time-readout">
-            <span class="main-time">{formatDisplayTime(currentSeconds)}</span>
-            {#if mode === 'countdown'}
-              <span class="sub-label">Cible : {timerTarget}s</span>
-            {:else}
-              <span class="sub-label">Chrono libre</span>
-            {/if}
-          </div>
-        {/if}
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Target Adjusters (when idle) -->
-  {#if state === 'idle' && mode === 'countdown'}
-    <div class="target-adjust-row">
-      <button type="button" class="btn-adjust" onclick={() => adjustTarget(-5)} title="-5 secondes">
-        <Minus size={14} /> 5s
-      </button>
-      <span class="adjust-label">Objectif : <strong>{timerTarget}s</strong></span>
-      <button type="button" class="btn-adjust" onclick={() => adjustTarget(+5)} title="+5 secondes">
-        <Plus size={14} /> 5s
-      </button>
-    </div>
-  {/if}
-
-  <!-- Action Controls -->
-  <div class="timer-controls">
+  <div class="timer-actions">
     {#if state === 'idle'}
-      <button type="button" class="btn-timer-main start" onclick={start}>
-        <Play size={20} fill="currentColor" />
+      <div class="add-row">
+        <button
+          type="button"
+          class="btn-add"
+          onclick={() => adjustTarget(-5)}
+          disabled={timerTarget <= 5}
+          title="Diminuer de 5 secondes"
+        >
+          -5 s
+        </button>
+        <button
+          type="button"
+          class="btn-add"
+          onclick={() => adjustTarget(+5)}
+          title="Augmenter de 5 secondes"
+        >
+          +5 s
+        </button>
+        <button
+          type="button"
+          class="btn-add prep-toggle"
+          class:active={prepCountdown}
+          onclick={() => prepCountdown = !prepCountdown}
+          title="Délai de préparation de 3 secondes"
+        >
+          {prepCountdown ? 'Prépa 3s' : 'Direct'}
+        </button>
+      </div>
+
+      <button type="button" class="btn-primary timer-next" onclick={start}>
+        <Play size={18} fill="currentColor" />
         <span>Lancer le maintien ({timerTarget}s)</span>
       </button>
+
     {:else if state === 'prepping'}
-      <button type="button" class="btn-timer-main cancel" onclick={reset}>
-        <span>Annuler la prépa</span>
+      <button type="button" class="btn-secondary timer-cancel" onclick={cancelPrep}>
+        Annuler la préparation
       </button>
+
     {:else if state === 'running'}
-      <div class="running-controls">
-        <button type="button" class="btn-ctrl pause" onclick={pause} title="Mettre en pause">
-          <Pause size={18} />
+      <div class="running-row">
+        <button
+          type="button"
+          class="btn-icon"
+          onclick={pause}
+          title="Mettre en pause"
+          aria-label="Pause"
+        >
+          <Pause size={20} />
         </button>
-        <button type="button" class="btn-timer-main stop" onclick={stopAndSave}>
+        <button type="button" class="btn-primary timer-next" onclick={stopAndSave}>
           <Square size={16} fill="currentColor" />
-          <span>Fin du maintien ({currentSeconds}s)</span>
+          <span>Fin du maintien ({elapsedSec}s)</span>
         </button>
       </div>
+
     {:else if state === 'paused'}
-      <div class="running-controls">
-        <button type="button" class="btn-ctrl reset" onclick={reset} title="Recommencer">
+      <div class="paused-row">
+        <button
+          type="button"
+          class="btn-icon"
+          onclick={reset}
+          title="Recommencer"
+          aria-label="Recommencer"
+        >
           <RotateCcw size={18} />
         </button>
-        <button type="button" class="btn-timer-main resume" onclick={resume}>
-          <Play size={18} fill="currentColor" />
+        <button type="button" class="btn-secondary timer-resume" onclick={resume}>
+          <Play size={16} fill="currentColor" />
           <span>Reprendre</span>
         </button>
-        <button type="button" class="btn-timer-main stop" onclick={stopAndSave}>
-          <Check size={18} />
-          <span>Enregistrer ({currentSeconds}s)</span>
+        <button type="button" class="btn-primary timer-next" onclick={stopAndSave}>
+          <span>Valider ({elapsedSec}s)</span>
         </button>
       </div>
+
     {:else if state === 'finished'}
-      <div class="finished-box">
-        <div class="finished-badge">
-          <span class="flame-icon"><Flame size={18} /></span>
-          <span>Maintien réussi ! ({currentSeconds}s)</span>
-        </div>
-        <button type="button" class="btn-retry" onclick={reset}>
-          <RotateCcw size={14} /> Recommencer
+      <p class="done-msg">Maintien validé : {recordedSeconds}s</p>
+      <div class="finished-row">
+        <button type="button" class="btn-add" onclick={reset}>
+          <RotateCcw size={13} />
+          <span>Recommencer</span>
         </button>
       </div>
     {/if}
@@ -356,120 +352,32 @@
 </div>
 
 <style>
-  .hold-timer-card {
-    background: color-mix(in srgb, var(--bg-elevated) 85%, var(--bg-card));
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.15rem;
-    margin: 0.75rem 0 1.25rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.85rem;
-    position: relative;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease;
-  }
-
-  .hold-timer-card.running {
-    border-color: color-mix(in srgb, var(--pink) 70%, var(--border));
-    box-shadow: 0 0 24px color-mix(in srgb, var(--pink) 25%, transparent);
-  }
-
-  .hold-timer-card.prepping {
-    border-color: var(--warning);
-    box-shadow: 0 0 24px color-mix(in srgb, var(--warning) 25%, transparent);
-  }
-
-  .hold-timer-card.finished {
-    border-color: #4ade80;
-    box-shadow: 0 0 24px rgba(74, 222, 128, 0.25);
-  }
-
-  /* === Top Bar === */
-  .timer-top-bar {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .mode-tabs {
-    display: flex;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 2px;
-    gap: 2px;
-  }
-
-  .tab-btn {
+  .hold-timer {
+    text-align: center;
+    padding: 0.5rem 0 1rem;
+    margin: 0.25rem 0 0.75rem;
     background: transparent;
     border: none;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.65rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    min-height: auto;
+    box-shadow: none;
+  }
+
+  .timer-label {
     font-family: 'Montserrat', sans-serif;
-  }
-
-  .tab-btn.active {
-    background: var(--bg-elevated);
-    color: var(--pink);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .top-toggles {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .icon-toggle {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    border-radius: 8px;
-    padding: 0.25rem 0.55rem;
     font-size: 0.72rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 28px;
-    transition: all 0.15s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    margin: 0 0 0.75rem;
   }
 
-  .icon-toggle.active {
-    color: var(--pink);
-    border-color: color-mix(in srgb, var(--pink) 50%, transparent);
-    background: color-mix(in srgb, var(--pink) 12%, var(--bg-card));
-  }
-
-  /* === Center Display === */
-  .timer-display-wrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0.5rem 0;
-  }
-
-  .circular-ring-container {
-    width: 150px;
-    height: 150px;
+  .ring-wrap {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1.25rem;
   }
 
-  .ring-svg {
+  .ring {
     width: 100%;
     height: 100%;
     transform: rotate(-90deg);
@@ -477,251 +385,227 @@
 
   .ring-bg {
     fill: none;
-    stroke: color-mix(in srgb, var(--border) 60%, transparent);
-    stroke-width: 8;
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 4;
   }
 
-  .ring-progress {
+  .ring-fill {
     fill: none;
-    stroke: var(--pink);
-    stroke-width: 9;
+    stroke: #06375a;
+    stroke-width: 4;
     stroke-linecap: round;
-    stroke-dasharray: 440;
-    transition: stroke-dashoffset 0.1s linear;
+    stroke-dasharray: 326.73;
+    transition: stroke-dashoffset 0.2s linear, stroke 0.3s ease;
   }
 
-  .ring-progress.is-finished {
-    stroke: #4ade80;
+  .ring-fill.is-prepping {
+    stroke: var(--beige);
   }
 
-  .timer-inner-content {
+  .ring-fill.is-finished {
+    stroke: #238656;
+  }
+
+  .timer-center {
     position: absolute;
     inset: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
+    pointer-events: none;
   }
 
-  .time-readout {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .main-time {
+  .timer-time {
     font-family: 'Montserrat', sans-serif;
-    font-size: 2.2rem;
-    font-weight: 800;
-    line-height: 1;
-    color: var(--text-heading);
-    letter-spacing: -0.02em;
-  }
-
-  .sub-label {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 0.25rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .prep-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    animation: scaleIn 0.3s ease;
-  }
-
-  .prep-label {
-    font-size: 0.68rem;
+    font-size: 3rem;
     font-weight: 700;
-    color: var(--warning);
-    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-heading);
+    line-height: 1;
+    margin: 0;
   }
 
   .prep-count {
     font-family: 'Montserrat', sans-serif;
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 800;
-    color: var(--warning);
+    font-variant-numeric: tabular-nums;
+    color: var(--beige);
     line-height: 1;
-    animation: prepPulse 1s infinite;
+    margin: 0;
+    animation: prepPop 1s infinite;
   }
 
-  /* === Adjust Row === */
-  .target-adjust-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.82rem;
+  .timer-sub {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     color: var(--text-muted);
+    margin-top: 0.35rem;
+    font-weight: 600;
   }
 
-  .adjust-label strong {
-    color: var(--pink);
+  .prep-sub {
+    color: var(--beige);
   }
 
-  .btn-adjust {
+  .success-sub {
+    color: #238656;
+  }
+
+  .timer-actions {
     display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .add-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
     align-items: center;
-    gap: 0.2rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 0.2rem 0.55rem;
-    font-size: 0.75rem;
+  }
+
+  .btn-add {
+    min-height: 40px;
+    padding: 0.45rem 1rem;
+    background: color-mix(in srgb, var(--beige) 10%, transparent);
+    color: var(--beige);
+    border: 1px solid color-mix(in srgb, var(--beige) 25%, transparent);
+    border-radius: 999px;
+    font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
-    min-height: auto;
-    transition: all 0.15s ease;
-  }
-
-  .btn-adjust:hover {
-    border-color: var(--pink);
-    color: var(--pink);
-  }
-
-  /* === Controls === */
-  .timer-controls {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .btn-timer-main {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0.55rem !important;
-    width: 100% !important;
-    padding: 0.75rem 1.25rem !important;
-    border-radius: 12px !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 0.92rem !important;
-    cursor: pointer !important;
-    border: none !important;
-    min-height: 48px !important;
-    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  }
-
-  .btn-timer-main.start {
-    background: linear-gradient(135deg, var(--pink), color-mix(in srgb, var(--pink) 80%, #fff)) !important;
-    color: #070706 !important;
-    box-shadow: 0 4px 16px rgba(230, 166, 178, 0.3) !important;
-  }
-
-  .btn-timer-main.start:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(230, 166, 178, 0.45) !important;
-  }
-
-  .btn-timer-main.stop {
-    background: var(--destructive) !important;
-    color: #fff !important;
-  }
-
-  .btn-timer-main.resume {
-    background: var(--pink) !important;
-    color: #070706 !important;
-  }
-
-  .btn-timer-main.cancel {
-    background: var(--bg-card) !important;
-    color: var(--text-muted) !important;
-    border: 1px solid var(--border) !important;
-  }
-
-  .running-controls {
-    display: flex;
-    gap: 0.65rem;
-    width: 100%;
-  }
-
-  .btn-ctrl {
-    display: flex;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: 'Montserrat', sans-serif;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 12px;
-    width: 48px;
-    height: 48px;
-    min-height: 48px;
-    min-width: 48px;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.15s ease;
-    padding: 0;
+    gap: 0.35rem;
   }
 
-  .btn-ctrl:hover {
-    border-color: var(--pink);
-    color: var(--pink);
+  .btn-add:active {
+    background: color-mix(in srgb, var(--beige) 20%, transparent);
   }
 
-  .finished-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    background: color-mix(in srgb, #4ade80 15%, var(--bg-card));
-    border: 1px solid color-mix(in srgb, #4ade80 35%, transparent);
-    border-radius: 12px;
-    padding: 0.6rem 1rem;
+  .btn-add:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
-  .finished-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: #4ade80;
+  .prep-toggle.active {
+    background: color-mix(in srgb, var(--beige) 22%, transparent);
+    border-color: var(--beige);
+  }
+
+  .timer-next {
+    min-height: 54px;
+    font-size: 1rem;
+    background: #06375a;
+    color: #f7f5f2;
+    border: none;
+    border-radius: 14px;
     font-weight: 700;
-    font-size: 0.88rem;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    width: 100%;
     font-family: 'Montserrat', sans-serif;
   }
 
-  .flame-icon {
-    display: inline-flex;
-    animation: flameBounce 0.8s infinite alternate ease-in-out;
+  .timer-next:active {
+    background: color-mix(in srgb, #06375a 80%, black);
+    box-shadow: none;
+    transform: scale(0.98);
   }
 
-  .btn-retry {
+  .running-row,
+  .paused-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  .btn-icon {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
-    background: var(--bg-elevated);
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    min-height: 54px;
+    border-radius: 14px;
+    background: var(--bg-card);
     border: 1px solid var(--border);
     color: var(--text);
-    border-radius: 8px;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.78rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .btn-icon:hover {
+    border-color: var(--beige);
+    color: var(--beige);
+  }
+
+  .btn-secondary {
+    min-height: 54px;
+    padding: 0 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 14px;
+    font-size: 0.92rem;
     font-weight: 600;
     cursor: pointer;
-    min-height: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    font-family: 'Montserrat', sans-serif;
+    transition: background 0.15s, border-color 0.15s;
   }
 
-  .btn-retry:hover {
-    border-color: var(--pink);
-    color: var(--pink);
+  .btn-secondary:hover {
+    border-color: var(--beige);
   }
 
-  @keyframes prepPulse {
-    0% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1); opacity: 0.8; }
+  .timer-cancel {
+    width: 100%;
   }
 
-  @keyframes scaleIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+  .timer-resume {
+    flex: 1;
   }
 
-  @keyframes flameBounce {
-    from { transform: translateY(0); }
-    to { transform: translateY(-3px); }
+  .done-msg {
+    color: #238656;
+    font-weight: 700;
+    font-size: 0.98rem;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .finished-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.25rem;
+  }
+
+  @keyframes prepPop {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.12);
+    }
   }
 </style>
