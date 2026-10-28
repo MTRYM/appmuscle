@@ -409,19 +409,22 @@
   }
 
   .dot.done {
-    background: var(--deepblue);
+    background: #1e5a3a;
+  }
+  .dot.pending {
+    background: #c4a482;
   }
   .dot.missed {
-    background: var(--destructive);
+    background: #942b37;
   }
   .dot.extra {
-    background: var(--pink);
+    background: #06375a;
   }
   .dot.vacation {
-    background: var(--warning);
+    background: #b45309;
   }
   .dot.rest {
-    background: var(--faint);
+    background: rgba(247, 245, 242, 0.25);
   }
 
   .weekdays {
@@ -445,11 +448,16 @@
     min-height: 44px;
     border-radius: 10px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     padding: 0;
     background: var(--bg-card);
     color: var(--text);
-    border: 2px solid transparent;
+    border: none;
+    transition: transform 0.1s ease;
+  }
+
+  .day:active {
+    transform: scale(0.95);
   }
 
   .day.empty {
@@ -458,39 +466,49 @@
   }
 
   .day.done {
-    background: color-mix(in srgb, var(--deepblue) 35%, var(--bg-card));
-    border-color: var(--deepblue);
+    background: #1e5a3a;
+    color: #f7f5f2;
+    font-weight: 700;
   }
 
   .day.missed {
-    background: color-mix(in srgb, var(--destructive) 28%, var(--bg-card));
-    border-color: var(--destructive);
+    background: #541920;
+    color: #fde8eb;
+    font-weight: 700;
   }
 
   .day.pending {
-    background: color-mix(in srgb, var(--beige) 35%, var(--bg-card));
-    border-color: color-mix(in srgb, var(--beige) 70%, var(--ink));
-    color: var(--text-heading);
+    background: #423223;
+    color: #fcefe3;
+    font-weight: 700;
   }
 
   .day.extra {
-    background: color-mix(in srgb, var(--pink) 30%, var(--bg-card));
-    border-color: var(--pink);
+    background: #06375a;
+    color: #f7f5f2;
+    font-weight: 700;
   }
 
   .day.vacation {
-    background: color-mix(in srgb, var(--warning) 28%, var(--bg-card));
-    border-color: var(--warning);
-    color: var(--text-heading);
+    background: #523414;
+    color: #fef3c7;
+    font-weight: 700;
   }
 
   .day.rest {
     background: var(--bg-card);
-    color: var(--text-muted);
+    color: rgba(247, 245, 242, 0.38);
+    font-weight: 500;
+  }
+
+  .day.today {
+    box-shadow: inset 0 0 0 2px var(--pink);
+    color: var(--text-heading);
+    font-weight: 800;
   }
 
   .day.selected {
-    box-shadow: 0 0 0 2px var(--pink);
+    box-shadow: inset 0 0 0 2.5px #f7f5f2;
   }
 
   .detail h3 {

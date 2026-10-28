@@ -81,8 +81,10 @@
     const done = sessions.filter((s) => s.dateISO === dateISO);
     const isVacation = vacations.some((v) => dateISO >= v.startDateISO && dateISO <= v.endDateISO);
 
-    // Si n'importe quelle séance (prévue, hors planning ou routine récup) est faite -> Vert
-    if (planned.some((p) => p.status === 'done') || done.length > 0) return 'done';
+    // Si séance planifiée faite -> vert
+    if (planned.some((p) => p.status === 'done')) return 'done';
+    // Si séance libre/récup/extra réalisée -> bleu #06375a
+    if (done.length > 0) return 'extra';
     if (planned.some((p) => p.status === 'missed')) return 'missed';
     if (planned.some((p) => p.status === 'pending')) return 'pending';
     if (isVacation) return 'vacation';
@@ -540,13 +542,13 @@
   }
 
   .dot.done {
-    background: #3b7a57;
+    background: #1e5a3a;
   }
   .dot.pending {
-    background: var(--beige);
+    background: #c4a482;
   }
   .dot.missed {
-    background: #991b1b;
+    background: #942b37;
   }
   .dot.extra {
     background: #06375a;
@@ -555,7 +557,7 @@
     background: #b45309;
   }
   .dot.rest {
-    background: var(--faint);
+    background: rgba(247, 245, 242, 0.25);
   }
 
   .weekdays {
@@ -579,11 +581,16 @@
     min-height: 44px;
     border-radius: 10px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     padding: 0;
     background: var(--bg-card);
     color: var(--text);
     border: none;
+    transition: transform 0.1s ease;
+  }
+
+  .day:active {
+    transform: scale(0.95);
   }
 
   .day.empty {
@@ -592,42 +599,53 @@
   }
 
   .day.done {
-    background: color-mix(in srgb, #3b7a57 30%, var(--bg-card));
-    color: #a3e6b5;
+    background: #1e5a3a;
+    color: #f7f5f2;
+    font-weight: 700;
   }
 
   .day.missed {
-    background: color-mix(in srgb, #991b1b 25%, var(--bg-card));
-    color: var(--text-muted);
+    background: #541920;
+    color: #fde8eb;
+    font-weight: 700;
   }
 
   .day.pending {
-    background: color-mix(in srgb, var(--beige) 15%, var(--bg-card));
-    color: var(--beige);
+    background: #423223;
+    color: #fcefe3;
+    font-weight: 700;
   }
 
   .day.extra {
     background: #06375a;
     color: #f7f5f2;
+    font-weight: 700;
   }
 
   .day.vacation {
-    background: color-mix(in srgb, #b45309 25%, var(--bg-card));
-    color: var(--text-muted);
+    background: #523414;
+    color: #fef3c7;
+    font-weight: 700;
   }
 
   .day.rest {
     background: var(--bg-card);
-    color: var(--text-muted);
+    color: rgba(247, 245, 242, 0.38);
+    font-weight: 500;
   }
 
   .day.today {
-    box-shadow: inset 0 0 0 1.5px var(--pink);
+    box-shadow: inset 0 0 0 2px var(--pink);
     color: var(--text-heading);
+    font-weight: 800;
   }
 
   .day.selected {
-    box-shadow: inset 0 0 0 2px var(--beige);
+    box-shadow: inset 0 0 0 2.5px #f7f5f2;
+  }
+
+  .day.today.selected {
+    box-shadow: inset 0 0 0 2px var(--pink), inset 0 0 0 4.5px #f7f5f2;
   }
 
   .detail h3 {
