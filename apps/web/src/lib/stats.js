@@ -104,26 +104,40 @@ export function getPersonalRecords(sessionsWithSets) {
   for (const session of sessionsWithSets) {
     for (const set of session.sets) {
       if (!set.exerciseName) continue;
-      const reps = set.repsActual ?? parseRepsRange(set.repsTarget).mid;
+      const reps = set.repsActual ?? (set.repsTarget ? parseRepsRange(set.repsTarget)?.mid : 0) ?? 0;
       const weight = set.weight ?? 0;
       const volume = weight * reps;
       const rm1 = estimate1RM(weight, reps);
+      const isIso =
+        set.exerciseType === 'isometrique' ||
+        /stretch|étirement|gainage|hollow|plank|planche|l-sit|dead hang|decompression|pose|flow/i.test(set.exerciseName);
 
       if (!byExercise.has(set.exerciseName)) {
         byExercise.set(set.exerciseName, {
           exerciseName: set.exerciseName,
+          exerciseType: set.exerciseType ?? (isIso ? 'isometrique' : 'reps'),
           maxWeight: 0,
+          maxReps: 0,
           maxVolume: 0,
           max1RM: 0,
+          bestRpe: null,
+          avgRpe: null,
+          _rpes: [],
           maxWeightDate: null,
           max1RMDate: null,
         });
       }
 
       const rec = byExercise.get(set.exerciseName);
+      if (isIso || set.exerciseType === 'isometrique') {
+        rec.exerciseType = 'isometrique';
+      }
       if (weight > rec.maxWeight) {
         rec.maxWeight = weight;
         rec.maxWeightDate = session.dateISO;
+      }
+      if (reps > rec.maxReps) {
+        rec.maxReps = reps;
       }
       if (volume > rec.maxVolume) {
         rec.maxVolume = volume;
@@ -132,7 +146,21 @@ export function getPersonalRecords(sessionsWithSets) {
         rec.max1RM = Math.round(rm1 * 10) / 10;
         rec.max1RMDate = session.dateISO;
       }
+      if (set.rpe != null && !Number.isNaN(Number(set.rpe))) {
+        rec._rpes.push(Number(set.rpe));
+        if (rec.bestRpe === null || Number(set.rpe) > rec.bestRpe) {
+          rec.bestRpe = Number(set.rpe);
+        }
+      }
     }
+  }
+
+  for (const rec of byExercise.values()) {
+    if (rec._rpes.length) {
+      const sum = rec._rpes.reduce((a, b) => a + b, 0);
+      rec.avgRpe = Math.round((sum / rec._rpes.length) * 10) / 10;
+    }
+    delete rec._rpes;
   }
 
   return [...byExercise.values()].sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));

@@ -224,18 +224,33 @@
           <div class="card record-card">
             <h3>{rec.exerciseName}</h3>
             <div class="rec-grid">
-              <div>
-                <span class="card-title">Charge max</span>
-                <strong>{rec.maxWeight} kg</strong>
-              </div>
-              <div>
-                <span class="card-title">1RM estimé</span>
-                <strong>{rec.max1RM} kg</strong>
-              </div>
-              <div>
-                <span class="card-title">Volume max/série</span>
-                <strong>{rec.maxVolume} kg</strong>
-              </div>
+              {#if rec.maxWeight > 0}
+                <div>
+                  <span class="card-title">Charge max</span>
+                  <strong>{rec.maxWeight} kg</strong>
+                </div>
+                <div>
+                  <span class="card-title">1RM estimé</span>
+                  <strong>{rec.max1RM} kg</strong>
+                </div>
+                <div>
+                  <span class="card-title">Volume max/série</span>
+                  <strong>{rec.maxVolume} kg</strong>
+                </div>
+              {:else}
+                <div>
+                  <span class="card-title">{rec.exerciseType === 'isometrique' ? 'Durée max' : 'Reps max'}</span>
+                  <strong>{rec.maxReps} {rec.exerciseType === 'isometrique' ? 's' : 'reps'}</strong>
+                </div>
+                <div>
+                  <span class="card-title">RPE</span>
+                  <strong>{rec.bestRpe != null ? `RPE ${rec.bestRpe}` : '—'}</strong>
+                </div>
+                <div>
+                  <span class="card-title">Type</span>
+                  <strong>{rec.exerciseType === 'isometrique' ? 'Isométrie' : 'Poids du corps'}</strong>
+                </div>
+              {/if}
             </div>
           </div>
         {/each}

@@ -148,6 +148,20 @@
   );
   const recordGroups = $derived(groupByCategory(records, (r) => r.exerciseName));
 
+  const selectedExMaxWeight = $derived.by(() => {
+    if (!selectedExercise || !sessionsWithSets.length) return 0;
+    const exSets = sessionsWithSets
+      .flatMap((s) => s.sets || [])
+      .filter((s) => s.exerciseName === selectedExercise);
+    return Math.max(0, ...exSets.map((s) => s.weight || 0));
+  });
+
+  $effect(() => {
+    if (selectedExercise && selectedExMaxWeight === 0 && metric === 'weight') {
+      metric = 'rpe';
+    }
+  });
+
   function onCategoryChange() {
     const first = exercisesInCategory[0];
     if (first) selectedExercise = first;
@@ -209,8 +223,22 @@
           </select>
         </div>
         <div class="segmented" role="tablist">
-          <button type="button" role="tab" aria-selected={metric === 'weight'} class:on={metric === 'weight'} onclick={() => (metric = 'weight')}>Charge</button>
-          <button type="button" role="tab" aria-selected={metric === 'rpe'} class:on={metric === 'rpe'} onclick={() => (metric = 'rpe')}>RPE</button>
+          {#if selectedExMaxWeight > 0}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={metric === 'weight'}
+              class:on={metric === 'weight'}
+              onclick={() => (metric = 'weight')}
+            >Charge</button>
+          {/if}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={metric === 'rpe'}
+            class:on={metric === 'rpe'}
+            onclick={() => (metric = 'rpe')}
+          >RPE</button>
         </div>
         <div class="chart-wrap"><canvas bind:this={exerciseCanvas}></canvas></div>
       </section>
@@ -229,7 +257,27 @@
               {#each group.items as rec}
                 <li>
                   <span class="rec-name">{rec.exerciseName}</span>
-                  <span class="rec-val">{rec.maxWeight} kg <span class="sub">· 1RM {rec.max1RM}</span></span>
+                  {#if rec.maxWeight > 0}
+                    <span class="rec-val">
+                      {rec.maxWeight} kg
+                      {#if rec.max1RM > 0}
+                        <span class="sub">· 1RM {rec.max1RM}</span>
+                      {/if}
+                    </span>
+                  {:else}
+                    <span class="rec-val">
+                      {#if rec.maxReps > 0}
+                        {rec.maxReps} {rec.exerciseType === 'isometrique' ? 's' : 'reps'}
+                        {#if rec.bestRpe != null}
+                          <span class="sub">· RPE {rec.bestRpe}</span>
+                        {/if}
+                      {:else if rec.bestRpe != null}
+                        RPE {rec.bestRpe}
+                      {:else}
+                        PDC
+                      {/if}
+                    </span>
+                  {/if}
                 </li>
               {/each}
             </ul>
