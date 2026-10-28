@@ -837,11 +837,15 @@ import {
         {#if !showRest}
           <section class="w-exercise">
             <p class="w-step">
-              {#if isWarmupExercise(currentExercise)}Échauffement · {/if}Exercice {exerciseIndex + 1}/{exercices.length}
+              {#if isWarmupExercise(currentExercise)}<span class="w-warmup-pill">Échauffement</span> · {/if}Exercice {exerciseIndex + 1}/{exercices.length}
             </p>
             <h1 class="w-name">{currentExercise.nom}</h1>
             <p class="w-target">
-              {formatExerciseCible(currentExercise)} · RPE {currentExercise.rpe_cible} · {currentExercise.repos_sec} s de repos
+              <span class="w-target-cible">{formatExerciseCible(currentExercise)}</span>
+              <span class="w-sep">·</span>
+              <span class="w-target-rpe">RPE {currentExercise.rpe_cible}</span>
+              <span class="w-sep">·</span>
+              <span>{currentExercise.repos_sec} s repos</span>
             </p>
 
             {#if hasGuide}
@@ -908,7 +912,7 @@ import {
             <div class="w-rpe">
               <div class="w-rpe-head">
                 <span>Effort ressenti</span>
-                <span>cible RPE {currentExercise.rpe_cible}</span>
+                <span class="w-rpe-target-hint">cible RPE {currentExercise.rpe_cible}</span>
               </div>
               <div class="w-rpe-scale" role="radiogroup" aria-label="RPE ressenti">
                 {#each RPE_VALUES as val}
@@ -1093,7 +1097,7 @@ import {
           <div class="w-rpe">
             <div class="w-rpe-head">
               <span>Effort ressenti</span>
-              <span>cible RPE {editingSet.rpeTarget}</span>
+              <span class="w-rpe-target-hint">cible RPE {editingSet.rpeTarget}</span>
             </div>
             <div class="w-rpe-scale" role="radiogroup" aria-label="RPE réalisé">
               {#each RPE_VALUES as val}
@@ -1507,6 +1511,7 @@ import {
 
   .w-clock {
     font-variant-numeric: tabular-nums;
+    color: var(--beige);
   }
 
   .w-more {
@@ -1535,7 +1540,7 @@ import {
   .w-progress span {
     display: block;
     height: 100%;
-    background: var(--pink);
+    background: linear-gradient(90deg, #06375a, var(--pink));
     transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -1549,6 +1554,11 @@ import {
     color: var(--text-muted);
   }
 
+  .w-warmup-pill {
+    color: var(--beige);
+    font-weight: 700;
+  }
+
   .w-name {
     font-size: 1.9rem;
     line-height: 1.1;
@@ -1559,6 +1569,21 @@ import {
     margin: 0;
     font-size: 0.9rem;
     color: var(--text-muted);
+  }
+
+  .w-target-cible {
+    color: var(--beige);
+    font-weight: 600;
+  }
+
+  .w-target-rpe {
+    color: #7dd3fc;
+    font-weight: 600;
+  }
+
+  .w-sep {
+    color: var(--faint);
+    margin: 0 0.15rem;
   }
 
   .w-guide {
@@ -1635,7 +1660,7 @@ import {
   }
 
   .w-dots i.done {
-    background: var(--text-muted);
+    background: #06375a;
   }
 
   .w-dots i.current {
@@ -1696,8 +1721,9 @@ import {
   }
 
   .w-field span {
-    font-size: 0.78rem;
-    color: var(--text-muted);
+    font-size: 0.8rem;
+    color: var(--beige);
+    font-weight: 600;
   }
 
   .w-rpe {
@@ -1710,6 +1736,11 @@ import {
     margin-bottom: 0.4rem;
     font-size: 0.78rem;
     color: var(--text-muted);
+  }
+
+  .w-rpe-target-hint {
+    color: var(--beige);
+    font-weight: 600;
   }
 
   .w-rpe-scale {
@@ -1728,11 +1759,17 @@ import {
     font-size: 0.95rem;
     font-weight: 600;
     border-radius: 10px;
+    box-shadow: none;
   }
 
   .w-rpe-scale button.half {
     font-size: 0.75rem;
     color: var(--text-muted);
+  }
+
+  .w-rpe-scale button.target {
+    color: var(--beige);
+    border: 1px solid color-mix(in srgb, var(--beige) 35%, transparent);
   }
 
   .w-rpe-scale button.target::after {
@@ -1750,6 +1787,8 @@ import {
   .w-rpe-scale button.active {
     background: var(--pink);
     color: #070706;
+    border-color: transparent;
+    box-shadow: none;
   }
 
   .w-rpe-scale button.active::after {
@@ -1760,10 +1799,21 @@ import {
     margin-top: 1.75rem;
     min-height: 56px;
     font-size: 1.02rem;
+    background: var(--pink);
+    color: #070706;
+    font-weight: 700;
+    border-radius: 14px;
+    box-shadow: none;
+  }
+
+  .w-validate:active {
+    transform: scale(0.98);
+    box-shadow: none;
   }
 
   .workout.flash .w-progress span {
-    box-shadow: 0 0 10px var(--pink);
+    background: var(--pink);
+    box-shadow: none;
   }
 
   .w-done {
@@ -1820,7 +1870,8 @@ import {
 
   .w-set-n {
     font-size: 0.8rem;
-    color: var(--text-muted);
+    color: var(--beige);
+    font-weight: 700;
   }
 
   .w-set-perf {
@@ -1846,7 +1897,7 @@ import {
   }
 
   .w-set-rpe.lower {
-    color: color-mix(in srgb, var(--deepblue) 35%, var(--offwhite));
+    color: #38bdf8;
   }
 
   /* ─── Repos ─── */
@@ -1867,7 +1918,7 @@ import {
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--beige);
   }
 
   .w-next-name {
@@ -1934,7 +1985,8 @@ import {
   .sheet-sub {
     margin: 0 0 1.25rem;
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--beige);
+    font-weight: 600;
   }
 
   .sheet-item {
@@ -1955,8 +2007,8 @@ import {
   }
 
   .sheet-meta {
-    font-weight: 500;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--beige);
   }
 
   .sheet-close {

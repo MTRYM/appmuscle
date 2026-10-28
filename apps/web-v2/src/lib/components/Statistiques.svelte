@@ -99,8 +99,8 @@
 
   function renderExerciseChart() {
     if (!exerciseCanvas || !selectedExercise) return;
-    const pink = cssVar('--pink', '#e6a6b2');
     const isWeight = metric === 'weight';
+    const accentColor = isWeight ? cssVar('--pink', '#e6a6b2') : '#38bdf8';
     const data = isWeight
       ? getWeightProgression(sessionsWithSets, selectedExercise).map((d) => ({ x: d.dateISO, y: d.weight }))
       : getRpeProgression(sessionsWithSets, selectedExercise).map((d) => ({ x: d.dateISO, y: d.rpe }));
@@ -114,11 +114,12 @@
           {
             label: isWeight ? 'Charge max (kg)' : 'RPE moyen',
             data: data.map((d) => d.y),
-            borderColor: pink,
-            backgroundColor: `${pink}22`,
+            borderColor: accentColor,
+            backgroundColor: isWeight ? `${accentColor}22` : 'rgba(56, 189, 248, 0.15)',
             fill: true,
             tension: 0.3,
-            pointRadius: 3,
+            pointRadius: 4,
+            pointBackgroundColor: accentColor,
           },
         ],
       },

@@ -212,17 +212,21 @@
 
   .ring-bg {
     fill: none;
-    stroke: var(--border);
+    stroke: color-mix(in srgb, var(--deepblue) 40%, var(--border));
     stroke-width: 3;
   }
 
   .ring-fill {
     fill: none;
-    stroke: var(--pink);
+    stroke: #38bdf8;
     stroke-width: 3;
     stroke-linecap: round;
     stroke-dasharray: 326.73;
-    transition: stroke-dashoffset 0.25s linear;
+    transition: stroke-dashoffset 0.25s linear, stroke 0.3s ease;
+  }
+
+  .chrono.urgent .ring-fill {
+    stroke: var(--pink);
   }
 
   .chrono-time {
@@ -258,17 +262,34 @@
   .btn-add {
     min-height: 44px;
     padding: 0.5rem 1.25rem;
-    background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--beige) 10%, transparent);
+    color: var(--beige);
+    border: 1px solid color-mix(in srgb, var(--beige) 25%, transparent);
     border-radius: 999px;
     font-size: 0.85rem;
     font-weight: 600;
+    transition: background 0.15s;
+  }
+
+  .btn-add:active {
+    background: color-mix(in srgb, var(--beige) 20%, transparent);
   }
 
   .chrono-next {
     min-height: 56px;
     font-size: 1.02rem;
+    background: #06375a;
+    color: #f7f5f2;
+    border: 1px solid color-mix(in srgb, #38bdf8 30%, transparent);
+    border-radius: 14px;
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  .chrono-next:active {
+    background: color-mix(in srgb, #06375a 80%, black);
+    box-shadow: none;
+    transform: scale(0.98);
   }
 
   .done-msg {

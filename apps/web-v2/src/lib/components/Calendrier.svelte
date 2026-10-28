@@ -541,7 +541,6 @@
 
   .dot.done {
     background: var(--success);
-    box-shadow: 0 0 6px rgba(34, 197, 94, 0.4);
   }
   .dot.pending {
     background: var(--beige);
@@ -550,7 +549,8 @@
     background: var(--destructive);
   }
   .dot.extra {
-    background: var(--pink);
+    background: var(--deepblue);
+    border: 1.5px solid #38bdf8;
   }
   .dot.vacation {
     background: var(--warning);
@@ -593,26 +593,26 @@
   }
 
   .day.done {
-    background: color-mix(in srgb, var(--success) 28%, var(--bg-card));
+    background: color-mix(in srgb, var(--success) 24%, var(--bg-card));
     border-color: var(--success);
     color: #4ade80;
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
   }
 
   .day.missed {
-    background: color-mix(in srgb, var(--destructive) 28%, var(--bg-card));
+    background: color-mix(in srgb, var(--destructive) 24%, var(--bg-card));
     border-color: var(--destructive);
   }
 
   .day.pending {
-    background: color-mix(in srgb, var(--beige) 35%, var(--bg-card));
-    border-color: color-mix(in srgb, var(--beige) 70%, var(--ink));
-    color: var(--text-heading);
+    background: color-mix(in srgb, var(--beige) 18%, var(--bg-card));
+    border-color: color-mix(in srgb, var(--beige) 45%, transparent);
+    color: var(--beige);
   }
 
   .day.extra {
-    background: color-mix(in srgb, var(--pink) 30%, var(--bg-card));
-    border-color: var(--pink);
+    background: color-mix(in srgb, var(--deepblue) 55%, var(--bg-card));
+    border-color: color-mix(in srgb, var(--deepblue) 45%, #38bdf8);
+    color: #93c5fd;
   }
 
   .day.vacation {
