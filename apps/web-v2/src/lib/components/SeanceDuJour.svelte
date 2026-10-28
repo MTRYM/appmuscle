@@ -1484,6 +1484,7 @@ import {
   /* ─── Séance active : une seule colonne, typographie, aucune carte ─── */
   .workout {
     padding-top: 0.25rem;
+    padding-bottom: 2rem;
   }
 
   .w-top {
@@ -1800,6 +1801,7 @@ import {
 
   .w-validate {
     margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
     min-height: 56px;
     font-size: 1.02rem;
     background: #06375a;

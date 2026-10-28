@@ -70,7 +70,7 @@
     padding-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
     padding-left: max(0.85rem, calc(env(safe-area-inset-left, 0px) + 0.5rem));
     padding-right: max(0.85rem, calc(env(safe-area-inset-right, 0px) + 0.5rem));
-    padding-bottom: 54px;
+    padding-bottom: calc(56px + 1.25rem);
     box-sizing: border-box;
   }
 
