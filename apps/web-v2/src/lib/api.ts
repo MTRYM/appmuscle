@@ -30,8 +30,6 @@ export async function getMissedSessions() {
 }
 
 export async function markMissedSessions(todayISO: string) {
-  // Can be done server-side or here by fetching pending and updating
-  // For now, we fetch pending before today and mark missed
   const res = await fetch('/api/planned-sessions?status=pending');
   const pending = await res.json();
   const toMiss = pending.filter((p: any) => p.dateISO < todayISO);
@@ -43,6 +41,19 @@ export async function markMissedSessions(todayISO: string) {
       body: JSON.stringify({ status: 'missed' })
     });
   }
+}
+
+export async function movePlannedSession(id: string, newDateISO: string, swapWithId?: string) {
+  const res = await fetch(`/api/planned-sessions?id=${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dateISO: newDateISO, swapWithId })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `Erreur lors du déplacement (${res.status})`);
+  }
+  return data;
 }
 
 export async function replacePlannedSessions(sessions: any[]) {
@@ -58,8 +69,7 @@ export async function replacePlannedSessions(sessions: any[]) {
 }
 
 export async function syncPlannedWithCompleted() {
-  // Implementation depends on what this did in old Dexie.
-  // We can skip or implement server-side if needed.
+  // Handled server-side
 }
 
 export async function saveWorkoutSession(sessionData: any, setsData?: any[]) {
@@ -85,9 +95,8 @@ export async function saveWorkoutSession(sessionData: any, setsData?: any[]) {
 }
 
 export async function getAllSessionsWithSets() {
-  const res = await fetch('/api/sessions?limit=500'); // limit or get all
+  const res = await fetch('/api/sessions?limit=500');
   const data = await res.json();
-  // Map Prisma relation name 'performedSets' to 'sets' for frontend compatibility
   return data.map((session: any) => ({
     ...session,
     sets: session.performedSets || []
@@ -162,4 +171,62 @@ export async function getInProgressSession() {
     };
   }
   return null;
+}
+
+export async function getBodyData() {
+  const res = await fetch('/api/body');
+  if (!res.ok) {
+    throw new Error('Erreur lors du chargement des données corporelles');
+  }
+  return res.json();
+}
+
+export async function saveBodyProfile(data: { heightCm?: number | null; targetWeightKg?: number | null }) {
+  const res = await fetch('/api/body', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'profile', ...data }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(payload.error || 'Erreur lors de la sauvegarde du profil');
+  }
+  return payload;
+}
+
+export async function saveBodyWeight(weight: number, dateISO?: string, notes?: string) {
+  const res = await fetch('/api/body', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'weight', weight, dateISO, notes }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(payload.error || 'Erreur lors de la sauvegarde du poids');
+  }
+  return payload;
+}
+
+export async function saveBodyMeasurement(type: string, value: number, dateISO?: string) {
+  const res = await fetch('/api/body', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'measurement', type, value, dateISO }),
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(payload.error || 'Erreur lors de la sauvegarde de la mesure');
+  }
+  return payload;
+}
+
+export async function deleteBodyEntry(kind: 'weight' | 'measurement', id: string) {
+  const res = await fetch(`/api/body?kind=${kind}&id=${id}`, {
+    method: 'DELETE',
+  });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(payload.error || 'Erreur lors de la suppression');
+  }
+  return payload;
 }

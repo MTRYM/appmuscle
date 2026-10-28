@@ -1,5 +1,5 @@
 <script>
-  import { getPlannedSessions, getAllSessionsWithSets } from '$lib/api';
+  import { getPlannedSessions, getAllSessionsWithSets, getBodyData } from '$lib/api';
   import { todayISO, formatDateFR } from '$lib/programme';
   import { onMount } from 'svelte';
 
@@ -40,13 +40,24 @@
   async function exportData() {
     exporting = true;
     try {
-      const [planned, sessions] = await Promise.all([getPlannedSessions(), getAllSessionsWithSets()]);
+      const [planned, sessions, bodyData] = await Promise.all([
+        getPlannedSessions(),
+        getAllSessionsWithSets(),
+        getBodyData().catch(() => ({ profile: null, checkIns: [], measurements: [] })),
+      ]);
       const performedSets = sessions.flatMap((s) => s.sets ?? []);
       const workoutSessions = sessions.map(({ sets, performedSets: _p, plannedSession, ...rest }) => rest);
       const payload = {
-        version: 1,
+        version: 2,
         exportedAt: new Date().toISOString(),
-        tables: { plannedSessions: planned, workoutSessions, performedSets },
+        tables: {
+          plannedSessions: planned,
+          workoutSessions,
+          performedSets,
+          athleteProfile: bodyData.profile,
+          checkIns: bodyData.checkIns,
+          measurements: bodyData.measurements,
+        },
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

@@ -6,7 +6,8 @@
     getVacations,
     getPlannedSessions,
     getAllSessionsWithSets,
-    deleteWorkoutSession
+    deleteWorkoutSession,
+    movePlannedSession
   } from '$lib/api';
   import { formatDateFR, formatSetPerformance, todayISO } from '$lib/programme';
 
@@ -23,6 +24,11 @@
   let vacationEnd = $state(todayISO());
   let vacationMessage = $state('');
   let vacationSaving = $state(false);
+  let movingPlannedId = $state(null);
+  let moveTargetDate = $state(todayISO());
+  let moveSaving = $state(false);
+  let moveMessage = $state('');
+  let showPullSession = $state(false);
 
   let loading = $state(true);
 
@@ -109,6 +115,9 @@
 
   async function selectDay(dateISO) {
     selectedDate = dateISO;
+    movingPlannedId = null;
+    moveMessage = '';
+    showPullSession = false;
     dayDetail = await getDayData(dateISO);
   }
 
@@ -119,6 +128,71 @@
   function closeDetail() {
     selectedDate = null;
     dayDetail = null;
+    movingPlannedId = null;
+    moveMessage = '';
+    showPullSession = false;
+  }
+
+  function addDaysISO(baseISO, days) {
+    const d = new Date(`${baseISO}T12:00:00`);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function getNextMondayISO(fromISO) {
+    const d = new Date(`${fromISO}T12:00:00`);
+    const day = d.getDay();
+    const diff = day === 1 ? 7 : (8 - day) % 7;
+    d.setDate(d.getDate() + diff);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function openMovePicker(planned) {
+    if (movingPlannedId === planned.id) {
+      movingPlannedId = null;
+      moveMessage = '';
+      return;
+    }
+    movingPlannedId = planned.id;
+    moveMessage = '';
+    moveTargetDate = planned.dateISO === today ? addDaysISO(today, 1) : today;
+  }
+
+  let plannedOnTargetDate = $derived.by(() => {
+    if (!movingPlannedId || !moveTargetDate) return null;
+    return plannedSessions.find(
+      (p) => p.dateISO === moveTargetDate && p.id !== movingPlannedId && p.status !== 'done',
+    ) || null;
+  });
+
+  let movableSessionsForRestDay = $derived.by(() => {
+    if (!selectedDate) return [];
+    const limitFuture = addDaysISO(today, 14);
+    return plannedSessions.filter(
+      (p) =>
+        p.dateISO !== selectedDate &&
+        (p.status === 'missed' || (p.status === 'pending' && p.dateISO <= limitFuture)),
+    );
+  });
+
+  async function confirmMoveSession(plannedId, targetDate, swapWithId = undefined) {
+    if (moveSaving || !targetDate) return;
+    moveSaving = true;
+    moveMessage = '';
+    try {
+      await movePlannedSession(plannedId, targetDate, swapWithId);
+      await loadData();
+      if (selectedDate) {
+        dayDetail = await getDayData(selectedDate);
+      }
+      movingPlannedId = null;
+      showPullSession = false;
+      onCalendarChanged();
+    } catch (err) {
+      moveMessage = `Erreur : ${err?.message || err}`;
+    } finally {
+      moveSaving = false;
+    }
   }
 
   function formatDuration(secs) {
@@ -319,16 +393,132 @@
 
         {#if dayDetail.planned.length === 0 && dayDetail.sessions.length === 0 && dayDetail.vacations.length === 0}
           <p class="empty">Jour de repos — aucune séance.</p>
+          {#if movableSessionsForRestDay.length > 0}
+            <div class="pull-session-wrap">
+              <button
+                type="button"
+                class="btn-move-toggle"
+                onclick={() => (showPullSession = !showPullSession)}
+              >
+                {showPullSession ? 'Masquer la liste' : 'Ramener une séance sur ce jour'}
+              </button>
+              {#if showPullSession}
+                <div class="pull-list">
+                  <span class="move-hint">Choisir la séance à programmer le {formatDateFR(selectedDate)} :</span>
+                  {#each movableSessionsForRestDay as m}
+                    <button
+                      type="button"
+                      class="pull-item"
+                      disabled={moveSaving}
+                      onclick={() => confirmMoveSession(m.id, selectedDate)}
+                    >
+                      <div class="pull-item-main">
+                        <strong>{m.sessionName}</strong>
+                        <span class="badge badge-{m.status === 'missed' ? 'danger' : 'muted'}">
+                          {m.status === 'missed' ? 'Loupée' : 'Prévue'}
+                        </span>
+                      </div>
+                      <span class="pull-item-sub">Initialement le {formatDateFR(m.dateISO)}</span>
+                    </button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/if}
         {/if}
 
         {#each dayDetail.planned as p}
           <div class="detail-block">
-            <p>
-              <span class="badge badge-{p.status === 'done' ? 'success' : p.status === 'missed' ? 'danger' : 'muted'}">
-                {p.status === 'done' ? 'Réalisée' : p.status === 'missed' ? 'Loupée' : 'Prévue'}
-              </span>
-              {p.sessionName} — {p.cycleName}
-            </p>
+            <div class="planned-header-row">
+              <p>
+                <span class="badge badge-{p.status === 'done' ? 'success' : p.status === 'missed' ? 'danger' : 'muted'}">
+                  {p.status === 'done' ? 'Réalisée' : p.status === 'missed' ? 'Loupée' : 'Prévue'}
+                </span>
+                {p.sessionName} — {p.cycleName}
+              </p>
+              {#if p.status !== 'done'}
+                <button
+                  type="button"
+                  class="btn-move-toggle"
+                  onclick={() => openMovePicker(p)}
+                >
+                  {movingPlannedId === p.id ? 'Annuler' : 'Déplacer'}
+                </button>
+              {/if}
+            </div>
+
+            {#if movingPlannedId === p.id}
+              <div class="move-box">
+                <span class="move-hint">Nouvelle date (sans passer en rattrapage) :</span>
+                <div class="move-shortcuts">
+                  {#if p.dateISO !== today}
+                    <button
+                      type="button"
+                      class="move-chip"
+                      class:active={moveTargetDate === today}
+                      onclick={() => (moveTargetDate = today)}
+                    >
+                      Aujourd'hui
+                    </button>
+                  {/if}
+                  <button
+                    type="button"
+                    class="move-chip"
+                    class:active={moveTargetDate === addDaysISO(today, 1)}
+                    onclick={() => (moveTargetDate = addDaysISO(today, 1))}
+                  >
+                    Demain
+                  </button>
+                  <button
+                    type="button"
+                    class="move-chip"
+                    class:active={moveTargetDate === getNextMondayISO(p.dateISO)}
+                    onclick={() => (moveTargetDate = getNextMondayISO(p.dateISO))}
+                  >
+                    Lundi prochain
+                  </button>
+                </div>
+
+                <input type="date" class="move-date-input" bind:value={moveTargetDate} />
+
+                {#if plannedOnTargetDate}
+                  <p class="move-conflict">
+                    Ce jour contient déjà <strong>{plannedOnTargetDate.sessionName}</strong>.
+                  </p>
+                  <div class="move-actions-row">
+                    <button
+                      type="button"
+                      class="btn-move-confirm"
+                      disabled={moveSaving}
+                      onclick={() => confirmMoveSession(p.id, moveTargetDate, plannedOnTargetDate.id)}
+                    >
+                      {moveSaving ? '…' : 'Échanger les 2 jours'}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-move-secondary"
+                      disabled={moveSaving}
+                      onclick={() => confirmMoveSession(p.id, moveTargetDate)}
+                    >
+                      Déplacer quand même
+                    </button>
+                  </div>
+                {:else}
+                  <button
+                    type="button"
+                    class="btn-move-confirm"
+                    disabled={moveSaving || !moveTargetDate || moveTargetDate === p.dateISO}
+                    onclick={() => confirmMoveSession(p.id, moveTargetDate)}
+                  >
+                    {moveSaving ? 'Déplacement…' : `Programmer au ${formatDateFR(moveTargetDate)}`}
+                  </button>
+                {/if}
+
+                {#if moveMessage}
+                  <p class="move-error">{moveMessage}</p>
+                {/if}
+              </div>
+            {/if}
           </div>
         {/each}
 
@@ -736,5 +926,170 @@
     margin-bottom: 0.5rem;
     border-radius: 12px;
     font-weight: 600;
+  }
+
+  .planned-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .planned-header-row p {
+    margin: 0;
+    flex: 1;
+  }
+
+  .btn-move-toggle {
+    min-height: 36px;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--beige) 12%, transparent);
+    color: var(--beige);
+    border: 1px solid color-mix(in srgb, var(--beige) 30%, transparent);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .move-box {
+    margin-top: 0.85rem;
+    padding: 0.85rem;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .move-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .move-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .move-chip {
+    min-height: 34px;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .move-chip.active {
+    background: color-mix(in srgb, var(--beige) 20%, transparent);
+    color: var(--beige);
+    border-color: var(--beige);
+  }
+
+  .move-date-input {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .move-conflict {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--beige);
+  }
+
+  .move-actions-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .btn-move-confirm {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 10px;
+    background: #06375a;
+    color: #f7f5f2;
+    font-weight: 700;
+    font-size: 0.86rem;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-move-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-move-secondary {
+    width: 100%;
+    min-height: 40px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+
+  .move-error {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--destructive);
+  }
+
+  .pull-session-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .pull-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .pull-item {
+    width: 100%;
+    text-align: left;
+    padding: 0.7rem 0.85rem;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    cursor: pointer;
+  }
+
+  .pull-item:hover {
+    border-color: var(--beige);
+  }
+
+  .pull-item-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-heading);
+    font-size: 0.9rem;
+  }
+
+  .pull-item-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
   }
 </style>

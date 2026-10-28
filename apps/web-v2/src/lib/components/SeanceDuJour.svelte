@@ -10,7 +10,9 @@
     getAllSessionsWithSets,
     getInProgressSession,
     deleteWorkoutSession,
+    movePlannedSession,
   } from '$lib/api';
+  import { getExerciseCategory, groupByCategory } from '$lib/exerciseCategories';
 import {
     parseProgramme,
     getSessionTemplate,
@@ -41,6 +43,11 @@ import {
   let showCatchup = $state(false);
   let showFreePicker = $state(false);
   let freeTemplates = $state([]);
+  let showPostponeToday = $state(false);
+  let postponeTargetDate = $state('');
+  let postponing = $state(false);
+  let showSwapExercise = $state(false);
+  let swapCategory = $state('');
 
   let sessionMeta = $state(null);
   let exercices = $state([]);
@@ -307,6 +314,62 @@ import {
         sessionIndex: todaySession.sessionIndex,
         sessionName: todaySession.sessionName,
         cycleName: todaySession.cycleName,
+      },
+      template,
+      'planned',
+    );
+  }
+
+  function addDaysISO(baseISO, days) {
+    const d = new Date(`${baseISO}T12:00:00`);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function getNextMondayISO(fromISO) {
+    const d = new Date(`${fromISO}T12:00:00`);
+    const day = d.getDay();
+    const diff = day === 1 ? 7 : (8 - day) % 7;
+    d.setDate(d.getDate() + diff);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function togglePostponeToday() {
+    showPostponeToday = !showPostponeToday;
+    if (showPostponeToday && !postponeTargetDate) {
+      postponeTargetDate = addDaysISO(todayISO(), 1);
+    }
+  }
+
+  async function postponeTodaySession() {
+    if (!todaySession || !postponeTargetDate || postponing) return;
+    postponing = true;
+    try {
+      await movePlannedSession(todaySession.id, postponeTargetDate);
+      showPostponeToday = false;
+      await refreshIdle();
+      onSessionSaved();
+    } catch (err) {
+      alert('Erreur lors du report : ' + (err?.message || err));
+    } finally {
+      postponing = false;
+    }
+  }
+
+  async function moveAndStartToday(planned) {
+    try {
+      await movePlannedSession(planned.id, todayISO());
+    } catch (err) {
+      console.warn('Impossible de déplacer la séance, lancement normal:', err);
+    }
+    const template = getSessionTemplate(programme, planned.cycleIndex, planned.sessionIndex);
+    startSession(
+      {
+        plannedSessionId: planned.id,
+        cycleIndex: planned.cycleIndex,
+        sessionIndex: planned.sessionIndex,
+        sessionName: planned.sessionName,
+        cycleName: planned.cycleName,
       },
       template,
       'planned',
@@ -605,6 +668,43 @@ import {
     }
   }
 
+  let allProgramExercises = $derived.by(() => {
+    const map = new Map();
+    for (const t of freeTemplates) {
+      for (const ex of t.exercices || []) {
+        if (!map.has(ex.nom)) {
+          map.set(ex.nom, ex);
+        }
+      }
+    }
+    return [...map.values()];
+  });
+
+  let swapExerciseGroups = $derived(
+    groupByCategory(allProgramExercises, (ex) => ex.nom),
+  );
+
+  let swapExercisesInSelectedCategory = $derived(
+    swapExerciseGroups.find((g) => g.category === swapCategory)?.items ?? [],
+  );
+
+  function openSwapExercise() {
+    if (!currentExercise) return;
+    swapCategory = String(getExerciseCategory(currentExercise.nom));
+    showSwapExercise = true;
+  }
+
+  async function swapCurrentExercise(replacementEx) {
+    if (!currentExercise || !replacementEx) return;
+    const replaced = {
+      ...replacementEx,
+      series: currentExercise.series ?? replacementEx.series ?? 3,
+    };
+    exercices = exercices.map((ex, i) => (i === exerciseIndex ? replaced : ex));
+    showSwapExercise = false;
+    await initExerciseInputs(replaced);
+  }
+
   function finishSession() {
     const completedAt = new Date().toISOString();
     const durationSec = Math.round((Date.parse(completedAt) - Date.parse(startedAt)) / 1000);
@@ -776,18 +876,67 @@ import {
       {/if}
 
       <nav class="quick-links" aria-label="Autres options">
+        {#if todaySession}
+          <button type="button" class="quick-row" onclick={togglePostponeToday}>
+            <span>Reporter la séance du jour</span>
+            <span class="quick-meta">{showPostponeToday ? 'Fermer' : 'Déplacer'}</span>
+          </button>
+          {#if showPostponeToday}
+            <div class="picker postpone-picker">
+              <span class="postpone-label">Déplacer cette séance sur un autre jour :</span>
+              <div class="postpone-chips">
+                <button
+                  type="button"
+                  class="postpone-chip"
+                  class:active={postponeTargetDate === addDaysISO(todayISO(), 1)}
+                  onclick={() => (postponeTargetDate = addDaysISO(todayISO(), 1))}
+                >
+                  Demain
+                </button>
+                <button
+                  type="button"
+                  class="postpone-chip"
+                  class:active={postponeTargetDate === getNextMondayISO(todayISO())}
+                  onclick={() => (postponeTargetDate = getNextMondayISO(todayISO()))}
+                >
+                  Lundi prochain
+                </button>
+              </div>
+              <input type="date" bind:value={postponeTargetDate} />
+              <button
+                type="button"
+                class="btn-primary postpone-confirm"
+                disabled={postponing || !postponeTargetDate || postponeTargetDate === todayISO()}
+                onclick={postponeTodaySession}
+              >
+                {postponing ? 'Déplacement…' : `Programmer au ${formatDateFR(postponeTargetDate)}`}
+              </button>
+            </div>
+          {/if}
+        {/if}
+
         {#if missedSessions.length > 0}
           <button type="button" class="quick-row" onclick={() => (showCatchup = !showCatchup)}>
-            <span>Rattraper une séance</span>
+            <span>Reprogrammer ou rattraper une séance</span>
             <span class="quick-meta">{missedSessions.length}</span>
           </button>
           {#if showCatchup}
             <div class="picker">
               {#each missedSessions as m}
-                <button type="button" class="pick-item" onclick={() => startCatchup(m)}>
-                  <strong>{m.sessionName}</strong>
-                  <span>{formatDateFR(m.dateISO)} — {m.cycleName}</span>
-                </button>
+                <div class="pick-item-card">
+                  <div class="pick-item-head">
+                    <strong>{m.sessionName}</strong>
+                    <span>{formatDateFR(m.dateISO)} — {m.cycleName}</span>
+                  </div>
+                  <div class="pick-item-btns">
+                    <button type="button" class="btn-move-launch" onclick={() => moveAndStartToday(m)}>
+                      Déplacer à aujourd'hui & Lancer
+                    </button>
+                    <button type="button" class="btn-catchup-sub" onclick={() => startCatchup(m)}>
+                      Rattrapage
+                    </button>
+                  </div>
+                </div>
               {/each}
             </div>
           {/if}
@@ -1003,6 +1152,9 @@ import {
           onclick={(e) => e.stopPropagation()}
           onkeydown={(e) => e.stopPropagation()}
         >
+          {#if !showRest}
+            <button type="button" class="sheet-item" onclick={() => menuAction(openSwapExercise)}>Remplacer l'exercice</button>
+          {/if}
           {#if !showRest && !isLastSet}
             <button type="button" class="sheet-item" onclick={() => menuAction(skipToNextSet)}>Passer la série</button>
           {/if}
@@ -1018,6 +1170,49 @@ import {
           <button type="button" class="sheet-item" onclick={() => menuAction(finishSession)}>Terminer la séance</button>
           <button type="button" class="sheet-item danger" onclick={() => menuAction(cancelSession)}>Abandonner la séance</button>
           <button type="button" class="sheet-close" onclick={() => (showMenu = false)}>Fermer</button>
+        </div>
+      </div>
+    {/if}
+
+    {#if showSwapExercise}
+      <div
+        class="sheet-backdrop"
+        role="presentation"
+        onclick={() => (showSwapExercise = false)}
+        onkeydown={(e) => e.key === 'Escape' && (showSwapExercise = false)}
+      >
+        <div
+          class="sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Remplacer l'exercice"
+          tabindex="-1"
+          onclick={(e) => e.stopPropagation()}
+          onkeydown={(e) => e.stopPropagation()}
+        >
+          <p class="sheet-title">Remplacer {currentExercise?.nom}</p>
+          <div class="swap-filter">
+            <select bind:value={swapCategory} aria-label="Catégorie d'exercice">
+              {#each swapExerciseGroups as g}
+                <option value={g.category}>{g.category} ({g.items.length})</option>
+              {/each}
+            </select>
+          </div>
+          <div class="swap-list">
+            {#each swapExercisesInSelectedCategory as ex}
+              {#if ex.nom !== currentExercise?.nom}
+                <button
+                  type="button"
+                  class="swap-item"
+                  onclick={() => swapCurrentExercise(ex)}
+                >
+                  <strong>{ex.nom}</strong>
+                  <span>{formatExerciseCible(ex)} · RPE {ex.rpe_cible ?? 7}</span>
+                </button>
+              {/if}
+            {/each}
+          </div>
+          <button type="button" class="sheet-close" onclick={() => (showSwapExercise = false)}>Fermer</button>
         </div>
       </div>
     {/if}
@@ -2059,5 +2254,144 @@ import {
     from {
       opacity: 0;
     }
+  }
+
+  .postpone-picker {
+    padding: 0.75rem 0.25rem;
+    gap: 0.65rem;
+  }
+
+  .postpone-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .postpone-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .postpone-chip {
+    min-height: 36px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .postpone-chip.active {
+    background: color-mix(in srgb, var(--beige) 20%, transparent);
+    color: var(--beige);
+    border-color: var(--beige);
+  }
+
+  .postpone-confirm {
+    width: 100%;
+    min-height: 46px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+  }
+
+  .pick-item-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pick-item-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .pick-item-head strong {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-heading);
+  }
+
+  .pick-item-head span {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .pick-item-btns {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .btn-move-launch {
+    flex: 1;
+    min-height: 40px;
+    padding: 0.45rem 0.75rem;
+    border-radius: 10px;
+    background: #06375a;
+    color: #f7f5f2;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-catchup-sub {
+    min-height: 40px;
+    padding: 0.45rem 0.75rem;
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .swap-filter {
+    margin-bottom: 0.75rem;
+  }
+
+  .swap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 45vh;
+    overflow-y: auto;
+    margin-bottom: 0.5rem;
+  }
+
+  .swap-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .swap-item:hover {
+    border-color: var(--beige);
+  }
+
+  .swap-item strong {
+    font-size: 0.9rem;
+    color: var(--text-heading);
+  }
+
+  .swap-item span {
+    font-size: 0.76rem;
+    color: var(--text-muted);
   }
 </style>
