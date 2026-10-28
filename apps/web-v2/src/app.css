@@ -90,10 +90,10 @@
   --text-muted: var(--muted-foreground);
   --text-heading: var(--foreground);
   --accent-hover: color-mix(in srgb, var(--pink) 85%, #fff);
-  --success: #22c55e;
+  --success: #3b7a57;
   --warning: #f59e0b;
   --danger: var(--destructive);
-  --info: #38bdf8;
+  --info: #06375a;
   --rest: var(--faint);
   --shadow: rgba(0, 0, 0, 0.5);
 

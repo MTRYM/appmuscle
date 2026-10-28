@@ -77,7 +77,7 @@
   function renderVolumeChart() {
     if (!volumeCanvas) return;
     const volumeData = getVolumeByPeriod(sessionsWithSets, 'week').slice(-12);
-    const pink = cssVar('--pink', '#e6a6b2');
+    const deepblue = '#06375a';
 
     if (volumeChart) volumeChart.destroy();
     volumeChart = new Chart(volumeCanvas, {
@@ -88,7 +88,7 @@
           {
             label: 'Volume (kg)',
             data: volumeData.map((d) => d.volume),
-            backgroundColor: pink,
+            backgroundColor: deepblue,
             borderRadius: 6,
           },
         ],
@@ -100,7 +100,7 @@
   function renderExerciseChart() {
     if (!exerciseCanvas || !selectedExercise) return;
     const isWeight = metric === 'weight';
-    const accentColor = isWeight ? cssVar('--pink', '#e6a6b2') : '#38bdf8';
+    const accentColor = isWeight ? cssVar('--pink', '#e6a6b2') : '#06375a';
     const data = isWeight
       ? getWeightProgression(sessionsWithSets, selectedExercise).map((d) => ({ x: d.dateISO, y: d.weight }))
       : getRpeProgression(sessionsWithSets, selectedExercise).map((d) => ({ x: d.dateISO, y: d.rpe }));
@@ -115,11 +115,13 @@
             label: isWeight ? 'Charge max (kg)' : 'RPE moyen',
             data: data.map((d) => d.y),
             borderColor: accentColor,
-            backgroundColor: isWeight ? `${accentColor}22` : 'rgba(56, 189, 248, 0.15)',
+            borderWidth: 2.5,
+            backgroundColor: isWeight ? `${accentColor}22` : 'rgba(6, 55, 90, 0.35)',
             fill: true,
             tension: 0.3,
             pointRadius: 4,
             pointBackgroundColor: accentColor,
+            pointBorderColor: isWeight ? accentColor : '#e8dccf',
           },
         ],
       },

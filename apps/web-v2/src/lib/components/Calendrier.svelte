@@ -540,20 +540,19 @@
   }
 
   .dot.done {
-    background: var(--success);
+    background: #3b7a57;
   }
   .dot.pending {
     background: var(--beige);
   }
   .dot.missed {
-    background: var(--destructive);
+    background: #991b1b;
   }
   .dot.extra {
-    background: var(--deepblue);
-    border: 1.5px solid #38bdf8;
+    background: #06375a;
   }
   .dot.vacation {
-    background: var(--warning);
+    background: #b45309;
   }
   .dot.rest {
     background: var(--faint);
@@ -584,7 +583,7 @@
     padding: 0;
     background: var(--bg-card);
     color: var(--text);
-    border: 2px solid transparent;
+    border: none;
   }
 
   .day.empty {
@@ -593,32 +592,28 @@
   }
 
   .day.done {
-    background: color-mix(in srgb, var(--success) 24%, var(--bg-card));
-    border-color: var(--success);
-    color: #4ade80;
+    background: color-mix(in srgb, #3b7a57 30%, var(--bg-card));
+    color: #a3e6b5;
   }
 
   .day.missed {
-    background: color-mix(in srgb, var(--destructive) 24%, var(--bg-card));
-    border-color: var(--destructive);
+    background: color-mix(in srgb, #991b1b 25%, var(--bg-card));
+    color: var(--text-muted);
   }
 
   .day.pending {
-    background: color-mix(in srgb, var(--beige) 18%, var(--bg-card));
-    border-color: color-mix(in srgb, var(--beige) 45%, transparent);
+    background: color-mix(in srgb, var(--beige) 15%, var(--bg-card));
     color: var(--beige);
   }
 
   .day.extra {
-    background: color-mix(in srgb, var(--deepblue) 55%, var(--bg-card));
-    border-color: color-mix(in srgb, var(--deepblue) 45%, #38bdf8);
-    color: #93c5fd;
+    background: #06375a;
+    color: #f7f5f2;
   }
 
   .day.vacation {
-    background: color-mix(in srgb, var(--warning) 28%, var(--bg-card));
-    border-color: var(--warning);
-    color: var(--text-heading);
+    background: color-mix(in srgb, #b45309 25%, var(--bg-card));
+    color: var(--text-muted);
   }
 
   .day.rest {
@@ -626,8 +621,13 @@
     color: var(--text-muted);
   }
 
+  .day.today {
+    box-shadow: inset 0 0 0 1.5px var(--pink);
+    color: var(--text-heading);
+  }
+
   .day.selected {
-    box-shadow: 0 0 0 2px var(--pink);
+    box-shadow: inset 0 0 0 2px var(--beige);
   }
 
   .detail h3 {

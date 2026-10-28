@@ -1458,9 +1458,9 @@ import {
   }
 
   .btn-recovery {
-    background: color-mix(in srgb, var(--success) 22%, var(--bg-elevated));
-    color: #4ade80;
-    border: 1.5px solid color-mix(in srgb, var(--success) 60%, transparent);
+    background: color-mix(in srgb, #3b7a57 25%, var(--bg-elevated));
+    color: #a3e6b5;
+    border: 1px solid color-mix(in srgb, #3b7a57 40%, transparent);
     font-weight: 700;
     font-size: 0.95rem;
     border-radius: 12px;
@@ -1475,10 +1475,10 @@ import {
   }
 
   .btn-recovery:hover {
-    background: var(--success);
-    color: #070706;
-    border-color: var(--success);
-    box-shadow: 0 0 15px rgba(34, 197, 94, 0.35);
+    background: #3b7a57;
+    color: #f7f5f2;
+    border-color: #3b7a57;
+    box-shadow: none;
   }
 
   /* ─── Séance active : une seule colonne, typographie, aucune carte ─── */
@@ -1540,7 +1540,7 @@ import {
   .w-progress span {
     display: block;
     height: 100%;
-    background: linear-gradient(90deg, #06375a, var(--pink));
+    background: #06375a;
     transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
@@ -1577,8 +1577,11 @@ import {
   }
 
   .w-target-rpe {
-    color: #7dd3fc;
-    font-weight: 600;
+    color: #f7f5f2;
+    background: #06375a;
+    padding: 0.12rem 0.45rem;
+    border-radius: 6px;
+    font-weight: 700;
   }
 
   .w-sep {
@@ -1710,7 +1713,7 @@ import {
   }
 
   .w-field input:focus {
-    border-bottom-color: var(--pink);
+    border-bottom-color: #06375a;
     box-shadow: none;
   }
 
@@ -1785,24 +1788,25 @@ import {
   }
 
   .w-rpe-scale button.active {
-    background: var(--pink);
-    color: #070706;
+    background: #06375a;
+    color: #f7f5f2;
     border-color: transparent;
     box-shadow: none;
   }
 
   .w-rpe-scale button.active::after {
-    background: #070706;
+    background: #f7f5f2;
   }
 
   .w-validate {
     margin-top: 1.75rem;
     min-height: 56px;
     font-size: 1.02rem;
-    background: var(--pink);
-    color: #070706;
+    background: #06375a;
+    color: #f7f5f2;
     font-weight: 700;
     border-radius: 14px;
+    border: none;
     box-shadow: none;
   }
 
@@ -1812,7 +1816,7 @@ import {
   }
 
   .workout.flash .w-progress span {
-    background: var(--pink);
+    background: #06375a;
     box-shadow: none;
   }
 
@@ -1897,7 +1901,7 @@ import {
   }
 
   .w-set-rpe.lower {
-    color: #38bdf8;
+    color: color-mix(in srgb, #06375a 50%, var(--beige));
   }
 
   /* ─── Repos ─── */

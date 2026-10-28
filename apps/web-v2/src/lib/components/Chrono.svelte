@@ -212,14 +212,14 @@
 
   .ring-bg {
     fill: none;
-    stroke: color-mix(in srgb, var(--deepblue) 40%, var(--border));
-    stroke-width: 3;
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 4;
   }
 
   .ring-fill {
     fill: none;
-    stroke: #38bdf8;
-    stroke-width: 3;
+    stroke: #06375a;
+    stroke-width: 4;
     stroke-linecap: round;
     stroke-dasharray: 326.73;
     transition: stroke-dashoffset 0.25s linear, stroke 0.3s ease;
@@ -280,7 +280,7 @@
     font-size: 1.02rem;
     background: #06375a;
     color: #f7f5f2;
-    border: 1px solid color-mix(in srgb, #38bdf8 30%, transparent);
+    border: none;
     border-radius: 14px;
     font-weight: 700;
     box-shadow: none;
