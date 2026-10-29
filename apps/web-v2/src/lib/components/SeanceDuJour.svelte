@@ -13,10 +13,11 @@
     movePlannedSession,
   } from '$lib/api';
   import { getExerciseCategory, groupByCategory } from '$lib/exerciseCategories';
-import {
+  import {
     parseProgramme,
     getSessionTemplate,
     getAllSessionTemplates,
+    parseSessionTitle,
     todayISO,
     formatDateFR,
     isIsometricExercise,
@@ -26,7 +27,7 @@ import {
   } from '$lib/programme';
   import { calcAvgRpe, calcSessionVolume } from '$lib/stats';
   import { suggestWeightForExercise } from '$lib/weights';
-  import { Check } from 'lucide-svelte';
+  import { Check, Home, Dumbbell } from 'lucide-svelte';
   import ExerciseGif from './ExerciseGif.svelte';
   import { getExerciseGif } from '$lib/exerciseGifs.js';
 
@@ -820,9 +821,19 @@ import {
       </div>
     {:else}
       {#if inProgressSession}
+        {@const inProgTitle = parseSessionTitle(inProgressSession.plannedSession?.sessionName || 'Séance')}
         <header class="home-head">
-          <p class="home-date accent-text">En cours</p>
-          <h1>{inProgressSession.plannedSession?.sessionName || 'Séance'}</h1>
+          <p class="home-date accent-text">
+            <span>En cours</span>
+            {#if inProgTitle.location === 'home'}
+              <span class="loc-sep">·</span>
+              <span class="loc-icon" title="Maison" aria-label="Maison"><Home size={14} strokeWidth={1.6} /></span>
+            {:else if inProgTitle.location === 'gym'}
+              <span class="loc-sep">·</span>
+              <span class="loc-icon" title="Salle" aria-label="Salle"><Dumbbell size={14} strokeWidth={1.6} /></span>
+            {/if}
+          </p>
+          <h1>{inProgTitle.cleanName}</h1>
           <p class="muted">
             {inProgressSession.sets?.length || 0} série(s) · commencée le {formatDateFR(inProgressSession.dateISO)}
           </p>
@@ -836,9 +847,19 @@ import {
         </button>
       {:else if todaySession}
         {@const split = getSessionExercisesSplit(todaySession.cycleIndex, todaySession.sessionIndex)}
+        {@const todayTitle = parseSessionTitle(todaySession.sessionName)}
         <header class="home-head">
-          <p class="home-date accent-text">{formatDateFR(todayISO())}</p>
-          <h1>{todaySession.sessionName}</h1>
+          <p class="home-date accent-text">
+            <span>{formatDateFR(todayISO())}</span>
+            {#if todayTitle.location === 'home'}
+              <span class="loc-sep">·</span>
+              <span class="loc-icon" title="Maison" aria-label="Maison"><Home size={14} strokeWidth={1.6} /></span>
+            {:else if todayTitle.location === 'gym'}
+              <span class="loc-sep">·</span>
+              <span class="loc-icon" title="Salle" aria-label="Salle"><Dumbbell size={14} strokeWidth={1.6} /></span>
+            {/if}
+          </p>
+          <h1>{todayTitle.cleanName}</h1>
           <p class="muted">{todaySession.cycleName}</p>
         </header>
 
@@ -923,9 +944,17 @@ import {
           {#if showCatchup}
             <div class="picker">
               {#each missedSessions as m}
+                {@const mTitle = parseSessionTitle(m.sessionName)}
                 <div class="pick-item-card">
                   <div class="pick-item-head">
-                    <strong>{m.sessionName}</strong>
+                    <strong class="title-with-loc">
+                      {#if mTitle.location === 'home'}
+                        <span class="loc-icon-inline" title="Maison"><Home size={14} strokeWidth={1.6} /></span>
+                      {:else if mTitle.location === 'gym'}
+                        <span class="loc-icon-inline" title="Salle"><Dumbbell size={14} strokeWidth={1.6} /></span>
+                      {/if}
+                      <span>{mTitle.cleanName}</span>
+                    </strong>
                     <span>{formatDateFR(m.dateISO)} — {m.cycleName}</span>
                   </div>
                   <div class="pick-item-btns">
@@ -949,7 +978,14 @@ import {
           <div class="picker">
             {#each freeTemplates as t}
               <button type="button" class="pick-item" onclick={() => startFree(t)}>
-                <strong>{t.label}</strong>
+                <strong class="title-with-loc">
+                  {#if t.location === 'home'}
+                    <span class="loc-icon-inline" title="Maison"><Home size={14} strokeWidth={1.6} /></span>
+                  {:else if t.location === 'gym'}
+                    <span class="loc-icon-inline" title="Salle"><Dumbbell size={14} strokeWidth={1.6} /></span>
+                  {/if}
+                  <span>{t.label}</span>
+                </strong>
                 <span>{t.exercices.length} exercices</span>
               </button>
             {/each}
@@ -964,9 +1000,17 @@ import {
     {/if}
   {:else if phase === 'active'}
     {#if currentExercise}
+      {@const activeTitle = parseSessionTitle(sessionMeta.sessionName)}
       <div class="workout" class:flash={setFlash}>
         <header class="w-top">
-          <span class="w-session">{sessionMeta.sessionName}</span>
+          <span class="w-session">
+            {#if activeTitle.location === 'home'}
+              <span class="loc-icon-inline" title="Maison"><Home size={13} strokeWidth={1.6} /></span>
+            {:else if activeTitle.location === 'gym'}
+              <span class="loc-icon-inline" title="Salle"><Dumbbell size={13} strokeWidth={1.6} /></span>
+            {/if}
+            <span>{activeTitle.cleanName}</span>
+          </span>
           <span class="w-clock">{formatClock(sessionElapsed)}</span>
           <button
             type="button"
@@ -1337,10 +1381,11 @@ import {
 
     <PostSessionDebrief bind:feedback={sessionFeedback} onComplete={onDebriefComplete} />
   {:else if phase === 'done' && summary}
+    {@const doneTitle = parseSessionTitle(summary.sessionName)}
     <div class="done-screen">
       <div class="done-icon"><Check size={48} strokeWidth={2.5} /></div>
       <h1>Enregistré</h1>
-      <p class="accent-text">Belle séance — {summary.sessionName}</p>
+      <p class="accent-text">Belle séance — {doneTitle.cleanName}</p>
 
       <div class="card">
         <div class="summary-grid">
@@ -1375,9 +1420,31 @@ import {
   }
 
   .home-head .home-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     margin: 0 0 0.35rem;
     font-size: 1rem;
     text-transform: capitalize;
+  }
+
+  .loc-sep {
+    opacity: 0.55;
+  }
+
+  .loc-icon,
+  .loc-icon-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--beige);
+    flex-shrink: 0;
+  }
+
+  .title-with-loc {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 
   .home-head h1 {
@@ -1701,7 +1768,15 @@ import {
   .w-session {
     flex: 1;
     min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .w-session > span:last-child {
     overflow: hidden;
     text-overflow: ellipsis;
   }

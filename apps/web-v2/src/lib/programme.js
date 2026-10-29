@@ -210,19 +210,35 @@ export function getAllSessionTemplates(programme) {
       const key = `${seance.nom}-${cycle.cycleIndex}-${seance.sessionIndex}`;
       if (seen.has(key)) continue;
       seen.add(key);
+      const parsedTitle = parseSessionTitle(seance.nom);
       templates.push({
         cycleIndex: cycle.cycleIndex,
         sessionIndex: seance.sessionIndex,
         cycleName: cycle.nom,
         sessionName: seance.nom,
+        cleanName: parsedTitle.cleanName,
+        location: parsedTitle.location,
         jour: seance.jour,
         exercices: seance.exercices,
-        label: `${seance.nom} (${cycle.nom})`,
+        label: `${parsedTitle.cleanName} (${cycle.nom})`,
       });
     }
   }
 
   return templates;
+}
+
+/**
+ * Extrait le lieu ('home' | 'gym' | null) et le titre épuré sans le préfixe "Maison — " ou "Salle — ".
+ */
+export function parseSessionTitle(rawName) {
+  const str = String(rawName ?? '').trim();
+  const match = str.match(/^(Maison|Salle)\s*[—–-]\s*(.+)$/i);
+  if (!match) {
+    return { location: null, cleanName: str };
+  }
+  const location = match[1].toLowerCase() === 'maison' ? 'home' : 'gym';
+  return { location, cleanName: match[2].trim() };
 }
 
 export function formatDateFR(dateISO) {

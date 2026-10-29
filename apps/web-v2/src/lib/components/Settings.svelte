@@ -1,6 +1,7 @@
 <script>
   import { getPlannedSessions, getAllSessionsWithSets, getBodyData } from '$lib/api';
-  import { todayISO, formatDateFR } from '$lib/programme';
+  import { todayISO, formatDateFR, parseSessionTitle } from '$lib/programme';
+  import { Home, Dumbbell } from 'lucide-svelte';
   import { onMount } from 'svelte';
 
   let message = $state('');
@@ -105,7 +106,21 @@
         <ul class="facts">
           <li>
             <span>Prochaine séance</span>
-            <strong>{plan.next ? `${plan.next.sessionName} · ${formatDateFR(plan.next.dateISO)}` : 'Aucune'}</strong>
+            <strong>
+              {#if plan.next}
+                {@const nextTitle = parseSessionTitle(plan.next.sessionName)}
+                <span class="settings-next-session">
+                  {#if nextTitle.location === 'home'}
+                    <span class="settings-loc-icon" title="Maison"><Home size={13} strokeWidth={1.6} /></span>
+                  {:else if nextTitle.location === 'gym'}
+                    <span class="settings-loc-icon" title="Salle"><Dumbbell size={13} strokeWidth={1.6} /></span>
+                  {/if}
+                  <span>{nextTitle.cleanName} · {formatDateFR(plan.next.dateISO)}</span>
+                </span>
+              {:else}
+                Aucune
+              {/if}
+            </strong>
           </li>
           <li>
             <span>Réalisées</span>
@@ -205,6 +220,20 @@
     text-align: right;
     font-weight: 600;
     text-transform: capitalize;
+  }
+
+  .settings-next-session {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.35rem;
+  }
+
+  .settings-loc-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--beige);
+    flex-shrink: 0;
   }
 
   .row {

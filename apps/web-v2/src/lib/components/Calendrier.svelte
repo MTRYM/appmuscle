@@ -9,7 +9,8 @@
     deleteWorkoutSession,
     movePlannedSession
   } from '$lib/api';
-  import { formatDateFR, formatSetPerformance, todayISO } from '$lib/programme';
+  import { formatDateFR, formatSetPerformance, parseSessionTitle, todayISO } from '$lib/programme';
+  import { Home, Dumbbell } from 'lucide-svelte';
 
   let { refreshKey = 0, onCalendarChanged = () => {} } = $props();
 
@@ -406,6 +407,7 @@
                 <div class="pull-list">
                   <span class="move-hint">Choisir la séance à programmer le {formatDateFR(selectedDate)} :</span>
                   {#each movableSessionsForRestDay as m}
+                    {@const mTitle = parseSessionTitle(m.sessionName)}
                     <button
                       type="button"
                       class="pull-item"
@@ -413,7 +415,14 @@
                       onclick={() => confirmMoveSession(m.id, selectedDate)}
                     >
                       <div class="pull-item-main">
-                        <strong>{m.sessionName}</strong>
+                        <strong class="cal-title-loc">
+                          {#if mTitle.location === 'home'}
+                            <span class="cal-loc-icon" title="Maison"><Home size={13} strokeWidth={1.6} /></span>
+                          {:else if mTitle.location === 'gym'}
+                            <span class="cal-loc-icon" title="Salle"><Dumbbell size={13} strokeWidth={1.6} /></span>
+                          {/if}
+                          <span>{mTitle.cleanName}</span>
+                        </strong>
                         <span class="badge badge-{m.status === 'missed' ? 'danger' : 'muted'}">
                           {m.status === 'missed' ? 'Loupée' : 'Prévue'}
                         </span>
@@ -428,13 +437,19 @@
         {/if}
 
         {#each dayDetail.planned as p}
+          {@const pTitle = parseSessionTitle(p.sessionName)}
           <div class="detail-block">
             <div class="planned-header-row">
-              <p>
+              <p class="cal-planned-line">
                 <span class="badge badge-{p.status === 'done' ? 'success' : p.status === 'missed' ? 'danger' : 'muted'}">
                   {p.status === 'done' ? 'Réalisée' : p.status === 'missed' ? 'Loupée' : 'Prévue'}
                 </span>
-                {p.sessionName} — {p.cycleName}
+                {#if pTitle.location === 'home'}
+                  <span class="cal-loc-icon" title="Maison"><Home size={14} strokeWidth={1.6} /></span>
+                {:else if pTitle.location === 'gym'}
+                  <span class="cal-loc-icon" title="Salle"><Dumbbell size={14} strokeWidth={1.6} /></span>
+                {/if}
+                <span>{pTitle.cleanName} — {p.cycleName}</span>
               </p>
               {#if p.status !== 'done'}
                 <button
@@ -482,8 +497,9 @@
                 <input type="date" class="move-date-input" bind:value={moveTargetDate} />
 
                 {#if plannedOnTargetDate}
+                  {@const conflictTitle = parseSessionTitle(plannedOnTargetDate.sessionName)}
                   <p class="move-conflict">
-                    Ce jour contient déjà <strong>{plannedOnTargetDate.sessionName}</strong>.
+                    Ce jour contient déjà <strong>{conflictTitle.cleanName}</strong>.
                   </p>
                   <div class="move-actions-row">
                     <button
@@ -611,6 +627,22 @@
   .cal-header h2 {
     font-size: 1.2rem;
     margin: 0;
+  }
+
+  .cal-title-loc,
+  .cal-planned-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .cal-loc-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--beige);
+    flex-shrink: 0;
   }
 
   .nav-btn {
