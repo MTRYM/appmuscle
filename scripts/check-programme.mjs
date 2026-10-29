@@ -28,9 +28,9 @@ parsed.cycles.forEach((cycle, cIdx) => {
       errors.push(`Weighted Pull-Up trouvé hors séance salle Mardi: ${cycle.nom} / ${seance.jour}`);
     }
 
-    // Check no gym exercises on home days
-    if (seance.jour !== 'Mardi' && seance.jour !== 'Jeudi') {
-      if (names.includes('Bench Press') || names.includes('Larsen Press') || names.includes('Front Squat') || names.includes('Cable External Rotation')) {
+    // Check no gym exercises on home days (Maison = Mercredi, Jeudi, Vendredi)
+    if (seance.jour !== 'Mardi' && seance.jour !== 'Samedi' && seance.jour !== 'Dimanche') {
+      if (names.includes('Bench Press') || names.includes('Larsen Press') || names.includes('Front Squat') || names.includes('Cable External Rotation') || names.includes('Chest-Supported Row') || names.includes('Straight-Arm Lat Pulldown')) {
         errors.push(`Exercice de salle trouvé dans séance maison: ${cycle.nom} / ${seance.jour}`);
       }
     }

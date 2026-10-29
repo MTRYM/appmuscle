@@ -15,6 +15,12 @@ const LEG_KEYWORDS = [
   'leg extension',
 ];
 
+const EQUIVALENT_NAMES = {
+  'Weighted Dip': ['Weighted Dip', 'Ring Dip', 'Weighted Ring Dip'],
+  'Ring Dip': ['Ring Dip', 'Weighted Dip', 'Weighted Ring Dip'],
+  'Chest-Supported Row': ['Chest-Supported Row', 'Chest Supported Row'],
+};
+
 export function roundWeight(weight) {
   return Math.round(weight * 2) / 2;
 }
@@ -40,6 +46,7 @@ export function isExerciseSuccessful(sets, repsTarget) {
 }
 
 export function getLastExercisePerformance(sessionsWithSets, exerciseName) {
+  const candidates = EQUIVALENT_NAMES[exerciseName] ?? [exerciseName];
   const sorted = [...sessionsWithSets].sort((a, b) => {
     const dateA = a.completedAt ?? `${a.dateISO}T00:00:00`;
     const dateB = b.completedAt ?? `${b.dateISO}T00:00:00`;
@@ -47,7 +54,7 @@ export function getLastExercisePerformance(sessionsWithSets, exerciseName) {
   });
 
   for (const session of sorted) {
-    const sets = session.sets.filter((s) => s.exerciseName === exerciseName);
+    const sets = session.sets.filter((s) => candidates.includes(s.exerciseName));
     if (sets.length > 0) {
       return { session, sets };
     }

@@ -1,6 +1,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { prisma } from "$lib/server/prisma";
+import { parseProgramme } from "$lib/programme";
 
 const WEEKDAYS_FR = [
   "Dimanche",
@@ -17,14 +18,93 @@ function getFrenchJour(dateISO: string): string {
   return WEEKDAYS_FR[d.getDay()] || "Lundi";
 }
 
+function addDaysISO(baseISO: string, days: number): string {
+  const d = new Date(`${baseISO}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+let macrocycleCheckDone = false;
+
+async function ensureMacrocycleSeeded(nowISO: string, todayISO: string) {
+  if (macrocycleCheckDone) return;
+  try {
+    const existingMacroCount = await prisma.plannedSession.count({
+      where: { cycleIndex: { gte: 6 } },
+    });
+
+    if (existingMacroCount > 0) {
+      macrocycleCheckDone = true;
+      return;
+    }
+
+    const programme = parseProgramme();
+
+    // 1. Sync pending sessions of Cycles 3, 4, 5 (2026-10-27 → 2026-11-15) with updated v4.0 names
+    for (const cycleIdx of [3, 4, 5]) {
+      const cycle = programme.cycles[cycleIdx];
+      if (!cycle) continue;
+      for (const seance of cycle.seances) {
+        await prisma.plannedSession.updateMany({
+          where: {
+            cycleIndex: cycleIdx,
+            sessionIndex: seance.sessionIndex,
+            dateISO: { gte: "2026-10-27" },
+            status: "pending",
+          },
+          data: {
+            cycleName: cycle.nom,
+            sessionName: seance.nom,
+            updatedAt: nowISO,
+          },
+        });
+      }
+    }
+
+    // 2. Seed Cycles 6..18 (13-week Macrocycle: Monday 2026-11-16 → Sunday 2027-02-14, 78 sessions)
+    const macrocycleMonday = "2026-11-16";
+    const newSessions = [];
+
+    for (const cycle of programme.cycles) {
+      if (cycle.cycleIndex < 6) continue;
+      const weekOffset = (cycle.cycleIndex - 6) * 7;
+      for (const seance of cycle.seances) {
+        const sessionDateISO = addDaysISO(macrocycleMonday, weekOffset + seance.jourOffset);
+        newSessions.push({
+          dateISO: sessionDateISO,
+          cycleIndex: cycle.cycleIndex,
+          sessionIndex: seance.sessionIndex,
+          cycleName: cycle.nom,
+          sessionName: seance.nom,
+          jour: seance.jour,
+          status: sessionDateISO < todayISO ? "missed" : "pending",
+          createdAt: nowISO,
+          updatedAt: nowISO,
+        });
+      }
+    }
+
+    if (newSessions.length > 0) {
+      await prisma.plannedSession.createMany({ data: newSessions });
+    }
+    macrocycleCheckDone = true;
+  } catch (err) {
+    console.warn("Could not auto-seed 3-month macrocycle:", err);
+  }
+}
+
 // GET /api/planned-sessions — list planned sessions with automatic missed sync
 export const GET: RequestHandler = async ({ url }) => {
   const dateISO = url.searchParams.get("date");
   const status = url.searchParams.get("status");
-  const limit = parseInt(url.searchParams.get("limit") || "200", 10);
+  const limit = parseInt(url.searchParams.get("limit") || "500", 10);
 
   const now = new Date();
-  const todayISO = now.toISOString().slice(0, 10);
+  const nowISO = now.toISOString();
+  const todayISO = nowISO.slice(0, 10);
+
+  // 0. Ensure 3-month macrocycle (Cycles 6..18: Nov 16, 2026 → Feb 14, 2027) is seeded in DB
+  await ensureMacrocycleSeeded(nowISO, todayISO);
 
   // 1. Automatically mark past pending sessions as missed
   try {
@@ -35,7 +115,7 @@ export const GET: RequestHandler = async ({ url }) => {
       },
       data: {
         status: "missed",
-        updatedAt: now.toISOString(),
+        updatedAt: nowISO,
       },
     });
   } catch (err) {

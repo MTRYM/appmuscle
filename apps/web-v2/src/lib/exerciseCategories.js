@@ -18,16 +18,16 @@ export const CATEGORY_ORDER = [
 ];
 
 const RULES = [
-  ['Mobilité', ['mobility']],
+  ['Mobilité', ['mobility', 'butcher', '90/90 hip', 'pike compression stretch', 'wrist warm-up']],
   ['Handstand', ['handstand', 'pike push-up']],
   ['Front Lever & Planche', ['front lever', 'planche']],
   [
     'Gainage & Abdos',
     ['l-sit', 'hollow', 'dead bug', 'dragon flag', 'knee-to-chest', 'copenhagen', 'pallof', 'compression'],
   ],
-  ['Bras & Poignets', ['curl', 'external rotation']],
-  ['Jambes & Explosivité', ['squat', 'deadlift', 'glute', 'jump', 'clean']],
-  ['Tirage', ['pull-up', 'dead hang', 'pull-apart', 'muscle-up']],
+  ['Bras & Poignets', ['curl', 'external rotation', 'neck']],
+  ['Jambes & Explosivité', ['squat', 'deadlift', 'glute', 'jump', 'clean', 'calf']],
+  ['Tirage', ['pull-up', 'dead hang', 'pull-apart', 'muscle-up', 'row', 'lat pulldown']],
   ['Poussée', ['bench', 'larsen', 'push-up', 'dip', 'overhead press']],
 ];
 
